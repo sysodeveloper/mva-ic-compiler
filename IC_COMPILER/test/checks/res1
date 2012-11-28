@@ -1,0 +1,10 @@
+1: STRING
+1: ID(a)
+1: ASSIGN
+1: QUOTE(Hello)
+1: COMMA
+1: ID(b)
+1: ASSIGN
+1: QUOTE(word)
+1: SEMI
+2: EOF
