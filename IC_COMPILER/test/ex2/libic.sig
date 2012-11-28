@@ -17,4 +17,5 @@ class Library {
  static int random(int n); /* returns a random number between 0 and n-1 */
  static int time();        /* number of milliseconds since program start */
  static int exit(int i);   /* terminates the program with exit code n */
+ static string mymethod(int i,int a,int[] arr, string[] zzzzzzzz);   /* terminates the program with exit code n */
 }

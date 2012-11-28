@@ -38,7 +38,7 @@ public class Compiler
     		//Lexer
     		fr =  new FileReader(f);
     		Lexer lex = new Lexer(fr);
-	    	Token token = new Token(sym.EOF, 0, "");
+	    /*	Token token = new Token(sym.EOF, 0, "");
 	    	do {
 	    		try {
 	    			token = lex.next_token();
@@ -52,6 +52,7 @@ public class Compiler
 				}
 	    	}
 	    	while(token.sym != sym.EOF);
+	    	*/
     		//Parser	
 			 fr =  new FileReader(f);
 			 lex = new Lexer(fr);
