@@ -16,6 +16,11 @@ import java_cup.runtime.*;
 	StringBuffer string = new StringBuffer();
 %}
 
+%{
+	public int getLineNumber() { return yyline+1; }
+%}
+
+
 // State Definitions
 //////////////////////
 
