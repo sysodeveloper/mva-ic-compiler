@@ -2,7 +2,7 @@ package IC.Parser;
 import IC.AST.*;
 import java_cup.runtime.*;
 parser code  {:
-	/** Causes the parsr to print every token it reads.
+	/** Causes the parser to print every token it reads.
 	 * This is useful for debugging.
 	 */
 	public boolean printTokens;
@@ -36,15 +36,16 @@ scan with {:
 // Symbol list (terminals and non-terminals)
 
 non terminal libic, libmethod, type, formals, typelist;
-terminal CLASS, CLASS_ID, LCBR, RCBR, STATIC, VOID, ID, LP, RP, SEMI, LB, RB;
-terminal INT, BOOLEAN, STRING, COMMA;
+terminal int CLASS, CLASS_ID, LCBR, RCBR, STATIC, VOID, ID, LP, RP, SEMI, LB, RB;
+terminal int INT, BOOLEAN, STRING, COMMA;
 //////////////////////////
 // Precedence declarations
 
 //////////////
 // The grammar
-libic ::= CLASS CLASS_ID LCBR libmethod RCBR;
-libmethod ::=  | STATIC type ID LP formals RP SEMI | STATIC VOID ID LP formals RP SEMI;
-type ::= INT | BOOLEAN | STRING | CLASS_ID | type LB RB;
-formals ::= type ID typelist | ;
-typelist ::=  | COMMA type ID typelist;
+
+libic::= CLASS | CLASS CLASS_ID LCBR libmethod RCBR;
+libmethod::=  | STATIC type ID LP formals RP SEMI | STATIC VOID ID LP formals RP SEMI;
+type::= INT | BOOLEAN | STRING | CLASS_ID | type LB RB;
+formals::= type ID typelist | ;
+typelist::=  | COMMA type ID typelist;

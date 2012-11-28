@@ -40,7 +40,7 @@ public class Token extends java_cup.runtime.Symbol {
 	 * @param value 
 	 */
     public Token(int id, int line,String value) {
-        super(id, null);
+    	super(id,null);
         this.m_value = value;
         this.m_lineNumber=line+1;	//flex starts at 0 line
     }
