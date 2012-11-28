@@ -1,10 +1,10 @@
 package IC.Parser;
-import java_cup.runtime.*;
+
 %%
 
 // General Lexer Settings
 ///////////////////////////
-%cup
+
 %class Lexer
 %public
 %function next_token

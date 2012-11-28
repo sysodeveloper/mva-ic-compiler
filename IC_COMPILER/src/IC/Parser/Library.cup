@@ -1,3 +1,17 @@
 package IC.Parser;
-
 import IC.AST.*;
+////////////////////////////////////////////
+// Symbol list (terminals and non-terminals)
+
+
+nonterminal Program Program;
+
+terminal         ASSIGN;
+terminal Integer INTEGER;
+
+//////////////////////////
+// Precedence declarations
+
+//////////////
+// The grammar
+Program ::= INTEGER;

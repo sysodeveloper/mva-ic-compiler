@@ -1,7 +1,7 @@
 package IC.Parser;
 
 import IC.AST.*;
-
+import java_cup.runtime.*;
 ////////////////////////////////////////////
 // Symbol list (terminals and non-terminals)
 
@@ -9,11 +9,11 @@ nonterminal Program Program;
 
 terminal         ASSIGN;
 terminal Integer INTEGER;
-
+terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL , EXTENDS , ELSE , FALSE , GT , GTE , ID , IF , INT  , LAND , CLASS , LENGTH , NEW , LNEG , LOR , LT , LTE , MINUS , MOD , MULTIPLY , NEQUAL , NULL , PLUS , RETURN , SEMI , STATIC , STRING , QUOTE , THIS , TRUE , VOID , WHILE , CLASS_ID , PLUSPLUS , MINUSMINUS , PLUSEQUAL , MINUSEQUAL , MULTIPLYEQUAL, CONTINUE, DIVIDE, DIVIDEEQUAL;
 //////////////////////////
 // Precedence declarations
 
 //////////////
 // The grammar
+Program ::= INTEGER;
 
-Literal ::= INTEGER | NULL;

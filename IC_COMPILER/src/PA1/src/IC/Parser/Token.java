@@ -6,7 +6,7 @@ import com.sun.java_cup.internal.runtime.Symbol;
  * Represent a token parsed by the lexer.
  *
  */
-public class Token extends java_cup.runtime.Symbol {
+public class Token extends Symbol {
 	/**
 	 * The original text value of the token.
 	 */
@@ -103,6 +103,7 @@ public class Token extends java_cup.runtime.Symbol {
 	    	case IC.Parser.sym.MINUSEQUAL: buffer = "MINUSEQUAL";break;
 	    	case IC.Parser.sym.MULTIPLYEQUAL: buffer = "MULTIPLYEQUAL";break;
 	    	case IC.Parser.sym.CONTINUE: buffer = "CONTINUE";break;
+	    	case IC.Parser.sym.LNOT: buffer = "LNOT";break;
 	    	case IC.Parser.sym.DIVIDE: buffer = "DIVIDE";break;
 	    	case IC.Parser.sym.DIVIDEEQUAL: buffer = "DIVIDEEQUAL";break;
 	    	default: buffer="UNKOWN";
