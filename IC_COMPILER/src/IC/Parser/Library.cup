@@ -44,7 +44,7 @@ terminal int INT, BOOLEAN, STRING, COMMA;
 //////////////
 // The grammar
 
-libic::= CLASS | CLASS CLASS_ID LCBR libmethod RCBR;
+libic::= CLASS CLASS_ID LCBR libmethod RCBR;
 libmethod::=  | STATIC type ID LP formals RP SEMI | STATIC VOID ID LP formals RP SEMI;
 type::= INT | BOOLEAN | STRING | CLASS_ID | type LB RB;
 formals::= type ID typelist | ;
