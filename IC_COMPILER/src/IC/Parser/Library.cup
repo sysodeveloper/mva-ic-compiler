@@ -45,7 +45,7 @@ terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL 
 //////////////
 // The grammar
 libic ::= CLASS CLASS_ID LCBR libmethod RCBR;
-libmethod ::=  | STATIC type ID LP formals RP SEMI | STATIC VOID ID LP formals RP SEMI;
+libmethod ::=  | STATIC type ID LP formals RP SEMI libmethod | STATIC VOID ID LP formals RP SEMI libmethod;
 type::= INT | BOOLEAN | STRING | CLASS_ID | type LB RB;
 formals::= type ID typelist | ;
 typelist::=  | COMMA type ID typelist;
