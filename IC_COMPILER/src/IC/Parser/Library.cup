@@ -36,16 +36,16 @@ scan with {:
 // Symbol list (terminals and non-terminals)
 
 non terminal libic, libmethod, type, formals, typelist;
-terminal int CLASS, CLASS_ID, LCBR, RCBR, STATIC, VOID, ID, LP, RP, SEMI, LB, RB;
-terminal int INT, BOOLEAN, STRING, COMMA;
+terminal         ASSIGN;
+terminal Integer INTEGER;
+terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL , EXTENDS , ELSE , FALSE , GT , GTE , ID , IF , INT  , LAND , CLASS , LENGTH , NEW , LNEG , LOR , LT , LTE , MINUS , MOD , MULTIPLY , NEQUAL , NULL , PLUS , RETURN , SEMI , STATIC , STRING , QUOTE , THIS , TRUE , VOID , WHILE , CLASS_ID , PLUSPLUS , MINUSMINUS , PLUSEQUAL , MINUSEQUAL , MULTIPLYEQUAL, CONTINUE, DIVIDE, DIVIDEEQUAL;
 //////////////////////////
 // Precedence declarations
 
 //////////////
 // The grammar
-
-libic::= CLASS CLASS_ID LCBR libmethod RCBR;
-libmethod::=  | STATIC type ID LP formals RP SEMI | STATIC VOID ID LP formals RP SEMI;
+libic ::= CLASS CLASS_ID LCBR libmethod RCBR;
+libmethod ::=  | STATIC type ID LP formals RP SEMI | STATIC VOID ID LP formals RP SEMI;
 type::= INT | BOOLEAN | STRING | CLASS_ID | type LB RB;
 formals::= type ID typelist | ;
 typelist::=  | COMMA type ID typelist;
