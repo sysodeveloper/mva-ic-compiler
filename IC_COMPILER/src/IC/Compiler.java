@@ -58,7 +58,7 @@ public class Compiler
 			 LibraryParser libParser = new LibraryParser(lex);
 			 libParser.printTokens = true;
 			 Symbol parsedSymbol = libParser.parse();
-			 System.out.println("Parsed Symbol: " + parsedSymbol.toString());
+			 System.out.println("Parsed Symbol: " + parsedSymbol.value);
     	} catch (FileNotFoundException e1) {
 			System.err.println("Error: The file doesn't exist.");
 			System.exit(1);
