@@ -10,6 +10,8 @@ import java.util.List;
 
 import java_cup.runtime.Symbol;
 
+import IC.AST.ASTNode;
+import IC.AST.PrimitiveType;
 import IC.Parser.Lexer;
 import IC.Parser.LexicalError;
 import IC.Parser.LibraryParser;
@@ -38,7 +40,7 @@ public class Compiler
     		//Lexer
     		fr =  new FileReader(f);
     		Lexer lex = new Lexer(fr);
-	    /*	Token token = new Token(sym.EOF, 0, "");
+	    	/*Token token = new Token(sym.EOF, 0, "");
 	    	do {
 	    		try {
 	    			token = lex.next_token();
@@ -52,12 +54,13 @@ public class Compiler
 				}
 	    	}
 	    	while(token.sym != sym.EOF);
-	    	*/
+	    	System.out.println("-------------------------------------------");*/
     		//Parser	
 			 fr =  new FileReader(f);
 			 lex = new Lexer(fr);
 			 LibraryParser libParser = new LibraryParser(lex);
 			 libParser.printTokens = true;
+			 
 			 Symbol parsedSymbol = libParser.parse();
 			 System.out.println("Parsed Symbol: " + parsedSymbol.value);
     	} catch (FileNotFoundException e1) {

@@ -1,5 +1,6 @@
 package IC.Parser;
 import IC.AST.*;
+import IC.DataTypes;
 import java_cup.runtime.*;
 parser code  {:
 	/** Causes the parser to print every token it reads.
@@ -37,7 +38,7 @@ scan with {:
 ////////////////////////////////////////////
 // Symbol list (terminals and non-terminals)
 
-non terminal libic, libmethod, type, formals, typelist;
+non terminal libic, libmethod, type, formals, typelist, userclass;
 terminal         ASSIGN;
 terminal Integer INTEGER;
 terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL , EXTENDS , ELSE , FALSE , GT , GTE , ID , IF , INT  , LAND , CLASS , LENGTH , NEW , LNEG , LOR , LT , LTE , MINUS , MOD , MULTIPLY , NEQUAL , NULL , PLUS , RETURN , SEMI , STATIC , STRING , QUOTE , THIS , TRUE , VOID , WHILE , CLASS_ID , PLUSPLUS , MINUSMINUS , PLUSEQUAL , MINUSEQUAL , MULTIPLYEQUAL, CONTINUE, DIVIDE, DIVIDEEQUAL;
@@ -46,18 +47,17 @@ terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL 
 
 //////////////
 // The grammar
-libic ::= CLASS CLASS_ID LCBR libmethod:m RCBR
-{: System.out.println("Production Rule LIBIC"); :}
-;
-libmethod ::=  | STATIC type ID LP formals RP SEMI libmethod | STATIC VOID ID LP formals RP SEMI libmethod
-{: System.out.println("Production Rule LIBMETHOD"); :}
-;
-type::= INT | BOOLEAN | STRING | CLASS_ID | type LB RB
-{: System.out.println("Production Rule TYPE"); :}
-;
-formals::= type ID typelist | 
-{: System.out.println("Production Rule FORMALS"); :}
-;
-typelist::=  | COMMA type ID typelist
-{: System.out.println("Production Rule TYPELIST"); :}
-;
+libic ::= CLASS CLASS_ID LCBR libmethod:m RCBR;
+libmethod ::=  | STATIC type ID LP formals RP SEMI libmethod | STATIC VOID ID LP formals RP SEMI libmethod;
+type::= INT 
+{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.INT); :} | 
+BOOLEAN
+{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.BOOLEAN); :} | 
+STRING 
+{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.STRING); :} | 
+CLASS_ID:c
+{: RESULT = new UserType(parser.getLine(), ((Token)c).getValue()); :} | 
+type:t LB RB
+{:((Type)t).incrementDimension(); RESULT = t; :};
+formals::= type ID typelist | ; 
+typelist::=  | COMMA type ID typelist;
