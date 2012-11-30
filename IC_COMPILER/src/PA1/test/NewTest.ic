@@ -1,0 +1,14 @@
+class NewTest{
+	int x = 8;
+	int y = 000;
+	int a766g = 0;
+
+	function a(){
+		int x = 0000;
+		x = x009;
+		x = "\t\"\r\"", try = " ";
+		z_x_y = 1000009;
+	}
+}
+
+
