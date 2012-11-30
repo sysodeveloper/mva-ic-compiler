@@ -4,10 +4,19 @@ package IC;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import java_cup.runtime.Symbol;
 
+import IC.AST.ASTNode;
+import IC.AST.PrimitiveType;
 import IC.Parser.Lexer;
+import IC.Parser.LexicalError;
 import IC.Parser.LibraryParser;
+import IC.Parser.Token;
+import IC.Parser.sym;
 
 /**
  * The IC Compiler.
