@@ -67,7 +67,7 @@ public class Compiler
 			System.err.println("Error: The file doesn't exist.");
 			System.exit(1);
     	}catch (Exception e3){
-			System.err.println("Error: Unknown Error.");
+			System.err.println("Error: " + e3.getMessage());
 			System.exit(1);
 		}
     }

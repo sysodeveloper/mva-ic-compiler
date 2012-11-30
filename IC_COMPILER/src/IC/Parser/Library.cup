@@ -47,7 +47,7 @@ terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL 
 
 //////////////
 // The grammar
-libic ::= CLASS CLASS_ID LCBR libmethod:m RCBR;
+libic ::= CLASS CLASS_ID LCBR:l libmethod:m RCBR;
 libmethod ::=  | STATIC type ID LP formals RP SEMI libmethod | STATIC VOID ID LP formals RP SEMI libmethod;
 type::= INT 
 {: RESULT = new PrimitiveType(parser.getLine(), DataTypes.INT); :} | 
@@ -56,8 +56,12 @@ BOOLEAN
 STRING 
 {: RESULT = new PrimitiveType(parser.getLine(), DataTypes.STRING); :} | 
 CLASS_ID:c
-{: RESULT = new UserType(parser.getLine(), ((Token)c).getValue()); :} | 
+{: RESULT = new UserType(parser.getLine(),c.toString()); :} | 
 type:t LB RB
 {:((Type)t).incrementDimension(); RESULT = t; :};
-formals::= type ID typelist | ; 
-typelist::=  | COMMA type ID typelist;
+formals::= type:t ID:i typelist:lst 
+{: if(lst != null){
+		RESULT = new Formal((Type)t,i.toString());
+	}
+:} | ; 
+typelist::=  COMMA type ID typelist | ;

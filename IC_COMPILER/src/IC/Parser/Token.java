@@ -43,9 +43,10 @@ public class Token extends java_cup.runtime.Symbol {
     	super(id,null);
         this.m_value = value;
         this.m_lineNumber=line+1;	//flex starts at 0 line
-        this.value = this.toString();
+        //this.value = this.toString();
+        this.value = value;
     }
-	
+    
     /**
      * Convert the token to string.
      */
