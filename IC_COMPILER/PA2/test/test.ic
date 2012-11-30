@@ -1,0 +1,8 @@
+class Test() {
+	int m_1;
+	string m_2;
+	
+	void main(string[] args) {
+		println(args[0]);
+	}
+}
