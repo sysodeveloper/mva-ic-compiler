@@ -51,7 +51,8 @@ public class Compiler {
 			//Program root = (Program) parsedSymbol.value;
 			ICClass root2 = (ICClass) parsedSymbol.value;
 			PrettyPrinter printer = new PrettyPrinter(args[0]);
-			printer.visit(root2);
+			Object out = printer.visit(root2);
+			System.out.println(out.toString());
 			// Interpret the program
 			// TODO: Check breaks.
 			
