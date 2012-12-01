@@ -49,6 +49,7 @@ public class Compiler {
 			Symbol parsedSymbol = libParser.parse();
 			System.out.println("Parsed Symbol: " + parsedSymbol.value);
 			
+			/*
 			Program root = (Program) parsedSymbol.value;
 			PrettyPrinter printer = new PrettyPrinter(args[0]);
 			printer.visit(root);
@@ -56,6 +57,8 @@ public class Compiler {
 			// TODO: Check breaks.
 			
 			// TODO: bonux 2 - Check decleration statements after if, while..
+			 * 
+			 */
 		} catch (FileNotFoundException e1) {
 			System.err.println("Error: The file doesn't exist.");
 			System.exit(1);
