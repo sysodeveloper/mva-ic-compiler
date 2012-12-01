@@ -45,20 +45,18 @@ public class Compiler {
 			 */
 			// Parser
 			LibraryParser libParser = new LibraryParser(lex);
-			libParser.printTokens = true;
+			libParser.printTokens = false;
 			Symbol parsedSymbol = libParser.parse();
-			System.out.println("Parsed Symbol: " + parsedSymbol.value);
 			
-			/*
-			Program root = (Program) parsedSymbol.value;
+			//Program root = (Program) parsedSymbol.value;
+			ICClass root2 = (ICClass) parsedSymbol.value;
 			PrettyPrinter printer = new PrettyPrinter(args[0]);
-			printer.visit(root);
+			printer.visit(root2);
 			// Interpret the program
 			// TODO: Check breaks.
 			
 			// TODO: bonux 2 - Check decleration statements after if, while..
-			 * 
-			 */
+	
 		} catch (FileNotFoundException e1) {
 			System.err.println("Error: The file doesn't exist.");
 			System.exit(1);
