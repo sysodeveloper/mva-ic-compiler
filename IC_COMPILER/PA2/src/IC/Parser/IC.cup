@@ -1,11 +1,48 @@
 package IC.Parser;
 
 import IC.AST.*;
+import IC.DataTypes;
 import java_cup.runtime.*;
+import java.util.*;
+
+parser code  {:
+    /** Causes the parser to print every token it reads.
+     * This is useful for debugging.
+     */
+    public boolean printTokens;
+    
+    private Lexer lexer;
+
+    public LibraryParser(Lexer lexer) {
+        super(lexer);
+        this.lexer = lexer;
+    }
+    
+    public int getLine() {
+        return lexer.getLineNumber();
+    }
+    
+    public void syntax_error(Symbol s) {
+        Token tok = (Token) s;
+        System.out.println("Line " + tok.getLineNumber()+": Syntax error; unexpected " + tok);
+    }
+    
+    
+:}
+
+// This is just for debugging
+scan with {:
+    Token t = lexer.next_token();
+    if (printTokens)
+        System.out.println(t.getLineNumber() + ":" + t);
+    return t; 
+:};
+
 ////////////////////////////////////////////
 // Symbol list (terminals and non-terminals)
 
 nonterminal Program Program;
+nonterminal ClassIC, ClassExIC, ClassContent,FieldOrMethod,Field,FieldList,Method,MethodType;
 
 terminal         ASSIGN;
 terminal Integer INTEGER;
@@ -15,5 +52,9 @@ terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL 
 
 //////////////
 // The grammar
-Program ::= INTEGER;
-
+Program ::= ClassIC Program| ClassExIC Program| ;
+ClassIC ::= CLASS CLASS_ID ClassContent;
+ClassICEx ::= CLASS CLASS_ID EXTENDS CLASS_ID ClassContent;
+ClassContent ::= LCBR FieldOrMethod RCBR;
+FieldOrMethod ::= Field FieldOrMethod | Method FieldOrMethod | ;
+Field ::= Type ID FieldList;
