@@ -67,7 +67,7 @@ ClassIC ::= CLASS CLASS_ID ClassContent;
 ClassICEx ::= CLASS CLASS_ID EXTENDS CLASS_ID ClassContent;
 ClassContent ::= LCBR FieldOrMethod RCBR;
 FieldOrMethod ::= Field FieldOrMethod | StaticMethod FieldOrMethod | VirtualMethod FieldOrMethod | ;
-Field ::= Type ID FieldList;
+Field ::= Type ID FieldList SEMI;
 FieldList ::= COMMA ID FieldList| ;
 Type ::= INT | BOOLEAN | STRING | CLASS_ID | Type LB RB;
 VirtualMethod ::= MethodPrefix Formals RP LCBR StatmentOrEmpty RCBR;
@@ -79,8 +79,8 @@ Statement ::= LCBR Statement RCBR | Type ID InitVariable SEMI | CONTINUE SEMI | 
 			  IF LP Expr RP Statement ElseStatement | IF LP Expr RP Statement 
 			  WHILE LP Expr RP LCBR Statement RCBR |
 			  Location ASSIGN Expr SEMI | Call SEMI;
-StatmentOrEmpty ::= Statement | ;
-InitVariable ::= ASSIGN Expr SEMI | ;
+StatmentOrEmpty ::= Statement StatmentOrEmpty| ;
+InitVariable ::= ASSIGN Expr | ;
 ExprOrEmpty ::= Expr | ;
 ElseStatement ::= ELSE Statement;
 Location ::= ID | Expr DOT ID %prec SecondDot | Expr LB Expr RB %prec SecondDot;
@@ -93,7 +93,7 @@ ArgumentsList ::= COMMA Expr ArgumentsList | ;
 Binop ::= PLUS | MINUS;
 Unop ::= MINUS | LNEG;
 Literal ::= INTEGER | QUOTE | TRUE | FALSE | NULL;
-Expr ::= A ASSIGN Expr | A  | Location | Call;
+Expr ::= A ASSIGN Expr | A  ;
 A ::= A LOR B|B;
 B ::= B LAND C|C;
 C ::= C EQUAL D|C NEQUAL D|D;
@@ -102,4 +102,4 @@ F ::= F PLUS G|F MINUS G|G;
 G ::= G MULTIPLY H|G DIVIDE H|G MOD H|H;
 H ::= MINUS I| LNEG I|I;
 I ::= LB J RB I | J | I DOT LENGTH %prec FirstDot; 
-J ::= LP Expr RP | THIS | NEW CLASS LP RP | NEW Type LB Expr RB  | Literal; 
+J ::= LP Expr RP | THIS | NEW CLASS LP RP | NEW Type LB Expr RB  | Literal ; 
