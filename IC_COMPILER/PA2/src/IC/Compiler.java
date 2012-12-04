@@ -9,6 +9,7 @@ import java_cup.runtime.Symbol;
 
 import IC.Parser.Lexer;
 import IC.Parser.LibraryParser;
+import IC.Parser.Parser;
 
 /**
  * The IC Compiler.
@@ -44,8 +45,8 @@ public class Compiler {
 			 * );
 			 */
 			// Parser
-			LibraryParser libParser = new LibraryParser(lex);
-			libParser.printTokens = false;
+		/*	LibraryParser libParser = new LibraryParser(lex);
+			libParser.printTokens = true;
 			Symbol parsedSymbol = libParser.parse();
 			
 			//Program root = (Program) parsedSymbol.value;
@@ -57,7 +58,14 @@ public class Compiler {
 			// TODO: Check breaks.
 			
 			// TODO: bonux 2 - Check decleration statements after if, while..
-	
+	*/
+			Parser parser = new Parser(lex);
+			parser.printTokens = true;
+			Symbol parsedSymbol = parser.parse();
+			Program root = (Program) parsedSymbol.value;
+			PrettyPrinter printer = new PrettyPrinter(args[0]);
+			Object out = printer.visit(root);
+			System.out.println(out.toString());
 		} catch (FileNotFoundException e1) {
 			System.err.println("Error: The file doesn't exist.");
 			System.exit(1);
