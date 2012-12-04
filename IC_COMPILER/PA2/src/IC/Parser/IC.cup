@@ -47,8 +47,7 @@ non terminal Formals,StatmentOrEmpty,Type,TypeList, Statement,InitVariable,Expr,
 non terminal Call,ElseStatement,StaticCall,VirtualCall,Arguments,ArgumentsList;
 non terminal ExprDotOrEmpty, Binop, Unop, Literal, Location;
 non terminal MethodPrefix,VirtualCallPrefix, IFExpr;
-
-
+non terminal A,B,C,D,F,G,H,I,J, Z;
 terminal         ASSIGN;
 terminal Integer INTEGER;
 terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA  , EQUAL , EXTENDS , ELSE , FALSE , GT , GTE , ID , IF , INT  , LAND , CLASS , LENGTH , NEW , LNEG , LOR , LT , LTE , MINUS , MOD , MULTIPLY , NEQUAL , NULL , PLUS , RETURN , SEMI , STATIC , STRING , QUOTE , THIS , TRUE , VOID , WHILE , CLASS_ID , PLUSPLUS , MINUSMINUS , PLUSEQUAL , MINUSEQUAL , MULTIPLYEQUAL, CONTINUE, DIVIDE, DIVIDEEQUAL, DOT;
@@ -56,8 +55,15 @@ terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA  , EQUAL , EXT
 //////////////////////////
 // Precedence declarations
 //////////////
-precedence left PLUS,MINUS;
+precedence right ASSIGN;
 precedence right ELSE;
+precedence left LOR;
+precedence left LAND;
+precedence left EQUAL, NEQUAL;
+precedence left GT,GTE,LT,LTE;
+precedence left PLUS,MINUS;
+precedence left MULTIPLY,DIVIDE;
+precedence left DOT, LB,RB,LP,RP;
 ////////////////////////
 // The grammar
 //////////////
@@ -92,4 +98,13 @@ ArgumentsList ::= COMMA Expr ArgumentsList | ;
 Binop ::= PLUS | MINUS | MULTIPLY | DIVIDE | MOD | LAND | LOR | GT | GTE | LT | LTE | EQUAL | NEQUAL;
 Unop ::= MINUS | LNEG;
 Literal ::= INTEGER | QUOTE | TRUE | FALSE | NULL;
-Expr ::= Literal | ID;
+Expr ::= A ASSIGN Expr| A;
+A ::= A LOR B|B;
+B ::= B LAND C|C;
+C ::= C EQUAL D|C NEQUAL D|D;
+D ::= D LT F| D LTE F|D GT F|GTE F|F;
+F ::= F PLUS G|F MINUS G|G;
+G ::= G MULTIPLY H|G DIVIDE H|G MOD H|H;
+H ::= MINUS I| LNEG I|I;
+I ::= I DOT J | I LB J RB | I LP J RP | J;
+J ::= LP Expr RP | THIS | NEW CLASS LP RP | NEW Type LB Expr RB | Literal;
