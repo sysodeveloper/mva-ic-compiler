@@ -13,7 +13,7 @@ parser code  {:
     
     private Lexer lexer;
 
-    public LibraryParser(Lexer lexer) {
+    public Parser(Lexer lexer) {
         super(lexer);
         this.lexer = lexer;
     }
@@ -46,7 +46,8 @@ non terminal ClassIC, ClassICEx, ClassContent,FieldOrMethod,Field,FieldList,Virt
 non terminal Formals,StatmentOrEmpty,Type,TypeList, Statement,InitVariable,Expr,ExprOrEmpty;
 non terminal Call,ElseStatement,StaticCall,VirtualCall,Arguments,ArgumentsList;
 non terminal ExprDotOrEmpty, Binop, Unop, Literal, Location;
-non terminal A,B,C,D,F,G,H,I,J;
+non terminal A,B,C,D,F,G,H,I,J, Z;
+non terminal MethodPrefix,VirtualCallPrefix,I1,I2,ComplexExpr,IDot,K, ExprDot;
 terminal         ASSIGN;
 terminal Integer INTEGER;
 terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL , EXTENDS , ELSE , FALSE , GT , GTE , ID , IF , INT  , LAND , CLASS , LENGTH , NEW , LNEG , LOR , LT , LTE , MINUS , MOD , MULTIPLY , NEQUAL , NULL , PLUS , RETURN , SEMI , STATIC , STRING , QUOTE , THIS , TRUE , VOID , WHILE , CLASS_ID , PLUSPLUS , MINUSMINUS , PLUSEQUAL , MINUSEQUAL , MULTIPLYEQUAL, CONTINUE, DIVIDE, DIVIDEEQUAL;
@@ -55,35 +56,44 @@ terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL 
 
 //////////////
 // The grammar
-Program ::= ClassIC Program| ClassICEx Program| ;
+Program ::= ClassIC Program | ClassICEx Program | ;
 ClassIC ::= CLASS CLASS_ID ClassContent;
 ClassICEx ::= CLASS CLASS_ID EXTENDS CLASS_ID ClassContent;
 ClassContent ::= LCBR FieldOrMethod RCBR;
 FieldOrMethod ::= Field FieldOrMethod | StaticMethod FieldOrMethod | VirtualMethod FieldOrMethod | ;
 Field ::= Type ID FieldList;
 FieldList ::= COMMA ID FieldList| ;
-StaticMethod ::= STATIC MethodType ID LP Formals RP LCBR StatmentOrEmpty RCBR;
-VirtualMethod ::= MethodType ID LP Formals RP LCBR StatmentOrEmpty RCBR;
-MethodType ::= Type | VOID;
+Type ::= INT | BOOLEAN | STRING | CLASS_ID | Type LB RB;
+VirtualMethod ::= MethodPrefix Formals RP LCBR StatmentOrEmpty RCBR;
+MethodPrefix ::= VOID ID LP | Type ID LP;
+StaticMethod ::= STATIC MethodPrefix Formals RP LCBR StatmentOrEmpty RCBR;
 Formals ::= Type ID TypeList | ;
 TypeList ::= COMMA Type ID TypeList | ;
-Type ::= INT | BOOLEAN | STRING | CLASS_ID | Type LB RB;
 Statement ::= LCBR Statement RCBR | Type ID InitVariable SEMI | CONTINUE SEMI | BREAK SEMI | RETURN ExprOrEmpty SEMI |
-			  IF LP Expr RP Statement ElseStatement | 
+			  IF LP Expr RP Statement ElseStatement | IF LP Expr RP Statement 
 			  WHILE LP Expr RP LCBR Statement RCBR |
 			  Location ASSIGN Expr SEMI | Call SEMI;
+StatmentOrEmpty ::= Statement | ;
 InitVariable ::= ASSIGN Expr SEMI | ;
 ExprOrEmpty ::= Expr | ;
-StatmentOrEmpty ::= Statement | ;
-ElseStatement ::= ELSE Statement | ;
+ElseStatement ::= ELSE Statement;
 Location ::= ID | Expr DOT ID | Expr LB Expr RB;
 Call ::= StaticCall | VirtualCall;
 StaticCall ::= CLASS_ID DOT ID LP Arguments RP;
-VirtualCall ::= ExprDotOrEmpty ID LP Arguments RP;
-ExprDotOrEmpty ::= Expr DOT | ;
+VirtualCall ::= VirtualCallPrefix Arguments RP | ID LP Arguments RP;
+VirtualCallPrefix ::= Expr DOT ID LP;
 Arguments ::= Expr ArgumentsList | ;
 ArgumentsList ::= COMMA Expr ArgumentsList | ; 
 Binop ::= PLUS | MINUS;
 Unop ::= MINUS | LNEG;
-Literal ::= INTEGER | STRING | TRUE | FALSE | NULL;
-Expr ::= INTEGER;
+Literal ::= INTEGER | QUOTE | TRUE | FALSE | NULL;
+Expr ::= A ASSIGN Expr| A;
+A ::= A LOR B|B;
+B ::= B LAND C|C;
+C ::= C EQUAL D|C NEQUAL D|D;
+D ::= D LT F| D LTE F|D GT F|GTE F|F;
+F ::= F PLUS G|F MINUS G|G;
+G ::= G MULTIPLY H|G DIVIDE H|G MOD H|H;
+H ::= MINUS I| LNEG I|I;
+I ::= LB J RB I | J | J DOT ID LP; 
+J ::= LP Expr RP | THIS | NEW CLASS LP RP | NEW Type LB Expr RB  | Literal; 
