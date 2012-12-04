@@ -73,13 +73,13 @@ StaticMethod ::= STATIC MethodPrefix Formals RP LCBR StatmentOrEmpty RCBR;
 Formals ::= Type ID TypeList | ;
 TypeList ::= COMMA Type ID TypeList | ;
 Statement ::= LCBR Statement RCBR | LCBR RCBR | Type ID InitVariable SEMI | CONTINUE SEMI | BREAK SEMI | RETURN ExprOrEmpty SEMI |
-			  IF LP Expr RP Statement ElseStatement | IF LP Expr RP Statement 
+			  IF LP Expr RP Statement | IF LP Expr RP Statement ElseStatement |
 			  WHILE LP Expr RP LCBR Statement RCBR |
 			  Location ASSIGN Expr SEMI | Call SEMI;
 StatmentOrEmpty ::= Statement StatmentOrEmpty| ;
 InitVariable ::= ASSIGN Expr | ;
 ExprOrEmpty ::= Expr | ;
-ElseStatement ::= ELSE Statement;
+ElseStatement ::= ELSE Statement;  
 Location ::= ID | Expr DOT ID %prec SecondDot | Expr LB Expr RB %prec SecondDot;
 Call ::= StaticCall | VirtualCall;
 StaticCall ::= CLASS_ID DOT ID LP Arguments RP;
