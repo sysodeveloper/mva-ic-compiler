@@ -1,10 +1,8 @@
 class IhateCom{
 	int y;
-	void dropOut(){
-		int x;
-		if (2+1){
-			int y;
-		} 
+	void try(){
+		if(y){
+
+		}
 	}
-	
 }

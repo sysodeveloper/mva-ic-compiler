@@ -46,8 +46,7 @@ non terminal ClassIC, ClassICEx, ClassContent,FieldOrMethod,Field,FieldList,Virt
 non terminal Formals,StatmentOrEmpty,Type,TypeList, Statement,InitVariable,Expr,ExprOrEmpty;
 non terminal Call,ElseStatement,StaticCall,VirtualCall,Arguments,ArgumentsList;
 non terminal ExprDotOrEmpty, Binop, Unop, Literal, Location;
-non terminal A,B,C,D,F,G,H,I,J, Z;
-non terminal MethodPrefix,VirtualCallPrefix,I1,I2,ComplexExpr;
+non terminal MethodPrefix,VirtualCallPrefix;
 
 
 terminal         ASSIGN;
@@ -58,8 +57,37 @@ terminal FirstDot;
 
 //////////////////////////
 // Precedence declarations
-precedence left  RB, LB;
-precedence left  DOT;
 //////////////
 // The grammar
 Program ::= ClassIC Program | ClassICEx Program | ;
+ClassIC ::= CLASS CLASS_ID ClassContent;
+ClassICEx ::= CLASS CLASS_ID EXTENDS CLASS_ID ClassContent;
+ClassContent ::= LCBR FieldOrMethod RCBR;
+FieldOrMethod ::= Field FieldOrMethod | StaticMethod FieldOrMethod | VirtualMethod FieldOrMethod | ;
+Field ::= Type ID FieldList SEMI;
+FieldList ::= COMMA ID FieldList| ;
+Type ::= INT | BOOLEAN | STRING | CLASS_ID | Type LB RB;
+VirtualMethod ::= MethodPrefix Formals RP LCBR StatmentOrEmpty RCBR;
+MethodPrefix ::= VOID ID LP | Type ID LP;
+StaticMethod ::= STATIC MethodPrefix Formals RP LCBR StatmentOrEmpty RCBR;
+Formals ::= Type ID TypeList | ;
+TypeList ::= COMMA Type ID TypeList | ;
+Statement ::= LCBR Statement RCBR | LCBR RCBR | Type ID InitVariable SEMI | CONTINUE SEMI | BREAK SEMI | RETURN ExprOrEmpty SEMI |
+			  IF LP Expr RP Statement ElseStatement | IF LP Expr RP Statement 
+			  WHILE LP Expr RP LCBR Statement RCBR |
+			  Location ASSIGN Expr SEMI | Call SEMI;
+StatmentOrEmpty ::= Statement StatmentOrEmpty| ;
+InitVariable ::= ASSIGN Expr | ;
+ExprOrEmpty ::= Expr | ;
+ElseStatement ::= ELSE Statement;
+Location ::= ID | Expr DOT ID %prec SecondDot | Expr LB Expr RB %prec SecondDot;
+Call ::= StaticCall | VirtualCall;
+StaticCall ::= CLASS_ID DOT ID LP Arguments RP;
+VirtualCall ::= VirtualCallPrefix Arguments RP | ID LP Arguments RP;
+VirtualCallPrefix ::= Expr DOT ID LP;
+Arguments ::= Expr ArgumentsList | ;
+ArgumentsList ::= COMMA Expr ArgumentsList | ; 
+Binop ::= PLUS | MINUS | MULTIPLY | DIVIDE | MOD | LAND | LOR | GT | GTE | LT | LTE | EQUAL | NEQUAL;
+Unop ::= MINUS | LNEG;
+Literal ::= INTEGER | QUOTE | TRUE | FALSE | NULL;
+Expr ::= Literal | ID;
