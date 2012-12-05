@@ -25,7 +25,7 @@ public enum LiteralTypes {
 				string.replace(i, i + 1, replacement);
 				i += replacement.length() - 1;
 			}
-		}
+	 	}
 
 		public String toFormattedString(Object value) {
 			if (value == null)

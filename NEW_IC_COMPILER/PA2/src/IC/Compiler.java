@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
-import IC.AST.*;
 import java_cup.runtime.Symbol;
-
+import IC.AST.PrettyPrinter;
+import IC.AST.Program;
 import IC.Parser.Lexer;
-import IC.Parser.LibraryParser;
 import IC.Parser.Parser;
 
 /**
