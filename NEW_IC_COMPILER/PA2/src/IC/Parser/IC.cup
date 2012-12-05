@@ -90,7 +90,7 @@ STRING
 {: RESULT = new PrimitiveType(parser.getLine(), DataTypes.STRING); :} | 
 CLASS_ID:c
 {: RESULT = new UserType(parser.getLine(),c.toString()); :} | 
-type:t LB RB
+Type:t LB RB
 {:((Type)t).incrementDimension(); RESULT = t; :};
 
 VirtualMethod ::= MethodPrefix Formals RP LCBR StatementStar RCBR ;
