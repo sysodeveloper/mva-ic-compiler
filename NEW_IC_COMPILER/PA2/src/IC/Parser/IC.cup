@@ -63,15 +63,15 @@ terminal UNOP;
 // Precedence declarations
 
 precedence right ASSIGN;
-precedence left ELSE;
 precedence left LOR;
 precedence left LAND;
 precedence left EQUAL, NEQUAL;
 precedence left GT,GTE,LT,LTE;
 precedence left PLUS,MINUS;
 precedence left MULTIPLY,DIVIDE,MOD;
-precedence left DOT,LB,LP,LCBR;
+precedence left DOT,LB,LP,RB,RP;
 precedence right UNOP;
+precedence left ELSE;
 //////////////
 // The grammar
 Program ::= ClassIC Program | ClassICEx Program | ;
