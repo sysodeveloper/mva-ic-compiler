@@ -1,0 +1,121 @@
+/*****************************************************************************
+*                                                                            *
+*  Full Spec Test file of IC Language                                        *
+*  __________________________________                                        *
+*                                                                            *
+* Created: 10/11/2012                                                        *
+*                                                                            *
+*                                                                            *
+*                                                                            *
+******************************************************************************/
+
+/**
+ * The main program class.
+*/
+class Program {
+	/** The main entry of the code.
+	* args - The arguments for the program.
+	*/
+	static void main (string[] args) {
+		int i = 3;
+		B a = new B("B Text", true);
+
+		// Test printings.
+		if(a.getStatus()) {
+			Library.print(A.getNum());
+		}
+		else {
+			A.setNum(3);
+			Library.print(A.getNum());
+		}
+		Library.print("Sum: " +  a.sum(4));
+
+		int i = 1;
+		while(i % 149 != 0) {
+			Library.print(++i);
+
+			while(true) {
+				if(i % 7 == 0) {
+					break;
+				}
+				else {
+					continue;
+				}
+				Library.print("Never print me!");
+			}
+		}
+
+		A[] arr = null;
+
+		arr = new A[7];
+		i = 0;
+		while(i < arr.length) {
+			A.setNum(i);
+			Library.print(arr[i].sum(0));
+			i++;
+		}
+
+		int[][] mat = new int[3][3];
+		i = 0;
+		int j;
+		while(i < mat.length) {
+			j = 0;
+			while(j < mat[i].length) {
+				mat[i][j] = i*j;
+				Library.print(mat[i][j] + " ");
+				i++;
+			}
+			i++;
+			Library.print("\n");
+		}
+		Library.print((3+4)*7 + 2*7*6+2+(2+3*5-3/7/2/(3+2)));
+		return;
+	}
+}
+
+class A {
+	static int m_num;
+
+	static void setNum(int num) {
+		this.m_num = num;
+	}
+
+	static int GetNum() {
+		return m_num;
+	}
+
+	int sum(int add) {
+		return m_num + add;
+	}
+}
+
+class B extends A {
+	string m_text;
+	boolean m_status;
+
+	string getText() {
+		return text;
+	}
+
+	boolean getStatus() {
+		return m_status;
+	}
+
+	void setStatus(boolean status) {
+		m_status = status;
+	}
+
+	B(string text, boolean stauts) {
+		setStatus(stauts);
+		m_text = text;
+	}
+}
+
+class List { int data; List next; }
+class Node { int data; Edge[] edges; }
+class Edge { int label; Node dest; }
+
+// /* blabla
+/* // */
+// /*
+

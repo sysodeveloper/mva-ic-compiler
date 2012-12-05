@@ -1,0 +1,138 @@
+                                                                     
+                                                                     
+                                                                     
+                                             
+package IC.Parser;
+
+import IC.AST.*;
+import IC.DataTypes;
+import java_cup.runtime.*;
+import java.util.*;
+
+parser code  {:
+    /** Causes the parser to print every token it reads.
+     * This is useful for debugging.
+     */
+    public boolean printTokens;
+    
+    private Lexer lexer;
+
+    public Parser(Lexer lexer) {
+        super(lexer);
+        this.lexer = lexer;
+    }
+    
+    public int getLine() {
+        return lexer.getLineNumber();
+    }
+    
+    public void syntax_error(Symbol s) {
+        Token tok = (Token) s;
+        System.out.println("Line " + tok.getLineNumber()+": Syntax error; unexpected " + tok);
+    }
+    
+    
+:}
+
+// This is just for debugging
+scan with {:
+    Token t = lexer.next_token();
+    if (printTokens)
+        System.out.println(t.getLineNumber() + ":" + t);
+    return t; 
+:};
+
+////////////////////////////////////////////
+// Symbol list (terminals and non-terminals)
+
+non terminal Program Program;
+non terminal ClassIC, ClassICEx, ClassContent,FieldOrMethod,Field,FieldList,VirtualMethod,StaticMethod,MethodType;
+non terminal Formals,StatmentOrEmpty,Type,TypeList, Statement,InitVariable,Expr,ExprOrEmpty;
+non terminal Call,ElseStatement,StaticCall,VirtualCall,Arguments,ArgumentsList;
+non terminal ExprDotOrEmpty, Binop, Unop, Literal, Location;
+non terminal MethodPrefix,VirtualCallPrefix;
+non terminal StatementStar;
+non terminal A,B,C,D,F,G,H,I,J;
+
+terminal         ASSIGN;
+terminal Integer INTEGER;
+terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA  , EQUAL , EXTENDS , ELSE , FALSE , GT , GTE , ID , IF , INT  , LAND , CLASS , LENGTH , NEW , LNEG , LOR , LT , LTE , MINUS , MOD , MULTIPLY , NEQUAL , NULL , PLUS , RETURN , SEMI , STATIC , STRING , QUOTE , THIS , TRUE , VOID , WHILE , CLASS_ID , PLUSPLUS , MINUSMINUS , PLUSEQUAL , MINUSEQUAL , MULTIPLYEQUAL, CONTINUE, DIVIDE, DIVIDEEQUAL, DOT;
+terminal UNOP;
+
+//////////////////////////
+// Precedence declarations
+
+precedence right ASSIGN;
+precedence left ELSE;
+precedence left LOR;
+precedence left LAND;
+precedence left EQUAL, NEQUAL;
+precedence left GT,GTE,LT,LTE;
+precedence left PLUS,MINUS;
+precedence left MULTIPLY,DIVIDE,MOD;
+precedence left DOT,LB,LP,LCBR;
+precedence right UNOP;
+//////////////
+// The grammar
+Program ::= ClassIC Program | ClassICEx Program | ;
+ClassIC ::= CLASS CLASS_ID ClassContent;
+ClassICEx ::= CLASS CLASS_ID EXTENDS CLASS_ID ClassContent;
+ClassContent ::= LCBR FieldOrMethod RCBR;
+FieldOrMethod ::= Field FieldOrMethod | StaticMethod FieldOrMethod | VirtualMethod FieldOrMethod | ;
+Field ::= Type ID FieldList SEMI;
+FieldList ::= COMMA ID FieldList| ;
+Type ::= INT | BOOLEAN | STRING | CLASS_ID | Type LB RB;
+VirtualMethod ::= MethodPrefix Formals RP LCBR StatementStar RCBR ;
+MethodPrefix ::= VOID ID LP | Type ID LP;
+StaticMethod ::= STATIC MethodPrefix Formals RP LCBR StatementStar RCBR;
+Formals ::= Type ID TypeList | ;
+TypeList ::= COMMA Type ID TypeList | ;
+
+
+Statement ::=   Location ASSIGN Expr SEMI| 
+				Call SEMI| 
+				RETURN ExprOrEmpty SEMI|
+				IF LP Expr RP Statement ELSE Statement|
+				IF LP Expr RP Statement|
+				WHILE LP Expr RP Statement|	    
+			    BREAK SEMI|
+			    CONTINUE SEMI|
+			    LCBR StatementStar RCBR |   
+			    Type ID InitVariable SEMI 
+			    ;
+
+StatementStar ::=  Statement StatementStar| ;
+
+InitVariable ::= ASSIGN Expr | ;
+
+ExprOrEmpty ::= Expr| ;
+
+Location ::= ID | Expr DOT ID| Expr LB Expr RB ;
+
+Call ::= StaticCall | VirtualCall;
+
+StaticCall ::= CLASS_ID DOT ID LP Arguments RP;
+
+VirtualCall ::= VirtualCallPrefix Arguments RP | ID LP Arguments RP;
+
+VirtualCallPrefix ::= Expr DOT ID LP;
+
+Arguments ::= Expr ArgumentsList | ;
+
+ArgumentsList ::= COMMA Expr ArgumentsList | ; 
+
+Binop ::= PLUS | MINUS | MULTIPLY | DIVIDE | MOD | LAND | LOR | GT | GTE | LT | LTE | EQUAL | NEQUAL;
+
+Unop ::= MINUS | LNEG;
+
+Literal ::= INTEGER | QUOTE | TRUE | FALSE | NULL;
+
+Expr ::= Location|Call|THIS|LP Expr RP|
+		NEW CLASS_ID LP RP|
+		NEW Type LB Expr RB|
+		Expr DOT LENGTH|
+		Literal|
+		MINUS Expr %prec UNOP | LNEG Expr %prec UNOP |
+		Expr Binop Expr;
+
+			
