@@ -1,8 +1,0 @@
-class IhateCom{
-	int y;
-	void try(){
-		if(y){
-
-		}
-	}
-}
