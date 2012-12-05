@@ -8,6 +8,7 @@ import IC.AST.*;
 import IC.DataTypes;
 import java_cup.runtime.*;
 import java.util.*;
+import IC.*;
 
 parser code  {:
     /** Causes the parser to print every token it reads.
@@ -55,7 +56,7 @@ non terminal StatementStar;
 non terminal A,B,C,D,F,G,H,I,J;
 
 terminal         ASSIGN;
-terminal Integer INTEGER;
+terminal  INTEGER;
 terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA  , EQUAL , EXTENDS , ELSE , FALSE , GT , GTE , ID , IF , INT  , LAND , CLASS , LENGTH , NEW , LNEG , LOR , LT , LTE , MINUS , MOD , MULTIPLY , NEQUAL , NULL , PLUS , RETURN , SEMI , STATIC , STRING , QUOTE , THIS , TRUE , VOID , WHILE , CLASS_ID , PLUSPLUS , MINUSMINUS , PLUSEQUAL , MINUSEQUAL , MULTIPLYEQUAL, CONTINUE, DIVIDE, DIVIDEEQUAL, DOT;
 terminal UNOP;
 
@@ -136,9 +137,16 @@ Binop ::= PLUS | MINUS | MULTIPLY | DIVIDE | MOD | LAND | LOR | GT | GTE | LT | 
 
 Unop ::= MINUS | LNEG;
 
-Literal ::= INTEGER | 
-QUOTE| 
-TRUE | FALSE | NULL;
+Literal ::= INTEGER:l
+{: RESULT = new Literal(parser.getLine(),LiteralTypes.INTEGER,l); :} | 
+QUOTE:l 
+{: RESULT = new Literal(parser.getLine(),LiteralTypes.STRING,l); :} | 
+TRUE:l
+{: RESULT = new Literal(parser.getLine(),LiteralTypes.TRUE,l); :} | 
+FALSE:l 
+{: RESULT = new Literal(parser.getLine(),LiteralTypes.TRUE,l); :} | 
+NULL:l
+{: RESULT = new Literal(parser.getLine(),LiteralTypes.NULL,l); :};
 
 Expr ::= Location|Call|THIS|LP Expr RP|
 		NEW CLASS_ID LP RP|
@@ -147,5 +155,3 @@ Expr ::= Location|Call|THIS|LP Expr RP|
 		Literal|
 		MINUS Expr %prec UNOP | LNEG Expr %prec UNOP |
 		Expr Binop Expr;
-
-			
