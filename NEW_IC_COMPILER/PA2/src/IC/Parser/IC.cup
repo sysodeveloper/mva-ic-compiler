@@ -196,12 +196,16 @@ FALSE:l
 NULL:l
 {: RESULT = new Literal(parser.getLine(),LiteralTypes.NULL); :};
 
-Expr ::= Location|Call|THIS|LP Expr RP|
+Expr ::= Location|
+		Call|
+		THIS|
+		LP Expr RP|
 		NEW CLASS_ID LP RP|
 		NEW Type LB Expr RB|
 		Expr DOT LENGTH|
 		Literal|
-		MINUS Expr %prec UNOP | LNEG Expr %prec UNOP |
+		MINUS:uminus Expr:e %prec UNOP|
+		LNEG:not Expr:e %prec UNOP |
 		Expr Binop Expr;
 
 			
