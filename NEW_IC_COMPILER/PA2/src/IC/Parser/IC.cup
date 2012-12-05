@@ -81,7 +81,18 @@ ClassContent ::= LCBR FieldOrMethod RCBR;
 FieldOrMethod ::= Field FieldOrMethod | StaticMethod FieldOrMethod | VirtualMethod FieldOrMethod | ;
 Field ::= Type ID FieldList SEMI;
 FieldList ::= COMMA ID FieldList| ;
-Type ::= INT | BOOLEAN | STRING | CLASS_ID | Type LB RB;
+
+Type::= INT 
+{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.INT); :} | 
+BOOLEAN
+{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.BOOLEAN); :} | 
+STRING 
+{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.STRING); :} | 
+CLASS_ID:c
+{: RESULT = new UserType(parser.getLine(),c.toString()); :} | 
+type:t LB RB
+{:((Type)t).incrementDimension(); RESULT = t; :};
+
 VirtualMethod ::= MethodPrefix Formals RP LCBR StatementStar RCBR ;
 MethodPrefix ::= VOID ID LP | Type ID LP;
 StaticMethod ::= STATIC MethodPrefix Formals RP LCBR StatementStar RCBR;
@@ -125,7 +136,9 @@ Binop ::= PLUS | MINUS | MULTIPLY | DIVIDE | MOD | LAND | LOR | GT | GTE | LT | 
 
 Unop ::= MINUS | LNEG;
 
-Literal ::= INTEGER | QUOTE | TRUE | FALSE | NULL;
+Literal ::= INTEGER | 
+QUOTE| 
+TRUE | FALSE | NULL;
 
 Expr ::= Location|Call|THIS|LP Expr RP|
 		NEW CLASS_ID LP RP|
