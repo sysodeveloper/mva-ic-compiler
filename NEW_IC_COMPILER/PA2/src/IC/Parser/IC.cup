@@ -136,8 +136,8 @@ TypeList::=  COMMA Type:t ID:i TypeList:lst
 
 
 
-Statement ::=   Location ASSIGN Expr SEMI| 
-				Call SEMI| 
+Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Location)l, (Expression)e); :}| 
+				Call:call SEMI {: RESULT = call;:}| 
 				RETURN ExprOrEmpty SEMI|
 				IF LP Expr RP Statement ELSE Statement|
 				IF LP Expr RP Statement|
@@ -150,21 +150,33 @@ Statement ::=   Location ASSIGN Expr SEMI|
 
 StatementStar ::=  Statement StatementStar| ;
 
-InitVariable ::= ASSIGN Expr:e|  ;
+InitVariable ::= ASSIGN Expr:e {: RESULT = e; :}|{:RESULT = null;:}  ;
 
-ExprOrEmpty ::= Expr| ;
+ExprOrEmpty ::= Expr:e{: RESULT = e; :}|{:RESULT = null;:} ;
 
 Location ::= ID:id {: RESULT = new VariableLocation(parser.getLine(), id.toString()); :}|
  			 Expr:e DOT ID:id {: RESULT = new VariableLocation(parser.getLine(),(Expression)e, id.toString()); :}|
   			 Expr:array LB Expr:index RB {: RESULT = new ArrayLocation((Expression) array, (Expression) index); :} ;
 
-Call ::= StaticCall | VirtualCall;
+Call ::= StaticCall:sc{:RESULT = sc;:} | VirtualCall:vc{:RESULT = vc;:};
 
-StaticCall ::= CLASS_ID DOT ID LP Arguments RP;
+StaticCall ::= CLASS_ID:class_id DOT ID:id LP Arguments:argsList RP
+				{: RESULT = new StaticCall(parser.getLine(), class_id.toString(), id.toString(),(List<Expression>) argsList); :};
 
-VirtualCall ::= VirtualCallPrefix Arguments RP | ID LP Arguments RP;
+VirtualCall ::= VirtualCallPrefix:callPrefix Arguments:argsList RP 
+					 {:
+					 	Object prefix[] = new Object[2];
+					 	prefix = (Object[])callPrefix;
+					 	RESULT = new VirtualCall(parser.getLine(),(Expression)prefix[0],prefix[1].toString(),(List<Expression>)argsList);
+					 
+					 :} | 
+ 				ID:id LP Arguments:argsList RP {: RESULT = new VirtualCall(parser.getLine(),id.toString(),(List<Expression>)argsList); :};
 
-VirtualCallPrefix ::= Expr DOT ID LP;
+VirtualCallPrefix ::= Expr:e DOT ID:id LP {:
+											 Object callPrefix[] = new Object[2];
+											 callPrefix[0]=e;  callPrefix[1]=id; 
+											 RESULT = callPrefix;
+									     :};
 
 Arguments ::= Expr:argument ArgumentsList:arglist 
 				{: ((ArrayList<Expression>)arglist).add((Expression)argument); RESULT = arglist;  :}|
@@ -226,12 +238,12 @@ Expr ::= Location:l{: RESULT = l ;:}|
 		
 		Expr:e1 Binop:op Expr:e2  {: 
 				if(op == BinaryOps.LAND || op == BinaryOps.LOR || op == BinaryOps.EQUAL || op == BinaryOps.NEQUAL ){ 
-					System.out.println("binary logic op  " + ((BinaryOps)op).getOperatorString() + "  " +((BinaryOps)op).getDescription() );
+					
 					RESULT = new LogicalBinaryOp((Expression)e1, (BinaryOps)op, (Expression)e2);
 					
 					}
 				else{
-					System.out.println("binary math op");
+					
 					RESULT = new MathBinaryOp((Expression)e1, (BinaryOps)op, (Expression)e2);
 					
 					} :};
