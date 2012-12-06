@@ -218,7 +218,7 @@ Expr ::= Location|
 		
 		Expr:e DOT LENGTH {: RESULT = new Length((Expression)e); :}|
 		
-		Literal|
+		Literal:lt {: RESULT = lt; :}|
 		
 		MINUS:um Expr:e {: RESULT = new LogicalUnaryOp(UnaryOps.UMINUS,(Expression)e); :} %prec UNOP  |
 		
