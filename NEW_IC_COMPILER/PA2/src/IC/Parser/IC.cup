@@ -198,7 +198,8 @@ NULL:l
 
 Expr ::= Location|
 		Call|
-		THIS|
+		THIS 
+		{: RESULT = new This(parser.getLine()); :} |
 		LP Expr RP|
 		NEW CLASS_ID LP RP|
 		NEW Type LB Expr RB|
