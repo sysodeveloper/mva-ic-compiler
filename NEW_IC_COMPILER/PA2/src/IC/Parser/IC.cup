@@ -137,18 +137,51 @@ TypeList::=  COMMA Type:t ID:i TypeList:lst
 
 
 Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Location)l, (Expression)e); :}| 
-				Call:call SEMI {: RESULT = call;:}| 
-				RETURN ExprOrEmpty SEMI|
-				IF LP Expr RP Statement ELSE Statement|
-				IF LP Expr RP Statement|
-				WHILE LP Expr RP Statement|	    
-			    BREAK SEMI|
-			    CONTINUE SEMI|
-			    LCBR StatementStar RCBR |   
+				
+				Call:call SEMI {: RESULT = new  CallStatement((Call)call);:}| 
+				
+				RETURN ExprOrEmpty:e SEMI {: RESULT = (e==null)? new Return(parser.getLine()): new Return(parser.getLine(),(Expression)e); :}|
+				
+				IF LP Expr:condition RP Statement:ifStm ELSE Statement:elseStm 
+					{:
+						List<Statement> ifStmList  = new ArrayList<Statement>();
+						List<Statement> elseStmList  = new ArrayList<Statement>();
+						
+						if(!(ifStm instanceof List<?>)) ifStmList.add((Statement)ifStm); else ifStmList = (ArrayList<Statement>)ifStm;
+						if(!(elseStm  instanceof List<?>)) elseStmList.add((Statement)elseStm); else elseStmList = (ArrayList<Statement>)elseStm;					 	
+						RESULT = new If((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)ifStmList), new StatementsBlock(parser.getLine(), (List<Statement>)elseStmList));
+					
+					:}|
+				
+				IF LP Expr:condition RP Statement:ifStm
+					 {:
+					 	List<Statement> stmList  = new ArrayList<Statement>();
+					 	if( !(ifStm instanceof List<?> )) stmList.add((Statement)ifStm); else stmList = (ArrayList<Statement>)ifStm;
+					 	RESULT = new If((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stmList));
+					 :} |
+				
+				WHILE LP Expr:condition RP Statement:stm 
+					 {: 
+						List<Statement> stmList  = new ArrayList<Statement>();
+						if(!(stm instanceof List<?>)) stmList.add((Statement)stm); else stmList = (ArrayList<Statement>)stm;
+						RESULT = new While((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stm)); 
+					 :}|	    
+			    
+			    BREAK SEMI {:RESULT = new Break(parser.getLine());:}|
+			    
+			    CONTINUE SEMI {:RESULT = new Continue(parser.getLine());:}|
+			    
+			    LCBR StatementStar:stmList RCBR {: RESULT = stmList; :}|   
+			    
 			    Type ID InitVariable SEMI 
 			    ;
 
-StatementStar ::=  Statement StatementStar| ;
+StatementStar ::=  Statement:stm StatementStar:stmList
+							   {:
+							   		((ArrayList<Statement>)stmList).add((Statement)stm);
+							   		RESULT = stmList;	 
+							   :}|
+							   {:RESULT = new ArrayList<Statement>();:} ;
 
 InitVariable ::= ASSIGN Expr:e {: RESULT = e; :}|{:RESULT = null;:}  ;
 
