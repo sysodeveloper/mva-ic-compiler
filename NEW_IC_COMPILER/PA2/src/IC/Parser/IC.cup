@@ -226,7 +226,7 @@ Expr ::= Location|
 		
 		Expr:e1 Binop:op Expr:e2  {: 
 				if(op == BinaryOps.LAND || op == BinaryOps.LOR || op == BinaryOps.EQUAL || op == BinaryOps.NEQUAL ){ 
-					System.out.println("binary logic op");
+					System.out.println("binary logic op  " + ((BinaryOps)op).getOperatorString() + "  " +((BinaryOps)op).getDescription() );
 					RESULT = new LogicalBinaryOp((Expression)e1, (BinaryOps)op, (Expression)e2);
 					
 					}
