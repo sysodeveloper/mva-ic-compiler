@@ -51,7 +51,7 @@ terminal LP, RP , LB , RB , LCBR , RCBR , BOOLEAN , BREAK , COMMA , DOT , EQUAL 
 // The grammar
 libic ::= CLASS CLASS_ID:id LCBR libmethod:lstMethods RCBR
 {:
-	if(id.toString().CompareTo("Library") != 0){ return syntax_error(i) };	
+	if(id.toString().compareTo("Library") != 0){ parser.syntax_error((Symbol) id); };	
 	RESULT = new ICClass(parser.getLine(), id.toString(),(List<Field>)new ArrayList<Field>(),(List<Method>) lstMethods);
 :};
 libmethod ::= STATIC type:t ID:i LP formals:lstFormals RP SEMI libmethod:lstMethods
