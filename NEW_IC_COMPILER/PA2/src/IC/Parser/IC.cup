@@ -150,7 +150,7 @@ Statement ::=   Location ASSIGN Expr SEMI|
 
 StatementStar ::=  Statement StatementStar| ;
 
-InitVariable ::= ASSIGN Expr:e {: RESULT = (Expression)e ;:} |{: RESULT = null ;:} ;
+InitVariable ::= ASSIGN Expr:e|  ;
 
 ExprOrEmpty ::= Expr| ;
 
@@ -167,12 +167,12 @@ VirtualCall ::= VirtualCallPrefix Arguments RP | ID LP Arguments RP;
 VirtualCallPrefix ::= Expr DOT ID LP;
 
 Arguments ::= Expr:argument ArgumentsList:arglist 
-				{: RESULT = ((ArrayList<Expression>)arglist).add((Expression)argument); :}|
+				{: ((ArrayList<Expression>)arglist).add((Expression)argument); RESULT = arglist;  :}|
 				{: RESULT = new ArrayList<Expression>(); :} ;
 
 ArgumentsList ::= COMMA Expr:argument ArgumentsList:arglist 
-				{: RESULT = ((ArrayList<Expression>)arglist).add((Expression)argument);	:}|
-			    {: RESULT = new ArrayList<Expression>(); :}; 
+				{:  ((ArrayList<Expression>)arglist).add((Expression)argument); RESULT = arglist; :}|
+			    {:  RESULT = new ArrayList<Expression>(); :}; 
 
 Binop ::= PLUS      {: RESULT = BinaryOps.PLUS;  :} |
  		  MINUS     {: RESULT = BinaryOps.MINUS;  :}  |
@@ -204,7 +204,7 @@ FALSE:l
 NULL:l
 {: RESULT = new Literal(parser.getLine(),LiteralTypes.NULL); :};
 
-Expr ::= Location|
+Expr ::= Location:l{: RESULT = l ;:}|
 		
 		Call|
 		
