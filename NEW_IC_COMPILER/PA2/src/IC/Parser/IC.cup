@@ -50,7 +50,7 @@ non terminal Program Program;
 non terminal ClassIC, ClassICEx, ClassContent,FieldOrMethod,Field,FieldList,VirtualMethod,StaticMethod,MethodType;
 non terminal Formals,StatmentOrEmpty,Type,TypeList, Statement,InitVariable,Expr,ExprOrEmpty;
 non terminal Call,ElseStatement,StaticCall,VirtualCall,Arguments,ArgumentsList;
-non terminal ExprDotOrEmpty, Binop, Unop, Literal, Location;
+non terminal ExprDotOrEmpty, LogicBinop, Binop, Unop, Literal, Location;
 non terminal MethodPrefix,VirtualCallPrefix;
 non terminal StatementStar;
 non terminal A,B,C,D,F,G,H,I,J;
@@ -150,11 +150,13 @@ Statement ::=   Location ASSIGN Expr SEMI|
 
 StatementStar ::=  Statement StatementStar| ;
 
-InitVariable ::= ASSIGN Expr | ;
+InitVariable ::= ASSIGN Expr:e {: RESULT = (Expression)e ;:} |{: RESULT = null ;:} ;
 
 ExprOrEmpty ::= Expr| ;
 
-Location ::= ID | Expr DOT ID| Expr LB Expr RB ;
+Location ::= ID:id {: RESULT = new VariableLocation(parser.getLine(), id.toString()); :}|
+ 			 Expr:e DOT ID:id {: RESULT = new VariableLocation(parser.getLine(),(Expression)e, id.toString()); :}|
+  			 Expr:array LB Expr:index RB {: RESULT = new ArrayLocation((Expression) array, (Expression) index); :} ;
 
 Call ::= StaticCall | VirtualCall;
 
@@ -164,23 +166,29 @@ VirtualCall ::= VirtualCallPrefix Arguments RP | ID LP Arguments RP;
 
 VirtualCallPrefix ::= Expr DOT ID LP;
 
-Arguments ::= Expr ArgumentsList | ;
+Arguments ::= Expr:argument ArgumentsList:arglist 
+				{: RESULT = ((ArrayList<Expression>)arglist).add((Expression)argument); :}|
+				{: RESULT = new ArrayList<Expression>(); :} ;
 
-ArgumentsList ::= COMMA Expr ArgumentsList | ; 
+ArgumentsList ::= COMMA Expr:argument ArgumentsList:arglist 
+				{: RESULT = ((ArrayList<Expression>)arglist).add((Expression)argument);	:}|
+			    {: RESULT = new ArrayList<Expression>(); :}; 
 
-Binop ::= PLUS {: RESULT = BinaryOps.PLUS;  :} |
- 		  MINUS  {: RESULT = BinaryOps.MINUS;  :}  |
+Binop ::= PLUS      {: RESULT = BinaryOps.PLUS;  :} |
+ 		  MINUS     {: RESULT = BinaryOps.MINUS;  :}  |
   		  MULTIPLY  {: RESULT = BinaryOps.MULTIPLY;  :}  |
-   		  DIVIDE  {: RESULT = BinaryOps.DIVIDE;  :}  | 
-   		  MOD  {: RESULT = BinaryOps.MOD;  :}  |
-		  LAND  {: RESULT = BinaryOps.LAND;  :}  |
-		  LOR  {: RESULT = BinaryOps.LOR;  :}  |
-		  GT  {: RESULT = BinaryOps.GT;  :}  |
-       	  GTE  {: RESULT = BinaryOps.GTE;  :}  |
-          LT  {: RESULT = BinaryOps.LT;  :}  |
-          LTE  {: RESULT = BinaryOps.LTE;  :}  |
-          EQUAL  {: RESULT = BinaryOps.EQUAL;  :}  |
-          NEQUAL  {: RESULT = BinaryOps.NEQUAL;  :} ;
+   		  DIVIDE    {: RESULT = BinaryOps.DIVIDE;  :}  | 
+   		  MOD       {: RESULT = BinaryOps.MOD;  :}  |
+		  LAND  	{: RESULT = BinaryOps.LAND;  :}  |
+		  LOR  		{: RESULT = BinaryOps.LOR;  :}  |
+		  GT  		{: RESULT = BinaryOps.GT;  :}  |
+       	  GTE  		{: RESULT = BinaryOps.GTE;  :}  |
+          LT  		{: RESULT = BinaryOps.LT;  :}  |
+          LTE  		{: RESULT = BinaryOps.LTE;  :}  |
+          EQUAL  	{: RESULT = BinaryOps.EQUAL;  :}  |
+          NEQUAL    {: RESULT = BinaryOps.NEQUAL;  :} ;
+          
+        
 
 Unop ::= MINUS {: RESULT = UnaryOps.UMINUS;  :} | 
 		 LNEG  {: RESULT = UnaryOps.LNEG;  :};
@@ -197,16 +205,35 @@ NULL:l
 {: RESULT = new Literal(parser.getLine(),LiteralTypes.NULL); :};
 
 Expr ::= Location|
+		
 		Call|
-		THIS 
-		{: RESULT = new This(parser.getLine()); :} |
-		LP Expr RP|
-		NEW CLASS_ID LP RP|
-		NEW Type LB Expr RB|
-		Expr DOT LENGTH|
+		
+		THIS {: RESULT = new This(parser.getLine()); :} |
+		
+		LP Expr:e RP {: RESULT = new ExpressionBlock((Expression)e); :}| 
+		
+		NEW CLASS_ID:cid LP RP {: RESULT = new NewClass(parser.getLine(), cid.toString()); :}|
+		
+		NEW Type:t LB Expr:e RB {: RESULT = new  NewArray((Type)t,(Expression)e);  :}|
+		
+		Expr:e DOT LENGTH {: RESULT = new Length((Expression)e); :}|
+		
 		Literal|
-		MINUS:uminus Expr:e %prec UNOP|
-		LNEG:not Expr:e %prec UNOP |
-		Expr Binop Expr;
+		
+		MINUS:um Expr:e {: RESULT = new LogicalUnaryOp(UnaryOps.UMINUS,(Expression)e); :} %prec UNOP  |
+		
+		LNEG:not Expr:e {: RESULT = new LogicalUnaryOp(UnaryOps.LNEG,(Expression)e); :} %prec UNOP |
+		
+		Expr:e1 Binop:op Expr:e2  {: 
+				if(op == BinaryOps.LAND || op == BinaryOps.LOR || op == BinaryOps.EQUAL || op == BinaryOps.NEQUAL ){ 
+					System.out.println("binary logic op");
+					RESULT = new LogicalBinaryOp((Expression)e1, (BinaryOps)op, (Expression)e2);
+					
+					}
+				else{
+					System.out.println("binary math op");
+					RESULT = new MathBinaryOp((Expression)e1, (BinaryOps)op, (Expression)e2);
+					
+					} :};
 
 			
