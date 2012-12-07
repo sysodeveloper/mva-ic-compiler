@@ -78,11 +78,75 @@ precedence left ELSE;
 
 
 
-Program ::= ClassIC Program | ClassICEx Program | ;
-ClassIC ::= CLASS CLASS_ID ClassContent;
-ClassICEx ::= CLASS CLASS_ID EXTENDS CLASS_ID ClassContent;
-ClassContent ::= LCBR FieldOrMethod RCBR;
-FieldOrMethod ::= Field FieldOrMethod | StaticMethod FieldOrMethod | VirtualMethod FieldOrMethod | ;
+Program ::= ClassIC:icClass Program:program 
+					{:
+						Program p = new Program(new ArrayList<ICClass>());
+						p = (Program)program;
+						List<ICClass> classes = p.getClasses();
+						classes.add((ICClass)icClass);
+						RESULT = new Program(classes);
+					:}|
+					
+ClassICEx:icClass Program:program
+					{:
+						Program p = new Program(new ArrayList<ICClass>());
+						p = (Program)program;
+						List<ICClass> classes = p.getClasses();
+						classes.add((ICClass)icClass);
+						RESULT = new Program(classes);
+					:}|
+					
+             	    {: RESULT = new Program(new ArrayList<ICClass>()); :} ;
+
+ClassIC ::= CLASS CLASS_ID:className ClassContent:content
+					{:
+							Object[] classContent = new Object[2];
+							classContent = (Object[])content;
+							ArrayList<Field> fields = (ArrayList<Field>)classContent[0];
+							ArrayList<Method> methods = (ArrayList<Method>)classContent[1];
+							RESULT = new ICClass(parser.getLine(), className.toString(), fields, methods);
+					:}
+;
+
+ClassICEx ::= CLASS CLASS_ID:derivedClass EXTENDS CLASS_ID:baseClass ClassContent:content 
+					{:
+							Object[] classContent = new Object[2];
+							classContent = (Object[])content;
+							ArrayList<Field> fields = (ArrayList<Field>)classContent[0];
+							ArrayList<Method> methods = (ArrayList<Method>)classContent[1];
+							RESULT = new ICClass(parser.getLine(), derivedClass.toString(),baseClass.toString(), fields, methods);
+					:}
+;
+
+ClassContent ::= LCBR FieldOrMethod:fom RCBR {: RESULT = fom; :};
+
+FieldOrMethod ::= Field:field FieldOrMethod:fom 		 {: Object[] arr = new Object[2];
+  				  											arr = (Object[])fom;		
+  				  											arr[0]=field;
+ 				  											RESULT = arr; :}|
+														 
+
+ 				  StaticMethod:method FieldOrMethod:fom  {: 
+ 				  											Object[] arr = new Object[2];
+  				  											arr = (Object[])fom;		
+  				  											((ArrayList<Method>)arr[1]).add((Method)method);
+ 				  											RESULT = arr;  
+ 				  										 :}|
+ 				  
+  				  VirtualMethod:method FieldOrMethod:fom {: 
+  				  											Object[] arr = new Object[2];
+  				  											arr = (Object[])fom;		
+  				  											((ArrayList<Method>)arr[1]).add((Method)method);
+ 				  											RESULT = arr; 
+ 				  										 :}|
+  				  
+  				 										 {: 
+  				 										 	ArrayList<Field> fields = new ArrayList<Field>();
+  				 										 	ArrayList<Method> methods = new ArrayList<Method>();
+  				 										 	Object[] fom = new Object[2];
+  				 										 	fom[0] = fields; fom[1] = methods;  				 										 	
+  				 										 	RESULT = fom; 
+  				 										 :} ;
 
 
 Field ::= Type:t ID:i FieldList:flst SEMI 
@@ -115,9 +179,34 @@ Type::= INT 	 	 {: RESULT = new PrimitiveType(parser.getLine(), DataTypes.INT); 
 		Type:t LB RB {: ((Type)t).incrementDimension(); RESULT = t; :};
 
 
-VirtualMethod ::= MethodPrefix Formals RP LCBR StatementStar RCBR ;
-MethodPrefix ::= VOID ID LP | Type ID LP;
-StaticMethod ::= STATIC MethodPrefix Formals RP LCBR StatementStar RCBR;
+MethodPrefix ::= VOID ID:id LP 
+					{: 
+							Object methodPrefix[] = new Object[2];
+							methodPrefix[0]=new PrimitiveType(parser.getLine(),DataTypes.VOID); methodPrefix[1]=id;
+							RESULT = methodPrefix;
+					:} |
+				 Type:t ID:id LP 
+				 	{:
+				 			Object methodPrefix[] = new Object[2];
+							methodPrefix[0]=t; methodPrefix[1]=id;
+							RESULT = methodPrefix;
+				 	:};
+
+
+VirtualMethod ::= MethodPrefix:mPrefix Formals:formals RP LCBR StatementStar:statements RCBR 
+					{:
+						Object[] prefix = new Object[2];
+						prefix = (Object[])mPrefix;
+						RESULT = new VirtualMethod((Type)prefix[0], prefix[1].toString(), (List<Formal>) formals, (List<Statement>) statements);	
+					:};
+
+
+StaticMethod ::= STATIC MethodPrefix:mPrefix Formals:formals RP LCBR StatementStar:statements RCBR
+					{:
+						Object[] prefix = new Object[2];
+						prefix = (Object[])mPrefix;
+						RESULT = new VirtualMethod((Type)prefix[0], prefix[1].toString(), (List<Formal>) formals, (List<Statement>) statements);	
+					:};
 
 Formals::= Type:t ID:i TypeList:lst 
 			{:	ArrayList<Formal> lstFormals = (ArrayList<Formal>)lst;
