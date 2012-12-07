@@ -225,88 +225,43 @@ TypeList::=  COMMA Type:t ID:i TypeList:lst
 
 
 
-Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Location)l, (Expression)e); :}| 
-				
-				Call:call SEMI {: RESULT = new  CallStatement((Call)call);:}| 
-				
-				RETURN ExprOrEmpty:e SEMI {: RESULT = (e==null)? new Return(parser.getLine()): new Return(parser.getLine(),(Expression)e); :}|
-				
-				IF LP Expr:condition RP Statement:ifStm ELSE Statement:elseStm 
-					{:
-						List<Statement> ifStmList  = new ArrayList<Statement>();
-						List<Statement> elseStmList  = new ArrayList<Statement>();
-						
-						if(!(ifStm instanceof List<?>)) ifStmList.add((Statement)ifStm); else ifStmList = (ArrayList<Statement>)ifStm;
-						if(!(elseStm  instanceof List<?>)) elseStmList.add((Statement)elseStm); else elseStmList = (ArrayList<Statement>)elseStm;					 	
-						RESULT = new If((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)ifStmList), new StatementsBlock(parser.getLine(), (List<Statement>)elseStmList));
-					
-					:}|
-				
-				IF LP Expr:condition RP Statement:ifStm
-					 {:
-					 	List<Statement> stmList  = new ArrayList<Statement>();
-					 	if( !(ifStm instanceof List<?> )) stmList.add((Statement)ifStm); else stmList = (ArrayList<Statement>)ifStm;
-					 	RESULT = new If((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stmList));
-					 :} |
-				
-				WHILE LP Expr:condition RP Statement:stm 
-					 {: 
-						List<Statement> stmList  = new ArrayList<Statement>();
-						if(!(stm instanceof List<?>)) stmList.add((Statement)stm); else stmList = (ArrayList<Statement>)stm;
-						RESULT = new While((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stm)); 
-					 :}|	    
-			    
-			    BREAK SEMI {:RESULT = new Break(parser.getLine());:}|
-			    
-			    CONTINUE SEMI {:RESULT = new Continue(parser.getLine());:}|
-			    
-			    LCBR StatementStar:stmList RCBR {: RESULT = stmList; :}|   
-			    
+Statement ::=   Location ASSIGN Expr SEMI| 
+				Call SEMI| 
+				RETURN ExprOrEmpty SEMI|
+				IF LP Expr RP Statement ELSE Statement|
+				IF LP Expr RP Statement|
+				WHILE LP Expr RP Statement|	    
+			    BREAK SEMI|
+			    CONTINUE SEMI|
+			    LCBR StatementStar RCBR |   
 			    Type ID InitVariable SEMI 
 			    ;
 
-StatementStar ::=  Statement:stm StatementStar:stmList
-							   {:
-							   		((ArrayList<Statement>)stmList).add((Statement)stm);
-							   		RESULT = stmList;	 
-							   :}|
-							   {:RESULT = new ArrayList<Statement>();:} ;
+StatementStar ::=  Statement StatementStar| ;
 
-InitVariable ::= ASSIGN Expr:e {: RESULT = e; :}|{:RESULT = null;:}  ;
+InitVariable ::= ASSIGN Expr:e {: RESULT = (Expression)e ;:} |{: RESULT = null ;:} ;
 
-ExprOrEmpty ::= Expr:e{: RESULT = e; :}|{:RESULT = null;:} ;
+ExprOrEmpty ::= Expr| ;
 
 Location ::= ID:id {: RESULT = new VariableLocation(parser.getLine(), id.toString()); :}|
  			 Expr:e DOT ID:id {: RESULT = new VariableLocation(parser.getLine(),(Expression)e, id.toString()); :}|
   			 Expr:array LB Expr:index RB {: RESULT = new ArrayLocation((Expression) array, (Expression) index); :} ;
 
-Call ::= StaticCall:sc{:RESULT = sc;:} | VirtualCall:vc{:RESULT = vc;:};
+Call ::= StaticCall | VirtualCall;
 
-StaticCall ::= CLASS_ID:class_id DOT ID:id LP Arguments:argsList RP
-				{: RESULT = new StaticCall(parser.getLine(), class_id.toString(), id.toString(),(List<Expression>) argsList); :};
+StaticCall ::= CLASS_ID DOT ID LP Arguments RP;
 
-VirtualCall ::= VirtualCallPrefix:callPrefix Arguments:argsList RP 
-					 {:
-					 	Object prefix[] = new Object[2];
-					 	prefix = (Object[])callPrefix;
-					 	RESULT = new VirtualCall(parser.getLine(),(Expression)prefix[0],prefix[1].toString(),(List<Expression>)argsList);
-					 
-					 :} | 
- 				ID:id LP Arguments:argsList RP {: RESULT = new VirtualCall(parser.getLine(),id.toString(),(List<Expression>)argsList); :};
+VirtualCall ::= VirtualCallPrefix Arguments RP | ID LP Arguments RP;
 
-VirtualCallPrefix ::= Expr:e DOT ID:id LP {:
-											 Object callPrefix[] = new Object[2];
-											 callPrefix[0]=e;  callPrefix[1]=id; 
-											 RESULT = callPrefix;
-									     :};
+VirtualCallPrefix ::= Expr DOT ID LP;
 
 Arguments ::= Expr:argument ArgumentsList:arglist 
-				{: ((ArrayList<Expression>)arglist).add((Expression)argument); RESULT = arglist;  :}|
+				{: RESULT = ((ArrayList<Expression>)arglist).add((Expression)argument); :}|
 				{: RESULT = new ArrayList<Expression>(); :} ;
 
 ArgumentsList ::= COMMA Expr:argument ArgumentsList:arglist 
-				{:  ((ArrayList<Expression>)arglist).add((Expression)argument); RESULT = arglist; :}|
-			    {:  RESULT = new ArrayList<Expression>(); :}; 
+				{: RESULT = ((ArrayList<Expression>)arglist).add((Expression)argument);	:}|
+			    {: RESULT = new ArrayList<Expression>(); :}; 
 
 Binop ::= PLUS      {: RESULT = BinaryOps.PLUS;  :} |
  		  MINUS     {: RESULT = BinaryOps.MINUS;  :}  |
@@ -338,7 +293,7 @@ FALSE:l
 NULL:l
 {: RESULT = new Literal(parser.getLine(),LiteralTypes.NULL); :};
 
-Expr ::= Location:l{: RESULT = l ;:}|
+Expr ::= Location|
 		
 		Call|
 		
@@ -352,7 +307,7 @@ Expr ::= Location:l{: RESULT = l ;:}|
 		
 		Expr:e DOT LENGTH {: RESULT = new Length((Expression)e); :}|
 		
-		Literal:lt {: RESULT = lt; :}|
+		Literal:l {:RESULT = l; :}|
 		
 		MINUS:um Expr:e {: RESULT = new LogicalUnaryOp(UnaryOps.UMINUS,(Expression)e); :} %prec UNOP  |
 		
@@ -360,12 +315,12 @@ Expr ::= Location:l{: RESULT = l ;:}|
 		
 		Expr:e1 Binop:op Expr:e2  {: 
 				if(op == BinaryOps.LAND || op == BinaryOps.LOR || op == BinaryOps.EQUAL || op == BinaryOps.NEQUAL ){ 
-					
+					System.out.println("binary logic op  " + ((BinaryOps)op).getOperatorString() + "  " +((BinaryOps)op).getDescription() );
 					RESULT = new LogicalBinaryOp((Expression)e1, (BinaryOps)op, (Expression)e2);
 					
 					}
 				else{
-					
+					System.out.println("binary math e1" + e2);
 					RESULT = new MathBinaryOp((Expression)e1, (BinaryOps)op, (Expression)e2);
 					
 					} :};

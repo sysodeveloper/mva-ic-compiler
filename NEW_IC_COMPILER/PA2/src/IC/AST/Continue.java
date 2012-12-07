@@ -11,6 +11,9 @@ public class Continue extends Statement {
 		return visitor.visit(this);
 	}
 
+	public Object accept(PropagatingVisitor visitor, Object context){
+		return visitor.visit(this, context);
+	}
 	/**
 	 * Constructs a continue statement node.
 	 * 

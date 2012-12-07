@@ -13,6 +13,9 @@ public class StaticMethod extends Method {
 		return visitor.visit(this);
 	}
 
+	public Object accept(PropagatingVisitor visitor, Object context){
+		return visitor.visit(this, context);
+	}
 	/**
 	 * Constructs a new static method node.
 	 * 

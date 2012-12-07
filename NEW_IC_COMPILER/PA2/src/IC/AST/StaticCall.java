@@ -15,6 +15,9 @@ public class StaticCall extends Call {
 		return visitor.visit(this);
 	}
 
+	public Object accept(PropagatingVisitor visitor, Object context){
+		return visitor.visit(this, context);
+	}
 	/**
 	 * Constructs a new static method call node.
 	 * 

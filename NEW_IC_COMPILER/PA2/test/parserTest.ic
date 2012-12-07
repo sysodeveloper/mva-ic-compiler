@@ -7,6 +7,7 @@ class IhateCom{
 	int foo(){
 	}
 	static void f(int x){
+		x = 2+3;
 		int x;
 		int y;
 		break;
@@ -14,6 +15,7 @@ class IhateCom{
 		return g;
 		x=1;
 		m.func();
+		this.a();
 		int[] a = new K[9];
 		boolean aa = (a[8].length).length;
 		if (x==2) return y[9];
