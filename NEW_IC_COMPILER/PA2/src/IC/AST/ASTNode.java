@@ -8,6 +8,7 @@ package IC.AST;
 public abstract class ASTNode {
 
 	private int line;
+	private int id;
 
 	/**
 	 * Double dispatch method, to allow a visitor to visit a specific subclass.
@@ -17,6 +18,8 @@ public abstract class ASTNode {
 	 * @return A value propagated by the visitor.
 	 */
 	public abstract Object accept(Visitor visitor);
+	
+	public abstract Object accept(PropagatingVisitor visitor, Object context);
 
 	/**
 	 * Constructs an AST node corresponding to a line number in the original
@@ -31,6 +34,14 @@ public abstract class ASTNode {
 
 	public int getLine() {
 		return line;
+	}
+	
+	public int getID(){
+		return id;
+	}
+	
+	public void setID(int id){
+		this.id = id;
 	}
 
 }

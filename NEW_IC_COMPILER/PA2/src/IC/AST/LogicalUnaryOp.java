@@ -13,6 +13,9 @@ public class LogicalUnaryOp extends UnaryOp {
 		return visitor.visit(this);
 	}
 
+	public Object accept(PropagatingVisitor visitor, Object context){
+		return visitor.visit(this, context);
+	}
 	/**
 	 * Constructs a new logical unary operation node.
 	 * 

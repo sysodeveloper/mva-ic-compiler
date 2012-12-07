@@ -17,6 +17,9 @@ public class LocalVariable extends Statement {
 		return visitor.visit(this);
 	}
 
+	public Object accept(PropagatingVisitor visitor, Object context){
+		return visitor.visit(this, context);
+	}
 	/**
 	 * Constructs a new local variable declaration statement node.
 	 * 

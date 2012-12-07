@@ -14,7 +14,10 @@ public class VirtualCall extends Call {
 	public Object accept(Visitor visitor) {
 		return visitor.visit(this);
 	}
-
+	
+	public Object accept(PropagatingVisitor visitor, Object context){
+		return visitor.visit(this, context);
+	}
 	/**
 	 * Constructs a new virtual method call node.
 	 * 

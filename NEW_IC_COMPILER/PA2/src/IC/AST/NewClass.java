@@ -12,6 +12,10 @@ public class NewClass extends New {
 	public Object accept(Visitor visitor) {
 		return visitor.visit(this);
 	}
+	
+	public Object accept(PropagatingVisitor visitor, Object context){
+		return visitor.visit(this, context);
+	}
 
 	/**
 	 * Constructs a new class instance creation expression node.
