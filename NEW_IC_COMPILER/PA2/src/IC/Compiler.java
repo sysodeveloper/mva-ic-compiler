@@ -119,7 +119,7 @@ public class Compiler {
 		}catch(NullPointerException e1){
 			System.out.println(e1.getMessage());
 		}catch(Exception e2){
-			e2.printStackTrace();
+			System.out.println(e2.getMessage());
 		}
 	}
 	
@@ -147,6 +147,7 @@ public class Compiler {
 			System.out.println("Error: The file " + libPath + " doesn't exist.");
 			System.exit(1);
 		} catch (Exception e2) {
+			System.out.println(e2.getMessage());
 		}
 		return null;
 	}
@@ -175,6 +176,7 @@ public class Compiler {
 			System.out.println("Error: The file " + filePath + " doesn't exist.");
 			System.exit(1);
 		} catch (Exception e2) {
+			System.out.println("Error while parsing: " + e2.getMessage());
 		}
 		return null;
 	}
