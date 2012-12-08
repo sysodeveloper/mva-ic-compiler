@@ -29,6 +29,10 @@ public class TreePrinter implements Visitor{
 		deleteLastComma(children);
 		indent(output);
 		output.append(program.getID() + " - Program");
+		output.append(" -> {");
+		output.append(children.toString());
+		output.append("}");
+		output.append("\n");
 		return output.toString();
 	}
 
