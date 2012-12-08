@@ -198,7 +198,7 @@ public class GrpahNodesPrinter implements Visitor{
 	public Object visit(VariableLocation location) {
 		StringBuffer output = new StringBuffer();
 		if(location.isExternal()){
-			output.append(location.accept(this));
+			output.append(location.getLocation().accept(this));
 		}
 		if(location.isExternal()){
 			output.append(PrintNode(location,"VariableLocation " + location.getName()+" in external scope"));
