@@ -13,6 +13,7 @@ import IC.AST.GrpahNodesPrinter;
 import IC.AST.ICClass;
 import IC.AST.Labeling;
 import IC.AST.LibraryMethod;
+import IC.AST.Method;
 import IC.AST.PrettyPrinter;
 import IC.AST.Program;
 import IC.AST.TreePrinter;
@@ -65,12 +66,33 @@ public class Compiler {
 				if(args[i].compareTo("-print-ast") == 0){
 					LabelAST(root, 0);
 					PrintASTCommand(root);
+					GraphvizAST((Program)root);
 					break;
 				}
 			}
 		}		
 	}
 
+	private static void GraphvizAST(Program root){
+		try{
+			FileWriter fstream = new FileWriter("out.txt");
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write("digraph G{");
+			out.write("\r\n");
+			GraphEdgesPrinter edges = new GraphEdgesPrinter();
+			out.write(edges.visit(root).toString().replace("\n", "\r\n"));
+			out.write("\r\n");
+			GrpahNodesPrinter nodes = new GrpahNodesPrinter();
+			out.write(nodes.visit(root).toString().replace("\n", "\r\n"));
+			out.write("\r\n");
+			out.write("}");
+			//Close the output stream
+			out.close();
+		}catch(Exception e){
+			
+		}	
+	}
+	
 	private static void GraphvizLibraryAST(ICClass root){
 		try{
 			FileWriter fstream = new FileWriter("out.txt");
@@ -100,11 +122,12 @@ public class Compiler {
 	private static void PrintASTCommand(Object root){
 		try{
 			TreePrinter treePrinter = new TreePrinter();
-			treePrinter.visit((Program)root);
+			System.out.println(treePrinter.visit((Program)root));
 		}catch(ClassCastException e){
 			System.out.println("Error printing program: " + e.getMessage());
 		}catch(NullPointerException e1){
-			System.out.println(e1.getMessage());
+			System.out.println("Null Pointer in PrintASTCommand");
+			e1.printStackTrace();
 		}catch(Exception e2){
 			e2.printStackTrace();
 		}

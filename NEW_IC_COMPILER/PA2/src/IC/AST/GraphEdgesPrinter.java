@@ -29,6 +29,11 @@ public class GraphEdgesPrinter implements Visitor {
 		deleteLastComma(children);
 		indent(output);
 		output.append(program.getID());
+		output.append(" -> {");
+		output.append(children.toString());
+		output.append("}");
+		output.append("\n");
+
 		return output.toString();
 	}
 
@@ -79,7 +84,7 @@ public class GraphEdgesPrinter implements Visitor {
 		StringBuffer children = new StringBuffer();
 		depth += 2;
 		output.append(method.getType().accept(this));
-		children.append(method.getType().getID());
+		children.append(method.getType().getID() + " ");
 		for(Formal f : method.getFormals()){
 			output.append(f.accept(this));
 			children.append(f.getID() + " ");
@@ -105,7 +110,7 @@ public class GraphEdgesPrinter implements Visitor {
 		StringBuffer children = new StringBuffer();
 		depth += 2;
 		output.append(method.getType().accept(this));
-		children.append(method.getType().getID());
+		children.append(method.getType().getID()+" ");
 		for(Formal f : method.getFormals()){
 			output.append(f.accept(this));
 			children.append(f.getID() + " ");

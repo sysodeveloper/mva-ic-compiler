@@ -33,7 +33,7 @@ class IhateCom{
 			myClass.runThisCrazyProgram(x,y);	
 		}		
 		else
-			jj = (!y.length + 0*5+!(-9) / 23 + m.func(6,7,8,0));	
+			jj = (!y.length + 0*5+(-9) / !23 );	
 		while(x){
 			if(u) if(z) x=0; else x=8;
 			if(!y)
