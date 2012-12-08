@@ -60,7 +60,7 @@ ESCAPE_SEQ		= \\t|\\n|\\r|\\\"|\\
 // Lexing Rules
 //////////////////
 
-<YYINITIAL> {IGNORE}          {}
+<YYINITIAL>  {IGNORE}          {}
 <ST_COMMENT> {IGNORE}          {}
 <YYINITIAL>  {NUMBER}          { return new Token(sym.INTEGER,       yyline, yytext()); }
 <YYINITIAL>  {IL_NUMBER}       { throw new LexicalError("Invalid number: " + yytext(), yyline); }
