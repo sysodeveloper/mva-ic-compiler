@@ -83,7 +83,7 @@ public class TreePrinter implements Visitor{
 		StringBuffer children = new StringBuffer();
 		depth += 2;
 		output.append(method.getType().accept(this));
-		children.append(method.getType().getID());
+		children.append(method.getType().getID() +",");
 		for(Formal f : method.getFormals()){
 			output.append(f.accept(this));
 			children.append(f.getID() + ",");
@@ -109,7 +109,7 @@ public class TreePrinter implements Visitor{
 		StringBuffer children = new StringBuffer();
 		depth += 2;
 		output.append(method.getType().accept(this));
-		children.append(method.getType().getID());
+		children.append(method.getType().getID() +",");
 		for(Formal f : method.getFormals()){
 			output.append(f.accept(this));
 			children.append(f.getID() + ",");
