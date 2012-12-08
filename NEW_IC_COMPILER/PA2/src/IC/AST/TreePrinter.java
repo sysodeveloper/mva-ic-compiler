@@ -356,7 +356,7 @@ public class TreePrinter implements Visitor{
 		StringBuffer output = new StringBuffer();
 		if(location.isExternal()){
 			++depth;
-			output.append(location.accept(this));
+			output.append(location.getLocation().accept(this));
 			--depth;
 		}
 		indent(output, location);
