@@ -19,6 +19,15 @@ public abstract class ASTNode {
 	 */
 	public abstract Object accept(Visitor visitor);
 	
+	/***
+	 * Double dispatch method, to allow a visitor to visit a specific subclass, including holding 
+	 * result object
+	 * @param visitor
+	 * 			The visitor.
+	 * @param context
+	 * 			The object to pass
+	 * @return A value propagated by the visitor
+	 */
 	public abstract Object accept(PropagatingVisitor visitor, Object context);
 
 	/**
@@ -36,10 +45,17 @@ public abstract class ASTNode {
 		return line;
 	}
 	
+	/***
+	 * Each node cann be assigned an ID
+	 * @return id of the node
+	 */
 	public int getID(){
 		return id;
 	}
-	
+	/**
+	 * Sets the id of a node 
+	 * @param id
+	 */
 	public void setID(int id){
 		this.id = id;
 	}
