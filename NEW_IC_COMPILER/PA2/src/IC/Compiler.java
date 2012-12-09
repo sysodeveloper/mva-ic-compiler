@@ -37,17 +37,6 @@ public class Compiler {
 			System.exit(1);
 		}
 		if(args.length == 1){
-			/////////////////////////////////////////
-			/////////////////DEBUG//////////////////
-			///////////////////////////////////////
-/*			ICClass root = (ICClass) ParseLibraryFile(args[0]);
-			Labeling l = new Labeling();
-			l.visit(root, 0);
-			TreePrinter tp = new TreePrinter();
-			System.out.println(tp.visit(root));
-			GraphvizLibraryAST(root);
-*/
-			//only ic file to parse
 			ParseICFile(args[0]);
 		}else{
 			//check which arguments are entered
@@ -156,21 +145,22 @@ public class Compiler {
 			fr = new FileReader(f);
 			Lexer lex = new Lexer(fr);
 			LibraryParser libParser = new LibraryParser(lex);
-			libParser.printTokens = true;
+			libParser.printTokens = false;
 			Symbol parsedSymbol = libParser.parse();
 			System.out.println("Successfully parsed library file " +libPath);
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
-			System.out.println(e3.getMessage());
+			System.out.println(libPath + " " + e3.getMessage());
 			System.exit(1);
 		}catch (LexicalError e1){
-			System.out.println(e1.getMessage());
+			System.out.println(libPath + " " +e1.getMessage());
 			System.exit(1);
 		}catch (FileNotFoundException e) {
 			System.out.println("Error: The file " + libPath + " doesn't exist.");
 			System.exit(1);
 		} catch (Exception e2) {
-			System.out.println(e2.getMessage());
+			System.out.println(libPath + " " + e2.getMessage());
+			System.exit(1);
 		}
 		return null;
 	}
@@ -185,21 +175,22 @@ public class Compiler {
 			fr = new FileReader(f);
 			Lexer lex = new Lexer(fr);
 			Parser parser = new Parser(lex);
-			parser.printTokens = true;
+			parser.printTokens = false;
 			Symbol parsedSymbol = parser.parse();
 			System.out.println("Successfully parsed " +filePath);
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
-			System.out.println(e3.getMessage());
+			System.out.println(filePath + " " + e3.getMessage());
 			System.exit(1);
 		}catch (LexicalError e1){
-			System.out.println(e1.getMessage());
+			System.out.println(filePath + " " + e1.getMessage());
 			System.exit(1);
 		}catch (FileNotFoundException e) {
 			System.out.println("Error: The file " + filePath + " doesn't exist.");
 			System.exit(1);
 		} catch (Exception e2) {
-			System.out.println("Error while parsing: " + e2.getMessage());
+			System.out.println(filePath + " " + "Error while parsing: " + e2.getMessage());
+			System.exit(1);
 		}
 		return null;
 	}
