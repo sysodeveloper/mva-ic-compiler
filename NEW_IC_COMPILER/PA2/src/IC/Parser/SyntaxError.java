@@ -13,6 +13,11 @@ public class SyntaxError extends Exception {
 	 * The last token scanned before the syntax error
 	 */
 	private Token tok;
+	
+	/**
+	 * Message
+	 */
+	private String m_msg;
 	/**
 	 * Get the line number.
 	 * @return The line number.
@@ -25,7 +30,7 @@ public class SyntaxError extends Exception {
 	 * get the error message.
 	 */
 	public String getMessage() {
-		return "Line " + this.getLineNumber() + ": Syntax Error; unexpected " + this.getToken().toString(); 
+		return "Line " + this.getLineNumber() + ": Syntax Error; unexpected " + this.getToken().toString() + " " + m_msg; 
 	}
 
 	/**
@@ -35,8 +40,14 @@ public class SyntaxError extends Exception {
     public SyntaxError(Token tok,int lineNumber) {
     	this.tok = tok;
     	m_lineNumber = lineNumber;
+    	m_msg = "";
     }
     
+    public SyntaxError(Token tok,int lineNumber, String msg) {
+    	this.tok = tok;
+    	m_lineNumber = lineNumber;
+    	m_msg = msg;    	
+    }
 	public Token getToken() {
 		return tok;
 	}
