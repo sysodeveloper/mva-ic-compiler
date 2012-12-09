@@ -14,9 +14,15 @@ public class LexicalError extends Exception
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * The error message.
+	 * The token that caused the lexical error.
+	 */
+	private String m_tok;
+
+	/**
+	 * The token that caused the lexical error.
 	 */
 	private String m_msg;
+	
 	
 	/**
 	 * The line number in the origin text..
@@ -35,26 +41,25 @@ public class LexicalError extends Exception
 	 * get the error message.
 	 */
 	public String getMessage() {
-		return m_msg;
-	}
-	
-	/**
-	 * Set the error message.
-	 * @param msg The error message.
-	 */
-	public void setMessage(String msg) {
-		m_msg = msg;
+		return "Line " + this.getLineNumber() + ": Lexical error; unresolved token " + m_tok + " " + m_msg;
 	}
 	
 	/**
 	 * Create new lexical error.
 	 * @param message The error message.
 	 */
-    public LexicalError(String message, int lineNumber) {
-    	m_msg = message;
+    public LexicalError(String tok, int lineNumber) {
+    	m_tok = tok;
     	m_lineNumber = lineNumber;
+    	m_msg = "";
     }
     
+    public LexicalError(String tok, int lineNumber, String msg) {
+    	m_tok = tok;
+    	m_lineNumber = lineNumber;
+    	m_msg = msg;
+    }
+        
     /**
 	 * Create new lexical error.
 	 * @param message The error message.
