@@ -8,17 +8,12 @@ import java.io.FileWriter;
 
 import java_cup.runtime.Symbol;
 import IC.AST.GraphEdgesPrinter;
-import IC.AST.Graphviz;
 import IC.AST.GrpahNodesPrinter;
 import IC.AST.ICClass;
 import IC.AST.Labeling;
-import IC.AST.LibraryMethod;
-import IC.AST.Method;
-import IC.AST.PrettyPrinter;
 import IC.AST.Program;
 import IC.AST.TreePrinter;
 import IC.Parser.*;
-import JFlex.RegExp;
 
 /**
  * The IC Compiler.
@@ -30,6 +25,8 @@ public class Compiler {
 	 * 
 	 * @param args
 	 *            - The IC file path.
+	 *            - The Library file path.
+	 *            - Supports -print-ast command 
 	 */
 	public static void main(String[] args) {
 		if (args.length < 1) {
@@ -37,6 +34,7 @@ public class Compiler {
 			System.exit(1);
 		}
 		if(args.length == 1){
+			//only parse the ic file
 			ParseICFile(args[0]);
 		}else{
 			//check which arguments are entered
@@ -62,6 +60,11 @@ public class Compiler {
 		}		
 	}
 
+	/**
+	 * 
+	 * @param root - the root of the ast tree
+	 * creates a file out.txt that can be viewed in graphviz program
+	 */
 	private static void GraphvizAST(Program root){
 		try{
 			FileWriter fstream = new FileWriter("out.txt");
@@ -82,6 +85,11 @@ public class Compiler {
 		}	
 	}
 	
+	/**
+	 * 
+	 * @param root
+	 * creates a file out.txt that can be viewed in graphviz program
+	 */
 	private static void GraphvizLibraryAST(ICClass root){
 		try{
 			FileWriter fstream = new FileWriter("out.txt");
@@ -102,12 +110,20 @@ public class Compiler {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param root - the root of the ast tree
+	 * @param startFrom - a number to start the ids of the nodes from
+	 */
 	private static void LabelAST(Object root, int startFrom){
 		Labeling l = new Labeling();
 		l.visit((Program)root, startFrom);
 	}
 	
-	//Prints the ast according to root node 
+	/**
+	 * @param root - the root of the ast tree
+	 * Prints the ast tree, needs to run after LabelAst(root,someNumber)
+	 */
 	private static void PrintASTCommand(Object root){
 		try{
 			TreePrinter treePrinter = new TreePrinter();
@@ -122,7 +138,11 @@ public class Compiler {
 		}
 	}
 	
-	//Adds the Library node to the root Program node
+	/**
+	 * Adds the Library node to the root Program node
+	 * @param root
+	 * @param lib
+	 */
 	private static void AddLibraryToRoot(Object root, Object lib){
 		try{
 			((Program)root).getClasses().add((ICClass)lib);
@@ -135,8 +155,12 @@ public class Compiler {
 		}
 	}
 	
-	//Parses the library file and outputs the correct user message
-	//Returns the root node of the ast
+	/**
+	 * Parses the library file and outputs the correct user message 
+	 * @param libPath - full path to library file
+	 * @return Returns the root node of the ast
+	 */
+
 	private static Object ParseLibraryFile(String libPath){
 		try{ 
 			File f = new File(libPath);
@@ -165,8 +189,11 @@ public class Compiler {
 		return null;
 	}
 	
-	//Parses the ic file and outputs the correct user message
-	//Returns the root node of the ast
+	/**
+	 * Parses the ic file and outputs the correct user message
+	 * @param filePath - full path to ic file to parse
+	 * @return the root node of the ast or null if there is an error
+	 */
 	private static Object ParseICFile(String filePath){
 		try{ 
 			File f = new File(filePath);
