@@ -1,5 +1,7 @@
 package IC.AST;
-
+/**
+ * Interface of propagating visitor
+ */
 public interface PropagatingVisitor {
 	
 		public Object visit(Program program, Object context);
