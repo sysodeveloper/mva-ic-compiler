@@ -2,6 +2,10 @@
                                                                      
                                                                      
                                              
+                                                                     
+                                                                     
+                                                                     
+                                             
                                                  
                                                                   
                                                                     
@@ -32,11 +36,17 @@ parser code  {:
     }
     
     public void syntax_error(Symbol s) {
-        Token tok = (Token) s;
+    return;
+        //Token tok = (Token) s;
+        /*
         System.out.println("Line " + tok.getLineNumber()+": Syntax error; unexpected " + tok);
+        */
     }
     
-    
+    public void unrecovered_syntax_error(Symbol s) throws SyntaxError{
+    	Token tok = (Token) s;
+    	throw new SyntaxError(tok,tok.getLineNumber());
+    }
 :}
 
 // This is just for debugging
@@ -83,7 +93,7 @@ precedence left ELSE;
 
 
 Program ::= ClassIC:icClass Program:program 
-					{:	System.out.println("program is null? " + (program==null));
+					{:	
 						Program p = new Program(new ArrayList<ICClass>());
 						p = (Program)program;
 						List<ICClass> classes = p.getClasses();
@@ -92,7 +102,7 @@ Program ::= ClassIC:icClass Program:program
 					:}|
 					
 ClassICEx:icClass Program:program
-					{:	System.out.println("program is null? " + (program==null));
+					{:	
 						Program p = new Program(new ArrayList<ICClass>());
 						p = (Program)program;
 						List<ICClass> classes = p.getClasses();
@@ -103,7 +113,7 @@ ClassICEx:icClass Program:program
              	    {: RESULT = new Program(new ArrayList<ICClass>()); :} ;
 
 ClassIC ::= CLASS CLASS_ID:className ClassContent:content
-					{:		System.out.println("class content is null? " + (content==null));
+					{:		
 							Object[] classContent = new Object[2];
 							classContent = (Object[])content;
 							ArrayList<Field> fields = (ArrayList<Field>)classContent[0];
@@ -122,7 +132,7 @@ ClassICEx ::= CLASS CLASS_ID:derivedClass EXTENDS CLASS_ID:baseClass ClassConten
 					:}
 ;
 
-ClassContent ::= LCBR FieldOrMethod:fom RCBR {:System.out.println("class content is null? " + (fom==null)); RESULT = fom; :};
+ClassContent ::= LCBR FieldOrMethod:fom RCBR {: RESULT = fom; :};
 
 FieldOrMethod ::= Field:field FieldOrMethod:fom 		 {: Object[] arr = new Object[2];
   				  											arr = (Object[])fom;		
@@ -233,7 +243,7 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 				
 				Call:call SEMI {: RESULT = new  CallStatement((Call)call);:}| 
 				
-				RETURN ExprOrEmpty:e SEMI {: RESULT = (e==null)? new Return(parser.getLine()): new Return(parser.getLine(),(Expression)e); :}|
+				RETURN ExprOrEmpty:e SEMI {: RESULT = (e==null)? new Return(parser.getLine()): new Return(parser.getLine(),(Expression)e); 	:}|
 				
 				IF LP Expr:condition RP Statement:ifStm ELSE Statement:elseStm 
 					{:
@@ -287,10 +297,11 @@ Location ::= ID:id {: RESULT = new VariableLocation(parser.getLine(), id.toStrin
 Call ::= StaticCall:sc{:RESULT = sc;:} | VirtualCall:vc{:RESULT = vc;:};
 
 StaticCall ::= CLASS_ID:class_id DOT ID:id LP Arguments:argsList RP
-				{: RESULT = new StaticCall(parser.getLine(), class_id.toString(), id.toString(),(List<Expression>) argsList); :};
+				{: 
+				RESULT = new StaticCall(parser.getLine(), class_id.toString(), id.toString(),(List<Expression>) argsList); :};
 
 VirtualCall ::= VirtualCallPrefix:callPrefix Arguments:argsList RP 
-					 {:
+					 {: 
 					 	Object prefix[] = new Object[2];
 					 	prefix = (Object[])callPrefix;
 					 	RESULT = new VirtualCall(parser.getLine(),(Expression)prefix[0],prefix[1].toString(),(List<Expression>)argsList);
@@ -344,7 +355,7 @@ NULL:l
 
 Expr ::= Location:l{: RESULT = l ;:}|
 		
-		Call|
+		Call:call {: RESULT = call; :}|
 		
 		THIS {: RESULT = new This(parser.getLine()); :} |
 		
