@@ -21,10 +21,19 @@ parser code  {:
 		return lexer.getLineNumber();
 	}
 	
-	public void syntax_error(Symbol s) {
-		Token tok = (Token) s;
-		System.out.println("Line " + tok.getLineNumber()+": Syntax error; unexpected " + tok);
-	}
+    public void syntax_error(Symbol s) {
+    return;
+        //Token tok = (Token) s;
+        /*
+        System.out.println("Line " + tok.getLineNumber()+": Syntax error; unexpected " + tok);
+        */
+    }
+    
+    public void unrecovered_syntax_error(Symbol s) throws SyntaxError{
+    	Token tok = (Token) s;
+    	throw new SyntaxError(tok,tok.getLineNumber());
+    }
+
 	
 	
 :}
