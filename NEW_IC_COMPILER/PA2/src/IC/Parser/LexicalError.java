@@ -1,7 +1,5 @@
 package IC.Parser;
 
-import com.sun.org.apache.bcel.internal.classfile.LineNumber;
-
 /**
  * Lexical error class.
  *
