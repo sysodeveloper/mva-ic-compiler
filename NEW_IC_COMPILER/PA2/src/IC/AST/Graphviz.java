@@ -196,7 +196,7 @@ public class Graphviz implements Visitor{
 	 */
 	public Object visit(Assignment assignment){
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(assignment.getID(), "Assign " + assignment.getID());
+		addNode(assignment.getID(), "Assignment");
 		children.add((Integer)assignment.getVariable().accept(this));
 		children.add((Integer)assignment.getAssignment().accept(this));
 		addEdge(assignment.getID() , children);
