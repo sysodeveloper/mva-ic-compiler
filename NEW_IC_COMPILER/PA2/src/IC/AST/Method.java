@@ -2,7 +2,6 @@ package IC.AST;
 
 import java.util.List;
 
-import IC.SymbolTable;
 
 /**
  * Abstract base class for method AST nodes.
@@ -18,24 +17,6 @@ public abstract class Method extends ASTNode {
 	protected List<Formal> formals;
 
 	protected List<Statement> statements;
-	
-	/** The symbol table of this method.
-	 */
-	private SymbolTable m_table;
-	
-	/**
-	 * @return The table.
-	 */
-	public SymbolTable getTable() {
-		return m_table;
-	}
-
-	/**
-	 * @param table The table to set.
-	 */
-	public void setTable(SymbolTable table) {
-		m_table = table;		
-	}
 
 	/**
 	 * Constructs a new method node. Used by subclasses.
@@ -52,7 +33,6 @@ public abstract class Method extends ASTNode {
 	protected Method(Type type, String name, List<Formal> formals,
 			List<Statement> statements) {
 		super(type.getLine());
-		setTable(new SymbolTable(SymbolTable.getNextId()));
 		this.type = type;
 		this.name = name;
 		this.formals = formals;

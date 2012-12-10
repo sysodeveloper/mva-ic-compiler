@@ -1,4 +1,4 @@
-class Test() {
+class Test {
 	int m_1;
 	string m_2;
 	
