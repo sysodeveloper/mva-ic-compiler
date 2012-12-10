@@ -240,7 +240,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(VirtualMethod method) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(method.getID(), "VirtualMethod" + method.getName());
+		addNode(method.getID(), "VirtualMethod " + method.getName());
 		for(Formal f : method.getFormals()){
 			children.add((Integer)f.accept(this));
 		}
@@ -257,7 +257,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(StaticMethod method) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(method.getID(), "StaticMethod" + method.getName());
+		addNode(method.getID(), "StaticMethod " + method.getName());
 		for(Formal f : method.getFormals()){
 			children.add((Integer)f.accept(this));
 		}
