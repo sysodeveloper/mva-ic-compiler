@@ -63,7 +63,7 @@ public class Graphviz implements Visitor{
 	public String getGraph(Program root) {
 		root.accept(this);
 		StringBuffer output = new StringBuffer();
-		output.append("digraph " + getName() + "{\n");
+		output.append("digraph \"" + getName() + "\"{\n");
 		output.append(nodes);
 		output.append(edges);
 		output.append("}\n");
