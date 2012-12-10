@@ -8,6 +8,7 @@ import java.io.FileWriter;
 
 import java_cup.runtime.Symbol;
 import IC.AST.GraphEdgesPrinter;
+import IC.AST.Graphviz;
 import IC.AST.GrpahNodesPrinter;
 import IC.AST.ICClass;
 import IC.AST.Labeling;
@@ -52,8 +53,10 @@ public class Compiler {
 			for(int i=1;i<args.length;i++){
 				if(args[i].compareTo("-print-ast") == 0){
 					LabelAST(root, 0);
-					PrintASTCommand(root);
-					GraphvizAST((Program)root);
+					//PrintASTCommand(root);
+					Graphviz gv = new Graphviz(args[0]);
+					System.out.println(gv.getGraph((Program)root));
+					//GraphvizAST((Program)root);
 					break;
 				}
 			}
@@ -171,7 +174,7 @@ public class Compiler {
 			LibraryParser libParser = new LibraryParser(lex);
 			libParser.printTokens = false;
 			Symbol parsedSymbol = libParser.parse();
-			System.out.println("Successfully parsed library file " +libPath);
+			//System.out.println("Successfully parsed library file " +libPath);
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
 			System.out.println(libPath + " " + e3.getMessage());
@@ -204,7 +207,7 @@ public class Compiler {
 			Parser parser = new Parser(lex);
 			parser.printTokens = false;
 			Symbol parsedSymbol = parser.parse();
-			System.out.println("Successfully parsed " +filePath);
+			//System.out.println("Successfully parsed " +filePath);
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
 			System.out.println(filePath + " " + e3.getMessage());
