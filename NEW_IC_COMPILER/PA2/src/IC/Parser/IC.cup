@@ -332,7 +332,7 @@ Unop ::= MINUS {: RESULT = UnaryOps.UMINUS;  :} |
 Literal ::= INTEGER:l
 {: RESULT = new Literal(parser.getLine(),LiteralTypes.INTEGER,l); :} | 
 QUOTE:l 
-{: RESULT = new Literal(parser.getLine(),LiteralTypes.STRING); :} | 
+{: RESULT = new Literal(parser.getLine(),LiteralTypes.STRING, l); :} | 
 TRUE:l
 {: RESULT = new Literal(parser.getLine(),LiteralTypes.TRUE); :} | 
 FALSE:l 
