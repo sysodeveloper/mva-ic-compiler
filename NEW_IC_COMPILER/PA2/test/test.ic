@@ -5,4 +5,10 @@ class Test {
 	void main(string[] args) {
 		println(args[0]);
 	}
+
+	int method(int a, int b) {
+		return a + b;
+	}
+
+	string m_3;
 }
