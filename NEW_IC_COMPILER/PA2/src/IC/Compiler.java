@@ -220,6 +220,7 @@ public class Compiler {
 			System.exit(1);
 		} catch (Exception e2) {
 			System.out.println(filePath + " " + "Error while parsing: " + e2.getMessage());
+			e2.printStackTrace();
 			System.exit(1);
 		}
 		return null;
