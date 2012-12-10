@@ -254,7 +254,7 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 					 {: 
 						List<Statement> stmList  = new ArrayList<Statement>();
 						if(!(stm instanceof List<?>)) stmList.add((Statement)stm); else stmList = (ArrayList<Statement>)stm;
-						RESULT = new While((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stm)); 
+						RESULT = new While((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stmList)); 
 					 :}|	    
 			    
 			    BREAK SEMI {:RESULT = new Break(parser.getLine());:}|

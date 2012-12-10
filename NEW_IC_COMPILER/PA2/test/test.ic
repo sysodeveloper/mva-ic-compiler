@@ -7,13 +7,15 @@ class Test extends T {
 	static void main(string[] args) {
 		boolean b = true;
 		T t = new T();
+		int arr = t.method(5, 7);
 		Test[] ts = new Test[3]; 
-		//Test.println(args[0]);
+		Test.println(args[0]);
 		return;
 	}
 
-	static int method(int a, int b) {
+	int method(int a, int b) {
 		string name = "moshe";
+		this.m_1 = 5;
 		while(true) {
 			if(a < -5 && !(b >= 6 || (a + b) % 2 != 0)  && name == "moshe") {
 				break;

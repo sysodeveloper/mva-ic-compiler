@@ -1,0 +1,6 @@
+class Test {
+	void method() {
+		int i;
+		while(true) i = 3;
+	}
+}
