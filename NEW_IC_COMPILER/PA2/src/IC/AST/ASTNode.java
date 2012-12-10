@@ -7,7 +7,7 @@ package IC.AST;
  */
 public abstract class ASTNode {
 
-	private int line;
+	protected int line;
 	private int id;
 
 	/**

@@ -5,7 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public abstract class Type extends ASTNode {
+public abstract class Type extends ASTNode implements Cloneable {
 
 	/**
 	 * Number of array 'dimensions' in data type. For example, int[][] ->
@@ -32,4 +32,9 @@ public abstract class Type extends ASTNode {
 	public void incrementDimension() {
 		++dimension;
 	}
+	
+	/**
+	 * Clone the object.
+	 */
+	public abstract Object clone();
 }
