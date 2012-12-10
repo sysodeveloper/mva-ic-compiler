@@ -1,12 +1,27 @@
-class Test {
+class T {
+}
+class Test extends T {
 	int m_1, m_11;
 	string m_2;
 	
-	void main(string[] args) {
-		println(args[0]);
+	static void main(string[] args) {
+		boolean b = true;
+		T t = new T();
+		Test[] ts = new Test[3]; 
+		//Test.println(args[0]);
+		return;
 	}
 
-	int method(int a, int b) {
+	static int method(int a, int b) {
+		string name = "moshe";
+		while(true) {
+			if(a < -5 && !(b >= 6 || (a + b) % 2 != 0)  && name == "moshe") {
+				break;
+			}
+			else {
+				continue;
+			}
+		}
 		return a + b;
 	}
 

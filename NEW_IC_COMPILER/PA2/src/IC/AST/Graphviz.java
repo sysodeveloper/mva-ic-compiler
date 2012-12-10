@@ -208,7 +208,7 @@ public class Graphviz implements Visitor{
 	 */
 	public Object visit(Literal literal){
 		addNode(literal.getID(), "Literal " + 
-				literal.getType().toFormattedString(literal.getValue()));
+				(literal.getType().toFormattedString(literal.getValue())).replace('\"', '\''));
 		return literal.getID();
 	}
 
