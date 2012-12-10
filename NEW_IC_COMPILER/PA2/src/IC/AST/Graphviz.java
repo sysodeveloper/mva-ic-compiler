@@ -32,6 +32,11 @@ public class Graphviz implements Visitor{
 	private Map<Integer, String> labels;
 	
 	/**
+	 * The map between class names to ids.
+	 */
+	private Map<String, Integer> classIds;
+	
+	/**
 	 * @return The name.
 	 */
 	public String getName() {
@@ -51,9 +56,10 @@ public class Graphviz implements Visitor{
 	 */
 	public Graphviz(String name){
 		setName(name);
-		edges = new StringBuilder();
-		nodes = new StringBuilder();
-		labels = new HashMap<Integer, String>();
+		edges    = new StringBuilder();
+		nodes    = new StringBuilder();
+		labels   = new HashMap<Integer, String>();
+		classIds = new HashMap<String, Integer>();
 	}
 	
 	/**
@@ -118,9 +124,10 @@ public class Graphviz implements Visitor{
 	 */
 	public Object visit(ICClass icClass){
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(icClass.getID(), "ICClass " + icClass.getName());
+		classIds.put(icClass.getName(), icClass.getID());
+		addNode(icClass.getID(), "ICClass '" + icClass.getName() + "'");
 		if(icClass.hasSuperClass()) {
-			// TODO: connect with parent.
+			children.add(classIds.get(icClass.getSuperClassName()));
 		}
 		
 		for (Field f : icClass.getFields()) {
@@ -139,7 +146,7 @@ public class Graphviz implements Visitor{
 	 */
 	public Object visit(LibraryMethod method){
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(method.getID(), "LibraryMethod " + method.getName());
+		addNode(method.getID(), "LibraryMethod '" + method.getName() + "'");
 		for(Formal f : method.getFormals()){
 			children.add((Integer)f.accept(this));
 		}
@@ -154,11 +161,10 @@ public class Graphviz implements Visitor{
 	 * Handle formal.
 	 */
 	public Object visit(Formal formal){
-		StringBuffer output = new StringBuffer();
-		output.append(formal.getType().accept(this));
-		output.append(" ");
-		output.append(formal.getName());
-		addNode(formal.getID(), output.toString());
+		List<Integer> children = new ArrayList<Integer>();
+		addNode(formal.getID(), formal.getName());
+		children.add((Integer)formal.getType().accept(this));
+		addEdge(formal.getID(), children);
 		return formal.getID();
 	}
 
@@ -168,7 +174,7 @@ public class Graphviz implements Visitor{
 	public Object visit(PrimitiveType type){
 		StringBuffer output = new StringBuffer();
 		output.append(type.getName());
-		for(int i=1;i<=type.getDimension();i++){
+		for(int i = 1; i <= type.getDimension(); ++i){
 			output.append("[]");
 		}
 		addNode(type.getID(), output.toString());
@@ -181,7 +187,7 @@ public class Graphviz implements Visitor{
 	public Object visit(UserType type){
 		StringBuffer output = new StringBuffer();
 		output.append(type.getName());
-		for(int i=1;i<=type.getDimension();i++){
+		for(int i = 1; i <= type.getDimension(); ++i){
 			output.append("[]");
 		}
 		addNode(type.getID(), output.toString());
@@ -215,7 +221,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(Program program) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(program.getID(), "Program " + getName());
+		addNode(program.getID(), "Program '" + getName() + "'");
 		for (ICClass c : program.getClasses()) {
 			children.add(c.getID());
 			c.accept(this);
@@ -229,8 +235,11 @@ public class Graphviz implements Visitor{
 	 */
 	@Override
 	public Object visit(Field field) {
-		addNode(field.getID(), "Field " + 
-		field.getType() + " " + field.getName());
+		List<Integer> children = new ArrayList<Integer>();
+		addNode(field.getID(), "Field '" + 
+		field.getName() + "'");
+		children.add((Integer)field.getType().accept(this));
+		addEdge(field.getID(), children);
 		return field.getID();
 	}
 	
@@ -240,7 +249,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(VirtualMethod method) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(method.getID(), "VirtualMethod " + method.getName());
+		addNode(method.getID(), "VirtualMethod '" + method.getName() + "'");
 		for(Formal f : method.getFormals()){
 			children.add((Integer)f.accept(this));
 		}
@@ -257,7 +266,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(StaticMethod method) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(method.getID(), "StaticMethod " + method.getName());
+		addNode(method.getID(), "StaticMethod '" + method.getName() + "'");
 		for(Formal f : method.getFormals()){
 			children.add((Integer)f.accept(this));
 		}
@@ -353,7 +362,7 @@ public class Graphviz implements Visitor{
 	 */
 	@Override
 	public Object visit(LocalVariable localVariable) {
-		addNode(localVariable.getID(), "LocalVariable " + localVariable.getName());
+		addNode(localVariable.getID(), "LocalVariable '" + localVariable.getName() + "'");
 		if(localVariable.hasInitValue()) {
 			List<Integer> children = new ArrayList<Integer>();
 			children.add((Integer)localVariable.getInitValue().accept(this));
@@ -367,7 +376,7 @@ public class Graphviz implements Visitor{
 	 */
 	@Override
 	public Object visit(VariableLocation location) {
-		addNode(location.getID(), "VariableLocation " + location.getName());
+		addNode(location.getID(), "VariableLocation '" + location.getName() + "'");
 		if(location.isExternal()) {
 			List<Integer> children = new ArrayList<Integer>();
 			children.add((Integer)location.getLocation().accept(this));
@@ -396,8 +405,8 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(StaticCall call) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(call.getID(), "StaticCall " + 
-	  call.getClassName() + "." + call.getName());
+		addNode(call.getID(), "StaticCall '" + 
+	  call.getClassName() + "." + call.getName() + "'");
 		for (Expression e : call.getArguments()) {
 			children.add((Integer)e.accept(this));
 		}
@@ -411,8 +420,8 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(VirtualCall call) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(call.getID(), "VirtualCall " + 
-		  call.getName());
+		addNode(call.getID(), "VirtualCall '" + 
+		  call.getName() + "'");
 		for (Expression e : call.getArguments()) {
 			children.add((Integer)e.accept(this));
 		}
@@ -434,7 +443,7 @@ public class Graphviz implements Visitor{
 	 */
 	@Override
 	public Object visit(NewClass newClass) {
-		addNode(newClass.getID(), "NewClass " + newClass.getName());
+		addNode(newClass.getID(), "NewClass '" + newClass.getName() + "'");
 		return newClass.getID();
 	}
 	
@@ -468,7 +477,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(MathBinaryOp binaryOp) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(binaryOp.getID(), "MathBinaryOp" + binaryOp.getOperator().getOperatorString());
+		addNode(binaryOp.getID(), "MathBinaryOp '" + binaryOp.getOperator().getOperatorString() + "'");
 		children.add((Integer)binaryOp.getFirstOperand().accept(this));
 		children.add((Integer)binaryOp.getSecondOperand().accept(this));
 		addEdge(binaryOp.getID(), children);
@@ -481,7 +490,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(LogicalBinaryOp binaryOp) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(binaryOp.getID(), "LogicalBinaryOp" + binaryOp.getOperator().getOperatorString());
+		addNode(binaryOp.getID(), "LogicalBinaryOp '" + binaryOp.getOperator().getOperatorString() + "'");
 		children.add((Integer)binaryOp.getFirstOperand().accept(this));
 		children.add((Integer)binaryOp.getSecondOperand().accept(this));
 		addEdge(binaryOp.getID(), children);
@@ -494,7 +503,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(MathUnaryOp unaryOp) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(unaryOp.getID(), "MathUnaryOp" + unaryOp.getOperator().getOperatorString());
+		addNode(unaryOp.getID(), "MathUnaryOp '" + unaryOp.getOperator().getOperatorString() + "'");
 		children.add((Integer)unaryOp.getOperand().accept(this));
 		addEdge(unaryOp.getID(), children);
 		return unaryOp.getID();
@@ -506,7 +515,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(LogicalUnaryOp unaryOp) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(unaryOp.getID(), "LogicalUnaryOp" + unaryOp.getOperator().getOperatorString());
+		addNode(unaryOp.getID(), "LogicalUnaryOp '" + unaryOp.getOperator().getOperatorString() + "'");
 		children.add((Integer)unaryOp.getOperand().accept(this));
 		addEdge(unaryOp.getID(), children);
 		return unaryOp.getID();
