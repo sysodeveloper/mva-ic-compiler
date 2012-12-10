@@ -291,8 +291,13 @@ public class Graphviz implements Visitor{
 	
 	@Override
 	public Object visit(Return returnStatement) {
-		addNode(returnStatement.getID(), "Return" + 
-		(returnStatement.hasValue()?returnStatement.getValue().toString():""));
+		addNode(returnStatement.getID(), "Return "); 
+		if(returnStatement.hasValue()) {
+			List<Integer> children = new ArrayList<Integer>();
+			children.add((Integer)returnStatement.getValue().accept(this));
+			addEdge(returnStatement.getID(), children);
+		}
+		
 		return returnStatement.getID();
 	}
 	
