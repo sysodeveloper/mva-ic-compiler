@@ -215,7 +215,7 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(Program program) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(program.getID(), "Program");
+		addNode(program.getID(), "Program " + getName());
 		for (ICClass c : program.getClasses()) {
 			children.add(c.getID());
 			c.accept(this);
