@@ -1,5 +1,5 @@
 class Test {
-	int m_1;
+	int m_1, m_11;
 	string m_2;
 	
 	void main(string[] args) {

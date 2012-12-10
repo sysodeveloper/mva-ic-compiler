@@ -123,10 +123,10 @@ ClassICEx ::= CLASS CLASS_ID:derivedClass EXTENDS CLASS_ID:baseClass ClassConten
 ClassContent ::= LCBR FieldOrMethod:fom RCBR {: RESULT = fom; :};
 
 FieldOrMethod ::= Field:field FieldOrMethod:fom 		 {: Object[] arr = new Object[2];
-  				  											arr = (Object[])fom;		
-  				  											arr[0]=field;
- 				  											RESULT = arr; :}|
-														 
+  				  											arr = (Object[])fom;
+  				  											((ArrayList<Field>)arr[0]).addAll((ArrayList<Field>)field);
+ 				  											RESULT = arr; 
+ 				  										 :}|
 
  				  StaticMethod:method FieldOrMethod:fom  {: 
  				  											Object[] arr = new Object[2];
@@ -143,7 +143,7 @@ FieldOrMethod ::= Field:field FieldOrMethod:fom 		 {: Object[] arr = new Object[
  				  										 :}|
   				  
   				 										 {: 
-  				 										 	ArrayList<Field> fields = new ArrayList<Field>();
+  				 										 	ArrayList<Field>  fields  = new ArrayList<Field >();
   				 										 	ArrayList<Method> methods = new ArrayList<Method>();
   				 										 	Object[] fom = new Object[2];
   				 										 	fom[0] = fields; fom[1] = methods;  				 										 	
@@ -155,9 +155,8 @@ Field ::= Type:t ID:i FieldList:flst SEMI
 		{:	 
 			ArrayList<Field> lstFields = (ArrayList<Field>)flst;
 			ArrayList<Field> TypedFields = new ArrayList<Field>();
-			
 			for(Field f : lstFields){
-				TypedFields.add(new Field((Type)t,f.getName()));				
+				TypedFields.add(new Field((Type)(((Type)t).clone()),f.getName()));				
 			}
 				
 			TypedFields.add( new Field((Type)t, i.toString()) );  

@@ -34,4 +34,12 @@ public class UserType extends Type {
 		return name;
 	}
 
+	/**
+	 * Clone the object.
+	 */
+	@Override
+	public Object clone() {
+		return new UserType(line, name);
+	}
+
 }

@@ -35,4 +35,12 @@ public class PrimitiveType extends Type {
 	public String getName() {
 		return type.getDescription();
 	}
+
+	/**
+	 * Clone the object.
+	 */
+	@Override
+	public Object clone() {
+		return new PrimitiveType(line, type);
+	}
 }
