@@ -12,6 +12,11 @@ import java.util.Map;
  */
 public class Graphviz implements Visitor{
 	/**
+	 * Local copy of the root.
+	 */
+	private Program root;
+	
+	/**
 	 * The name of the graph.
 	 */
 	private String name;	
@@ -30,11 +35,6 @@ public class Graphviz implements Visitor{
 	 * The map between id to label.
 	 */
 	private Map<Integer, String> labels;
-	
-	/**
-	 * The map between class names to ids.
-	 */
-	private Map<String, Integer> classIds;
 	
 	/**
 	 * @return The name.
@@ -59,7 +59,6 @@ public class Graphviz implements Visitor{
 		edges    = new StringBuilder();
 		nodes    = new StringBuilder();
 		labels   = new HashMap<Integer, String>();
-		classIds = new HashMap<String, Integer>();
 	}
 	
 	/**
@@ -67,6 +66,7 @@ public class Graphviz implements Visitor{
 	 * @return Get the graph.
 	 */
 	public String getGraph(Program root) {
+		this.root = root;
 		root.accept(this);
 		StringBuffer output = new StringBuffer();
 		output.append("digraph \"" + getName() + "\"{\n");
@@ -123,12 +123,8 @@ public class Graphviz implements Visitor{
 	 * Handle ICClass.
 	 */
 	public Object visit(ICClass icClass){
-		List<Integer> children = new ArrayList<Integer>();
-		classIds.put(icClass.getName(), icClass.getID());
+		List<Integer> children = new ArrayList<Integer>();		
 		addNode(icClass.getID(), "ICClass '" + icClass.getName() + "'");
-		if(icClass.hasSuperClass()) {
-			children.add(classIds.get(icClass.getSuperClassName()));
-		}
 		
 		for (Field f : icClass.getFields()) {
 			children.add((Integer)f.accept(this));
@@ -147,6 +143,7 @@ public class Graphviz implements Visitor{
 	public Object visit(LibraryMethod method){
 		List<Integer> children = new ArrayList<Integer>();
 		addNode(method.getID(), "LibraryMethod '" + method.getName() + "'");
+		children.add((Integer)method.getType().accept(this));
 		for(Formal f : method.getFormals()){
 			children.add((Integer)f.accept(this));
 		}
@@ -250,6 +247,7 @@ public class Graphviz implements Visitor{
 	public Object visit(VirtualMethod method) {
 		List<Integer> children = new ArrayList<Integer>();
 		addNode(method.getID(), "VirtualMethod '" + method.getName() + "'");
+		children.add((Integer)method.getType().accept(this));
 		for(Formal f : method.getFormals()){
 			children.add((Integer)f.accept(this));
 		}
@@ -267,6 +265,7 @@ public class Graphviz implements Visitor{
 	public Object visit(StaticMethod method) {
 		List<Integer> children = new ArrayList<Integer>();
 		addNode(method.getID(), "StaticMethod '" + method.getName() + "'");
+		children.add((Integer)method.getType().accept(this));
 		for(Formal f : method.getFormals()){
 			children.add((Integer)f.accept(this));
 		}
@@ -458,7 +457,8 @@ public class Graphviz implements Visitor{
 	@Override
 	public Object visit(NewArray newArray) {
 		List<Integer> children = new ArrayList<Integer>();
-		addNode(newArray.getID(), "NewArray " + newArray.getSize());
+		addNode(newArray.getID(), "NewArray ");
+		children.add((Integer)newArray.getSize().accept(this));
 		children.add((Integer)newArray.getType().accept(this));
 		addEdge(newArray.getID(), children);
 		return newArray.getID();
