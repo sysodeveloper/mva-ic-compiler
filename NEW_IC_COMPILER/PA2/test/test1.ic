@@ -1,5 +1,0 @@
-class Testing{
-	static boolean[] bar(){
-		int a = 6*7+1 / 2 * 7;
-	}
-}
