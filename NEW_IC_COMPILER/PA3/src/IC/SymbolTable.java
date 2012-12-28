@@ -160,8 +160,8 @@ public class SymbolTable implements Visitor<Boolean> {
 			getEntries().put(icClass.getName(), new SymbolRecord(getRecordId(), this, 
 					icClass.getName(), Kind.CLASS, 
 					new UserType(icClass.getLine(), icClass.getName())));
-			icClass.getTable().setParent(this);
-			isOk &= icClass.accept(icClass.getTable());
+			icClass.getInnerTable().setParent(this);
+			isOk &= icClass.accept(icClass.getInnerTable());
 		}
 			
 		return isOk;
@@ -207,13 +207,13 @@ public class SymbolTable implements Visitor<Boolean> {
 		getEntries().put(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
 				method.getFormals()));
-		method.getTable().setCurrentMethod(method);
-		method.getTable().setParent(this);
+		method.getInnerTable().setCurrentMethod(method);
+		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
-			e.accept(method.getTable());
+			e.accept(method.getInnerTable());
 		}
 		for (Statement s : method.getStatements()) {
-			isOk &= s.accept(method.getTable());
+			isOk &= s.accept(method.getInnerTable());
 		}
 
 		return isOk;
@@ -229,13 +229,13 @@ public class SymbolTable implements Visitor<Boolean> {
 		getEntries().put(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
 				method.getFormals()));
-		method.getTable().setCurrentMethod(method);
-		method.getTable().setParent(this);
+		method.getInnerTable().setCurrentMethod(method);
+		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
-			e.accept(method.getTable());
+			e.accept(method.getInnerTable());
 		}
 		for (Statement s : method.getStatements()) {
-			isOk &= s.accept(method.getTable());
+			isOk &= s.accept(method.getInnerTable());
 		}
 
 		return isOk;
@@ -251,13 +251,13 @@ public class SymbolTable implements Visitor<Boolean> {
 		getEntries().put(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
 				method.getFormals()));
-		method.getTable().setCurrentMethod(method);
-		method.getTable().setParent(this);
+		method.getInnerTable().setCurrentMethod(method);
+		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
-			e.accept(method.getTable());
+			e.accept(method.getInnerTable());
 		}
 		for (Statement s : method.getStatements()) {
-			isOk &= s.accept(method.getTable());
+			isOk &= s.accept(method.getInnerTable());
 		}
 		
 		return isOk;
@@ -371,9 +371,9 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(StatementsBlock statementsBlock) {
 		Boolean isOk = true;
-		statementsBlock.getTable().setParent(this);
+		statementsBlock.getInnerTable().setParent(this);
 		for (Statement s : statementsBlock.getStatements()) {
-			s.accept(statementsBlock.getTable());
+			s.accept(statementsBlock.getInnerTable());
 		}
 		
 		return isOk;

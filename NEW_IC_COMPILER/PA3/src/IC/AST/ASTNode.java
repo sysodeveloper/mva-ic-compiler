@@ -1,5 +1,7 @@
 package IC.AST;
 
+import IC.SymbolTable;
+
 /**
  * Abstract AST node base class.
  * 
@@ -9,6 +11,8 @@ public abstract class ASTNode {
 
 	protected int line;
 	private int id;
+	
+	private SymbolTable m_OuterTable;
 	
 	/**
 	 * Double dispatch method, to allow a visitor to visit a specific subclass.
@@ -40,6 +44,7 @@ public abstract class ASTNode {
 	 */
 	protected ASTNode(int line) {
 		this.line = line;
+		setOuterTable(null);
 	}
 
 	public int getLine() {
@@ -59,6 +64,20 @@ public abstract class ASTNode {
 	 */
 	public void setID(int id){
 		this.id = id;
+	}
+
+	/**
+	 * @return the m_OuterTable
+	 */
+	public SymbolTable getOuterTable() {
+		return m_OuterTable;
+	}
+
+	/**
+	 * @param m_OuterTable the m_OuterTable to set
+	 */
+	public void setOuterTable(SymbolTable m_OuterTable) {
+		this.m_OuterTable = m_OuterTable;
 	}
 
 }

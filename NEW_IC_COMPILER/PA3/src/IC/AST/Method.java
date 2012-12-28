@@ -9,7 +9,7 @@ import IC.SymbolTable;
  * 
  * @author Tovi Almozlino
  */
-public abstract class Method extends ASTNode {
+public abstract class Method extends ASTNode implements SymbolTableContainer {
 
 	protected Type type;
 
@@ -21,20 +21,20 @@ public abstract class Method extends ASTNode {
 	
 	/** The symbol table of this method.
 	 */
-	private SymbolTable m_table;
+	private SymbolTable m_InnerTable;
 	
 	/**
 	 * @return The table.
 	 */
-	public SymbolTable getTable() {
-		return m_table;
+	public SymbolTable getInnerTable() {
+		return m_InnerTable;
 	}
 
 	/**
 	 * @param table The table to set.
 	 */
-	public void setTable(SymbolTable table) {
-		m_table = table;		
+	public void setInnerTable(SymbolTable table) {
+		m_InnerTable = table;		
 	}
 
 	/**
@@ -52,7 +52,7 @@ public abstract class Method extends ASTNode {
 	protected Method(Type type, String name, List<Formal> formals,
 			List<Statement> statements) {
 		super(type.getLine());
-		setTable(new SymbolTable(SymbolTable.getNextId()));
+		setInnerTable(new SymbolTable(SymbolTable.getNextId()));
 		this.type = type;
 		this.name = name;
 		this.formals = formals;
