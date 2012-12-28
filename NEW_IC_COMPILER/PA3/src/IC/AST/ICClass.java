@@ -9,7 +9,7 @@ import IC.SymbolTable;
  * 
  * @author Tovi Almozlino
  */
-public class ICClass extends ASTNode {
+public class ICClass extends ASTNode implements SymbolTableContainer {
 
 	private String name;
 
@@ -21,39 +21,20 @@ public class ICClass extends ASTNode {
 	
 	/** The symbol table of this class.
 	 */
-	private SymbolTable m_table;
-	
-	/**
-	 * The static symbol table of the class.
-	 */
-	private SymbolTable m_sTable;
+	private SymbolTable m_InnerTable;
 
 	/**
 	 * @return The table.
 	 */
-	public SymbolTable getTable() {
-		return m_table;
+	public SymbolTable getInnerTable() {
+		return m_InnerTable;
 	}
 
 	/**
 	 * @param table The table to set.
 	 */
-	public void setTable(SymbolTable table) {
-		m_table = table;
-	}
-	
-	/**
-	 * @return The sTable.
-	 */
-	public SymbolTable getSTable() {
-		return m_sTable;
-	}
-
-	/**
-	 * @param sTable The table to set.
-	 */
-	public void setSTable(SymbolTable sTable) {
-		m_sTable = sTable;
+	public void setInnerTable(SymbolTable table) {
+		m_InnerTable = table;
 	}
 
 	@Override
@@ -85,8 +66,7 @@ public class ICClass extends ASTNode {
 		this.name = name;
 		this.fields = fields;
 		this.methods = methods;
-		setTable(new SymbolTable(SymbolTable.getNextId()));
-		setSTable(new SymbolTable(SymbolTable.getNextId()));
+		setInnerTable(new SymbolTable(SymbolTable.getNextId()));
 	}
 
 	/**

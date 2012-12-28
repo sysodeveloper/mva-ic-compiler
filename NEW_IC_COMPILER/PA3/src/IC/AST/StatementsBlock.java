@@ -9,26 +9,26 @@ import IC.SymbolTable;
  * 
  * @author Tovi Almozlino
  */
-public class StatementsBlock extends Statement {
+public class StatementsBlock extends Statement implements SymbolTableContainer {
 
 	private List<Statement> statements;
 	
 	/** The symbol table of this block.
 	 */
-	private SymbolTable m_table;
+	private SymbolTable m_InnerTable;
 	
 	/**
 	 * @return The table.
 	 */
-	public SymbolTable getTable() {
-		return m_table;
+	public SymbolTable getInnerTable() {
+		return m_InnerTable;
 	}
 
 	/**
 	 * @param table The table to set.
 	 */
-	public void setTable(SymbolTable table) {
-		m_table = table;		
+	public void setInnerTable(SymbolTable table) {
+		m_InnerTable = table;		
 	}
 
 	public Object accept(Visitor visitor) {
@@ -50,7 +50,7 @@ public class StatementsBlock extends Statement {
 	 */
 	public StatementsBlock(int line, List<Statement> statements) {
 		super(line);
-		setTable(new SymbolTable(SymbolTable.getNextId()));
+		setInnerTable(new SymbolTable(SymbolTable.getNextId()));
 		this.statements = statements;
 	}
 
