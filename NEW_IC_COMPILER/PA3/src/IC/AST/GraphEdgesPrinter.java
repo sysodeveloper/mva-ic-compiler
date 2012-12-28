@@ -2,7 +2,7 @@ package IC.AST;
 /**
  * A class to print the edges of the ast in a manner that Graphviz can accept
  */
-public class GraphEdgesPrinter implements Visitor {
+public class GraphEdgesPrinter implements Visitor<String> {
 	private int depth = 0;
 	
 	private void deleteLastComma(StringBuffer children){
@@ -21,7 +21,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 	
 	@Override
-	public Object visit(Program program) {
+	public String visit(Program program) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		for(ICClass c : program.getClasses()){
@@ -40,7 +40,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(ICClass icClass) {
+	public String visit(ICClass icClass) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -67,7 +67,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 	
 	@Override
-	public Object visit(Field field) {
+	public String visit(Field field) {
 		StringBuffer output = new StringBuffer();
 		++depth;
 		output.append(field.getType().accept(this));
@@ -81,7 +81,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(VirtualMethod method) {
+	public String visit(VirtualMethod method) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -107,7 +107,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(StaticMethod method) {
+	public String visit(StaticMethod method) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -133,7 +133,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(LibraryMethod method) {
+	public String visit(LibraryMethod method) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		++depth;
@@ -155,7 +155,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(Formal formal) {
+	public String visit(Formal formal) {
 		StringBuffer output = new StringBuffer();
 		++depth;
 		output.append(formal.getType().accept(this));
@@ -170,7 +170,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(PrimitiveType type) {
+	public String visit(PrimitiveType type) {
 		StringBuffer output = new StringBuffer();
 		indent(output, type);
 		output.append(type.getID());
@@ -182,7 +182,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(UserType type) {
+	public String visit(UserType type) {
 		StringBuffer output = new StringBuffer();
 		indent(output, type);
 		output.append(type.getID() );
@@ -194,7 +194,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(Assignment assignment) {
+	public String visit(Assignment assignment) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -214,7 +214,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(CallStatement callStatement) {
+	public String visit(CallStatement callStatement) {
 		StringBuffer output = new StringBuffer();
 		++depth;
 		output.append(callStatement.getCall().accept(this));
@@ -229,7 +229,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(Return returnStatement) {
+	public String visit(Return returnStatement) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		if(returnStatement.hasValue()){
@@ -249,7 +249,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(If ifStatement) {
+	public String visit(If ifStatement) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -273,7 +273,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(While whileStatement) {
+	public String visit(While whileStatement) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -293,7 +293,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(Break breakStatement) {
+	public String visit(Break breakStatement) {
 		StringBuffer output = new StringBuffer();
 		indent(output, breakStatement);
 		output.append(breakStatement.getID());
@@ -301,7 +301,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(Continue continueStatement) {
+	public String visit(Continue continueStatement) {
 		StringBuffer output = new StringBuffer();
 		indent(output, continueStatement);
 		output.append(continueStatement.getID());
@@ -309,7 +309,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(StatementsBlock statementsBlock) {
+	public String visit(StatementsBlock statementsBlock) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -329,7 +329,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(LocalVariable localVariable) {
+	public String visit(LocalVariable localVariable) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		if(localVariable.hasInitValue()){
@@ -355,7 +355,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(VariableLocation location) {
+	public String visit(VariableLocation location) {
 		StringBuffer output = new StringBuffer();
 		if(location.isExternal()){
 			++depth;
@@ -377,7 +377,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(ArrayLocation location) {
+	public String visit(ArrayLocation location) {
 		StringBuffer output = new StringBuffer();
 		depth += 2;
 		output.append(location.getArray().accept(this));
@@ -394,7 +394,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(StaticCall call) {
+	public String visit(StaticCall call) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -414,7 +414,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(VirtualCall call) {
+	public String visit(VirtualCall call) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -441,7 +441,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(This thisExpression) {
+	public String visit(This thisExpression) {
 		StringBuffer output = new StringBuffer();
 		indent(output,thisExpression);
 		output.append(thisExpression.getID());
@@ -449,7 +449,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(NewClass newClass) {
+	public String visit(NewClass newClass) {
 		StringBuffer output = new StringBuffer();
 		indent(output,newClass);
 		output.append(newClass.getID());
@@ -457,7 +457,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(NewArray newArray) {
+	public String visit(NewArray newArray) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -477,7 +477,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(Length length) {
+	public String visit(Length length) {
 		StringBuffer output = new StringBuffer();
 		++depth;
 		output.append(length.getArray().accept(this));
@@ -492,7 +492,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(MathBinaryOp binaryOp) {
+	public String visit(MathBinaryOp binaryOp) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -512,7 +512,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(LogicalBinaryOp binaryOp) {
+	public String visit(LogicalBinaryOp binaryOp) {
 		StringBuffer output = new StringBuffer();
 		StringBuffer children = new StringBuffer();
 		depth += 2;
@@ -532,7 +532,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(MathUnaryOp unaryOp) {
+	public String visit(MathUnaryOp unaryOp) {
 		StringBuffer output = new StringBuffer();
 		++depth;
 		output.append(unaryOp.getOperand().accept(this));
@@ -547,7 +547,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(LogicalUnaryOp unaryOp) {
+	public String visit(LogicalUnaryOp unaryOp) {
 		StringBuffer output = new StringBuffer();
 		++depth;
 		output.append(unaryOp.getOperand().accept(this));
@@ -562,7 +562,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(Literal literal) {
+	public String visit(Literal literal) {
 		StringBuffer output = new StringBuffer();
 		indent(output,literal);
 		output.append(literal.getID());
@@ -571,7 +571,7 @@ public class GraphEdgesPrinter implements Visitor {
 	}
 
 	@Override
-	public Object visit(ExpressionBlock expressionBlock) {
+	public String visit(ExpressionBlock expressionBlock) {
 		StringBuffer output = new StringBuffer();
 		++depth;
 		output.append(expressionBlock.getExpression().accept(this));

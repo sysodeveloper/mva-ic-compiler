@@ -1,70 +1,40 @@
 package IC.AST;
-/**
- * Interface of propagating visitor
+
+/** An interface for a propagating AST visitor.
+ * The visitor passes down objects of type <code>DownType</code>
+ * and propagates up objects of type <code>UpType</code>.
  */
-public interface PropagatingVisitor {
-	
-		public Object visit(Program program, Object context);
-
-		public Object visit(ICClass icClass, Object context);
-
-		public Object visit(Field field, Object context);
-
-		public Object visit(VirtualMethod method, Object context);
-
-		public Object visit(StaticMethod method, Object context);
-
-		public Object visit(LibraryMethod method, Object context);
-
-		public Object visit(Formal formal, Object context);
-
-		public Object visit(PrimitiveType type, Object context);
-
-		public Object visit(UserType type, Object context);
-
-		public Object visit(Assignment assignment, Object context);
-
-		public Object visit(CallStatement callStatement, Object context);
-
-		public Object visit(Return returnStatement, Object context);
-
-		public Object visit(If ifStatement, Object context);
-
-		public Object visit(While whileStatement, Object context);
-
-		public Object visit(Break breakStatement, Object context);
-
-		public Object visit(Continue continueStatement, Object context);
-
-		public Object visit(StatementsBlock statementsBlock, Object context);
-
-		public Object visit(LocalVariable localVariable, Object context);
-
-		public Object visit(VariableLocation location, Object context);
-
-		public Object visit(ArrayLocation location, Object context);
-
-		public Object visit(StaticCall call, Object context);
-
-		public Object visit(VirtualCall call, Object context);
-
-		public Object visit(This thisExpression, Object context);
-
-		public Object visit(NewClass newClass, Object context);
-
-		public Object visit(NewArray newArray, Object context);
-
-		public Object visit(Length length, Object context);
-
-		public Object visit(MathBinaryOp binaryOp, Object context);
-
-		public Object visit(LogicalBinaryOp binaryOp, Object context);
-
-		public Object visit(MathUnaryOp unaryOp, Object context);
-
-		public Object visit(LogicalUnaryOp unaryOp, Object context);
-
-		public Object visit(Literal literal, Object context);
-
-		public Object visit(ExpressionBlock expressionBlock, Object context);
+public interface PropagatingVisitor<DownType,UpType> {	
+	public UpType visit(Program program, DownType d);
+	public UpType visit(ICClass icClass, DownType d);
+	public UpType visit(Field field, DownType d);
+	public UpType visit(VirtualMethod method, DownType d);
+	public UpType visit(StaticMethod method, DownType d);
+	public UpType visit(LibraryMethod method, DownType d);
+	public UpType visit(Formal formal, DownType d);
+	public UpType visit(PrimitiveType type, DownType d);
+	public UpType visit(UserType type, DownType d);
+	public UpType visit(Assignment assignment, DownType d);
+	public UpType visit(CallStatement callStatement, DownType d);
+	public UpType visit(Return returnStatement, DownType d);
+	public UpType visit(If ifStatement, DownType d);
+	public UpType visit(While whileStatement, DownType d);
+	public UpType visit(Break breakStatement, DownType d);
+	public UpType visit(Continue continueStatement, DownType d);
+	public UpType visit(StatementsBlock statementsBlock, DownType d);
+	public UpType visit(LocalVariable localVariable, DownType d);
+	public UpType visit(VariableLocation location, DownType d);
+	public UpType visit(ArrayLocation location, DownType d);
+	public UpType visit(StaticCall call, DownType d);
+	public UpType visit(VirtualCall call, DownType d);
+	public UpType visit(This thisExpression, DownType d);
+	public UpType visit(NewClass newClass, DownType d);
+	public UpType visit(NewArray newArray, DownType d);
+	public UpType visit(Length length, DownType d);
+	public UpType visit(MathBinaryOp binaryOp, DownType d);
+	public UpType visit(LogicalBinaryOp binaryOp, DownType d);
+	public UpType visit(MathUnaryOp unaryOp, DownType d);
+	public UpType visit(LogicalUnaryOp unaryOp, DownType d);
+	public UpType visit(Literal literal, DownType d);
+	public UpType visit(ExpressionBlock expressionBlock, DownType d);
 }

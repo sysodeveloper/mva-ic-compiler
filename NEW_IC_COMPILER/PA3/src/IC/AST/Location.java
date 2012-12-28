@@ -6,7 +6,7 @@ package IC.AST;
  * @author Tovi Almozlino
  */
 public abstract class Location extends Expression {
-
+	
 	/**
 	 * Constructs a new variable reference node. Used by subclasses.
 	 * 

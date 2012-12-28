@@ -13,12 +13,13 @@ public class If extends Statement {
 
 	private Statement elseOperation = null;
 
-	public Object accept(Visitor visitor) {
+	public <UpType> UpType accept(Visitor<UpType> visitor) {
 		return visitor.visit(this);
 	}
 	
-	public Object accept(PropagatingVisitor visitor, Object context){
-		return visitor.visit(this, context);
+	public <DownType, UpType> UpType accept(
+			PropagatingVisitor<DownType, UpType> visitor, DownType d) {
+		return visitor.visit(this, d);
 	}
 
 	/**

@@ -6,7 +6,7 @@ package IC.AST;
  * @author Tovi Almozlino
  */
 public abstract class Expression extends ASTNode {
-
+	
 	/**
 	 * Constructs a new expression node. Used by subclasses.
 	 * 

@@ -6,7 +6,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public class PrettyPrinter implements Visitor {
+public class PrettyPrinter implements Visitor<String> {
 
 	private int depth = 0; // depth of indentation
 
@@ -34,7 +34,8 @@ public class PrettyPrinter implements Visitor {
 		indent(output, null);
 	}
 
-	public Object visit(Program program) {
+	@Override
+	public String visit(Program program) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output);
@@ -44,7 +45,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(ICClass icClass) {
+	@Override
+	public String visit(ICClass icClass) {
 		StringBuffer output = new StringBuffer();
 		
 		indent(output, icClass);
@@ -60,7 +62,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(PrimitiveType type) {
+	@Override
+	public String visit(PrimitiveType type) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, type);
@@ -71,7 +74,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(UserType type) {
+	@Override
+	public String visit(UserType type) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, type);
@@ -82,7 +86,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(Field field) {
+	@Override
+	public String visit(Field field) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, field);
@@ -93,7 +98,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(LibraryMethod method) {
+	@Override
+	public String visit(LibraryMethod method) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, method);
@@ -106,7 +112,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(Formal formal) {
+	@Override
+	public String visit(Formal formal) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, formal);
@@ -117,7 +124,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(VirtualMethod method) {
+	@Override
+	public String visit(VirtualMethod method) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, method);
@@ -132,7 +140,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(StaticMethod method) {
+	@Override
+	public String visit(StaticMethod method) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, method);
@@ -147,7 +156,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(Assignment assignment) {
+	@Override
+	public String visit(Assignment assignment) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, assignment);
@@ -159,7 +169,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(CallStatement callStatement) {
+	@Override
+	public String visit(CallStatement callStatement) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, callStatement);
@@ -170,7 +181,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(Return returnStatement) {
+	@Override
+	public String visit(Return returnStatement) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, returnStatement);
@@ -185,7 +197,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(If ifStatement) {
+	@Override
+	public String visit(If ifStatement) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, ifStatement);
@@ -201,7 +214,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(While whileStatement) {
+	@Override
+	public String visit(While whileStatement) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, whileStatement);
@@ -213,7 +227,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(Break breakStatement) {
+	@Override
+	public String visit(Break breakStatement) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, breakStatement);
@@ -221,7 +236,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(Continue continueStatement) {
+	@Override
+	public String visit(Continue continueStatement) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, continueStatement);
@@ -229,7 +245,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(StatementsBlock statementsBlock) {
+	@Override
+	public String visit(StatementsBlock statementsBlock) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, statementsBlock);
@@ -241,7 +258,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(LocalVariable localVariable) {
+	@Override
+	public String visit(LocalVariable localVariable) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, localVariable);
@@ -261,7 +279,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(VariableLocation location) {
+	@Override
+	public String visit(VariableLocation location) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, location);
@@ -276,7 +295,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(ArrayLocation location) {
+	@Override
+	public String visit(ArrayLocation location) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, location);
@@ -288,7 +308,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(StaticCall call) {
+	@Override
+	public String visit(StaticCall call) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, call);
@@ -301,7 +322,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(VirtualCall call) {
+	@Override
+	public String visit(VirtualCall call) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, call);
@@ -317,7 +339,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(This thisExpression) {
+	@Override
+	public String visit(This thisExpression) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, thisExpression);
@@ -325,7 +348,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(NewClass newClass) {
+	@Override
+	public String visit(NewClass newClass) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, newClass);
@@ -333,7 +357,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(NewArray newArray) {
+	@Override
+	public String visit(NewArray newArray) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, newArray);
@@ -345,7 +370,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(Length length) {
+	@Override
+	public String visit(Length length) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, length);
@@ -356,7 +382,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(MathBinaryOp binaryOp) {
+	@Override
+	public String visit(MathBinaryOp binaryOp) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, binaryOp);
@@ -369,7 +396,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(LogicalBinaryOp binaryOp) {
+	@Override
+	public String visit(LogicalBinaryOp binaryOp) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, binaryOp);
@@ -382,7 +410,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(MathUnaryOp unaryOp) {
+	@Override
+	public String visit(MathUnaryOp unaryOp) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, unaryOp);
@@ -394,7 +423,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(LogicalUnaryOp unaryOp) {
+	@Override
+	public String visit(LogicalUnaryOp unaryOp) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, unaryOp);
@@ -406,7 +436,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(Literal literal) {
+	@Override
+	public String visit(Literal literal) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, literal);
@@ -415,7 +446,8 @@ public class PrettyPrinter implements Visitor {
 		return output.toString();
 	}
 
-	public Object visit(ExpressionBlock expressionBlock) {
+	@Override
+	public String visit(ExpressionBlock expressionBlock) {
 		StringBuffer output = new StringBuffer();
 
 		indent(output, expressionBlock);

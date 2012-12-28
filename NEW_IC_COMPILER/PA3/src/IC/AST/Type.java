@@ -32,4 +32,9 @@ public abstract class Type extends ASTNode {
 	public void incrementDimension() {
 		++dimension;
 	}
+	
+	/**
+	 * Clone the object.
+	 */
+	public abstract Object clone();
 }

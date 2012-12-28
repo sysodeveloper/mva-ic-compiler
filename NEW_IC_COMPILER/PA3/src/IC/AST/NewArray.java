@@ -11,13 +11,15 @@ public class NewArray extends New {
 
 	private Expression size;
 
-	public Object accept(Visitor visitor) {
+	public <UpType> UpType accept(Visitor<UpType> visitor) {
 		return visitor.visit(this);
 	}
-
-	public Object accept(PropagatingVisitor visitor, Object context){
-		return visitor.visit(this, context);
+	
+	public <DownType, UpType> UpType accept(
+			PropagatingVisitor<DownType, UpType> visitor, DownType d) {
+		return visitor.visit(this, d);
 	}
+
 	/**
 	 * Constructs a new array creation expression node.
 	 * 
