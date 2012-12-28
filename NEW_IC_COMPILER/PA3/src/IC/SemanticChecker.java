@@ -14,36 +14,44 @@ import java.util.Set;
  * The symbol table of each scope.
  *
  */
-public class SymbolTable implements Visitor<Boolean> {
+public class SemanticChecker implements Visitor<Boolean> {
 	/**
-	 * The id of the table.
+	 * Indicate if the symbol table contains a break not 
+	 * yet under a while.
 	 */
-	private int m_id; 
+	private Boolean m_breakFlag;
 	
 	/**
-	 * The next id for table.
+	 * Indicate if the symbol table contains a continue not 
+	 * yet under a while.
 	 */
-	private static int m_next_id = 0;
+	private Boolean m_continueFlag;
 	
 	/**
-	 * The next record id.
+	 * The breaks triggered break flag.
 	 */
-	private int m_recordID;
-	
-	/** The parent table.
-	 */
-	private SymbolTable m_parent;
-
-	/**
-	 * The entries of the table.
-	 */
-	
-	private Map<String, SymbolRecord> m_entries;
+	private List<Break> m_breaks;
 	
 	/**
-	 * Hold all the used type. 
+	 * The continues triggered break flag.
+	 */
+	private List<Continue> m_continues;
+	
+	/**
+	 * Hold all the used 
 	 */
 	private Set<UserType> m_usedUserType;
+	
+	/**
+	 * indicate if the block of the current symbol table contain 
+	 *   non static statements.
+	 */
+	private Boolean m_nonStatic;
+	
+	/**
+	 * The non static nodes triggered the flag.
+	 */
+	private List<ASTNode> m_nonStaticNodes;
 	
 	/**
 	 * The current handled method.
@@ -51,47 +59,57 @@ public class SymbolTable implements Visitor<Boolean> {
 	private Method m_currentMethod;
 	
 	/**
-	 * @return The id.
+	 * @return The breakFlag.
 	 */
-	public int getId() {
-		return m_id;
-	}
-	/**
-	 * @param id The id to set.
-	 */
-	public void setId(int id) {
-		m_id = id;
+	public Boolean getBreakFlag() {
+		return m_breakFlag;
 	}
 	
 	/**
-	 * @return The parent.
+	 * @param breakFlag The breakFlag to set.
 	 */
-	public SymbolTable getParent() {
-		return m_parent;
-	}
-
-	/**
-	 * @param parent The m_parent to set.
-	 */
-	public void setParent(SymbolTable table) {
-		m_parent = table;
-	}
-
-	/**
-	 * @return The symbol entries.
-	 */
-	public Map<String, SymbolRecord> getEntries() {
-		return m_entries;
+	public void setBreakFlag(Boolean breakFlag) {
+		m_breakFlag = breakFlag;
 	}
 	
-	public boolean putSymbol(String key, SymbolRecord record, ASTNode node) {
-		if(getEntries().containsKey(key)){
-			SemanticAnalyse.getInstance().getErrors().add(
-					new SemanticError("Redefinition of " + key, node.getLine()));
-			return false;
-		}
-		getEntries().put(key, record);
-		return true;
+	/**
+	 * @return The breaks.
+	 */
+	public List<Break> getBreaks() {
+		return m_breaks;
+	}
+	/**
+	 * @param breaks The breaks to set.
+	 */
+	public void setBreaks(List<Break> breaks) {
+		m_breaks = breaks;
+	}
+	
+	/**
+	 * @return The continueFlag.
+	 */
+	public Boolean getContinueFlag() {
+		return m_continueFlag;
+	}
+	
+	/**
+	 * @param breakFlag The breakFlag to set.
+	 */
+	public void setContinueFlag(Boolean continueFlag) {
+		m_continueFlag = continueFlag;
+	}
+	
+	/**
+	 * @return The continues.
+	 */
+	public List<Continue> getContinues() {
+		return m_continues;
+	}
+	/**
+	 * @param break The continue to set.
+	 */
+	public void setContinues(List<Continue> continues) {
+		m_continues = continues;
 	}
 	
 	/**
@@ -105,6 +123,32 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	public void setUsedUserType(Set<UserType> usedUserType) {
 		m_usedUserType = usedUserType;
+	}
+	
+	/**
+	 * @return The nonStatic.
+	 */
+	public Boolean getNonStatic() {
+		return m_nonStatic;
+	}
+	/**
+	 * @param nonStatic The nonStatic to set.
+	 */
+	public void setNonStatic(Boolean nonStatic) {
+		m_nonStatic = nonStatic;
+	}
+	
+	/**
+	 * @return The nonStaticNodes.
+	 */
+	public List<ASTNode> getNonStaticNodes() {
+		return m_nonStaticNodes;
+	}
+	/**
+	 * @param nonStaticNodes The nonStaticNodes to set.
+	 */
+	public void setNonStaticNodes(List<ASTNode> nonStaticNodes) {
+		m_nonStaticNodes = nonStaticNodes;
 	}
 	
 	/**
@@ -125,52 +169,102 @@ public class SymbolTable implements Visitor<Boolean> {
 	 * @param id The id of the table.
 	 * @param parent The parent of the scope.
 	 */
-	public SymbolTable(int id, SymbolTable parent) {
-		m_recordID = 0;
+	public SemanticChecker(int id, SymbolTable parent) {
+		setBreakFlag(false);
+		setNonStatic(false);
+		setBreaks(new ArrayList<Break>());
+		setContinues(new ArrayList<Continue>());
+		setNonStaticNodes(new ArrayList<ASTNode>());
 		setCurrentMethod(null);
 		setUsedUserType(new HashSet<UserType>());
-		setId(id);
-		setParent(parent);
-		m_entries = new HashMap<String, SymbolRecord>();
 	}
 	
 	/**
 	 * Create the general scope symbol table.
 	 * @param id The id of the table.
 	 */
-	public SymbolTable(int id) {
+	public SemanticChecker(int id) {
 		this(id, null);
 	}
 	
 	/**
-	 * This function return the next id for this table.
-	 * @return
+	 * Check if there is a break not under a while.
+	 * @return true if the check is ok else false.
 	 */
-	public static int getNextId() {
-		return m_next_id++;
+	private Boolean checkBreak() {
+		Boolean isOk = true;
+		if(getBreakFlag()) {
+			isOk = false;
+			for (Break b : getBreaks()) {
+				SemanticAnalyse.getInstance().getErrors().add(
+					new SemanticError("break outside loop.", b.getLine()));
+			}
+		}
+		// Handle more than one break.
+		getBreaks().clear();
+		setBreakFlag(false);
+		
+		return isOk;
 	}
 	
 	/**
-	 * This function return the next record id for this table.
+	 * Check if there is a continue not under a while.
+	 * @return true if the check is ok else false.
+	 */
+	private Boolean checkContinue() {
+		Boolean isOk = true;
+		if(getContinueFlag()) {
+			isOk = false;
+			for (Continue c : getContinues()) {
+				SemanticAnalyse.getInstance().getErrors().add(
+					new SemanticError("continue outside loop.", c.getLine()));				
+			}
+		}
+		// Handle more than one break.
+		getContinues().clear();
+		setContinueFlag(false);
+		
+		return isOk;
+	}
+	
+	/**
+	 * Check if the current method pass the static check.
 	 * @return
 	 */
-	public int getRecordId() {
-		return m_recordID++;
+	private Boolean checkStatic() {
+		if(getNonStatic()) {
+			for (ASTNode node : getNonStaticNodes()) {
+				if(node instanceof This) {
+				SemanticAnalyse.getInstance().getErrors().add(
+						new SemanticError(
+				 "non-static variable this cannot be referenced from a static context", node.getLine()));
+				} else if(node instanceof Field) {
+					SemanticAnalyse.getInstance().getErrors().add(
+							new SemanticError("non-static variable " + ((Field)node).getName() + 
+									" cannot be referenced from a static context", node.getLine()));
+				} else if(node instanceof Method) {
+					SemanticAnalyse.getInstance().getErrors().add(
+							new SemanticError("non-static method " + ((Method)node).getName() + 
+									" cannot be referenced from a static context", node.getLine()));
+				}
+				else {
+					SemanticAnalyse.getInstance().getErrors().add(
+							new SemanticError(
+					"non-static node cannot be referenced from a static context", node.getLine()));
+				}
+			}
+			return false;
+		}
+		return true;
 	}
 
 	/**
 	 * Create a new Symbol Record for each class.
 	 */
-	
 	@Override
 	public Boolean visit(Program program) {
 		Boolean isOk = true;
-		setParent(null);
 		for (ICClass icClass : program.getClasses()) {
-			putSymbol(icClass.getName(), new SymbolRecord(getRecordId(), this, 
-					icClass.getName(), Kind.CLASS, 
-					new UserType(icClass.getLine(), icClass.getName())), icClass);
-			icClass.getInnerTable().setParent(this);
 			isOk &= icClass.accept(icClass.getInnerTable());
 		}
 			
@@ -179,12 +273,10 @@ public class SymbolTable implements Visitor<Boolean> {
 
 	/**
 	 * Accept the methods and fields so they create their symbol 
-	 *   table and register.
+	 *   table and register.getTable
 	 */
 	@Override
 	public Boolean visit(ICClass icClass) {
-		// TODO: Check name redefinition + register to parent in TypeTable.
-
 		Boolean isOk = true;
 		for (Field field : icClass.getFields()) {
 			isOk &= field.accept(this);
@@ -201,9 +293,6 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Field field) {
-		putSymbol(field.getName(), new SymbolRecord(getRecordId(), 
-			this, field.getName(), Kind.FIELD, field.getType()), field);
-
 		return true;
 	}
 
@@ -214,19 +303,15 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(VirtualMethod method) {
 		Boolean isOk = true;
-		putSymbol(method.getName(), new SymbolRecord(getRecordId(),
-				this, method.getName(), Kind.VIRTUAL_METHOD, 
-				method.getType(), null,
-				method.getFormals()), method);
-		method.getInnerTable().setCurrentMethod(method);
-		method.getInnerTable().setParent(this);
+		
 		for (Formal e : method.getFormals()) {
 			e.accept(method.getInnerTable());
 		}
 		for (Statement s : method.getStatements()) {
 			isOk &= s.accept(method.getInnerTable());
 		}
-
+		isOk &= checkBreak();
+		isOk &= checkContinue();
 		return isOk;
 	}
 
@@ -237,18 +322,23 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(StaticMethod method) {
 		Boolean isOk = true;
-		putSymbol(method.getName(), new SymbolRecord(getRecordId(),
-				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
-				method.getFormals()), method);
-		method.getInnerTable().setCurrentMethod(method);
-		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
 			e.accept(method.getInnerTable());
 		}
 		for (Statement s : method.getStatements()) {
 			isOk &= s.accept(method.getInnerTable());
+			if(s instanceof StatementsBlock) {
+				StatementsBlock sb = (StatementsBlock)s;
+				setBreakFlag(getBreakFlag() || getBreakFlag());
+				setContinueFlag(getContinueFlag() || getContinueFlag());
+				getBreaks().addAll(getBreaks());
+				getContinues().addAll(getContinues());
+				setNonStatic(getNonStatic() || getNonStatic());
+			}
 		}
-
+		isOk &= checkBreak();
+		isOk &= checkContinue();
+		isOk &= checkStatic();
 		return isOk;
 	}
 
@@ -259,18 +349,16 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(LibraryMethod method) {
 		Boolean isOk = true;
-		putSymbol(method.getName(), new SymbolRecord(getRecordId(),
-				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
-				method.getFormals()), method);
+		
 		method.getInnerTable().setCurrentMethod(method);
-		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
 			e.accept(method.getInnerTable());
 		}
 		for (Statement s : method.getStatements()) {
 			isOk &= s.accept(method.getInnerTable());
 		}
-		
+		isOk &= checkBreak();
+		isOk &= checkContinue();
 		return isOk;
 	}
 
@@ -279,8 +367,6 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Formal formal) {
-		putSymbol(formal.getName(), new SymbolRecord(getRecordId(), 
-				this, formal.getName(), Kind.FORMAL, formal.getType()), formal);
 		return true;
 	}
 
@@ -356,7 +442,10 @@ public class SymbolTable implements Visitor<Boolean> {
 		Boolean isOk;
 		isOk = whileStatement.getCondition().accept(this);
 		isOk &= whileStatement.getOperation().accept(this);
-		
+		setBreakFlag(false);
+		setContinueFlag(false);
+		getBreaks().clear();
+		getContinues().clear();
 		return isOk;
 	}
 
@@ -365,6 +454,8 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Break breakStatement) {
+		getBreaks().add(breakStatement);
+		setBreakFlag(true);
 		return true;
 	}
 
@@ -373,6 +464,8 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Continue continueStatement) {
+		getContinues().add(continueStatement);
+		setContinueFlag(true);
 		return true;
 	}
 
@@ -381,12 +474,13 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(StatementsBlock statementsBlock) {
-		Boolean isOk = true;
-		statementsBlock.getInnerTable().setParent(this);
+		Boolean isOk;
+		
 		for (Statement s : statementsBlock.getStatements()) {
 			s.accept(statementsBlock.getInnerTable());
 		}
-		
+		isOk = checkBreak();
+		isOk &= checkContinue();
 		return isOk;
 	}
 
@@ -396,9 +490,6 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(LocalVariable localVariable) {
 		Boolean isOk = true;
-		putSymbol(localVariable.getName(), new SymbolRecord(
-				getRecordId(), this, localVariable.getName(), 
-				Kind.LOCAL_VARIABLE, localVariable.getType()), localVariable);
 		if(localVariable.hasInitValue()) {
 			isOk = localVariable.getInitValue().accept(this);
 		}
@@ -447,7 +538,11 @@ public class SymbolTable implements Visitor<Boolean> {
 			isOk &= e.accept(this);
 		}
 		
-		if(call.isExternal()) {
+		if(!call.isExternal()) {
+			setNonStatic(true);
+			getNonStaticNodes().add(call);
+		}
+		else {
 			call.getLocation().accept(this);
 		}
 		
@@ -459,6 +554,8 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(This thisExpression) {
+		setNonStatic(true);
+		getNonStaticNodes().add(thisExpression);
 		return true;
 	}
 
