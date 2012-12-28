@@ -7,13 +7,15 @@ package IC.AST;
  */
 public class This extends Expression {
 
-	public Object accept(Visitor visitor) {
+	public <UpType> UpType accept(Visitor<UpType> visitor) {
 		return visitor.visit(this);
 	}
 	
-	public Object accept(PropagatingVisitor visitor, Object context){
-		return visitor.visit(this, context);
+	public <DownType, UpType> UpType accept(
+			PropagatingVisitor<DownType, UpType> visitor, DownType d) {
+		return visitor.visit(this, d);
 	}
+
 	/**
 	 * Constructs a 'this' expression node.
 	 * 

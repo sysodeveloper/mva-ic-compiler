@@ -9,12 +9,13 @@ public class UserType extends Type {
 
 	private String name;
 
-	public Object accept(Visitor visitor) {
+	public <UpType> UpType accept(Visitor<UpType> visitor) {
 		return visitor.visit(this);
 	}
 	
-	public Object accept(PropagatingVisitor visitor,Object context){
-		return visitor.visit(this, context);
+	public <DownType, UpType> UpType accept(
+			PropagatingVisitor<DownType, UpType> visitor, DownType d) {
+		return visitor.visit(this, d);
 	}
 
 	/**
@@ -34,4 +35,11 @@ public class UserType extends Type {
 		return name;
 	}
 
+	/**
+	 * Clone the object.
+	 */
+	@Override
+	public Object clone() {
+		return new UserType(line, name);
+	}
 }

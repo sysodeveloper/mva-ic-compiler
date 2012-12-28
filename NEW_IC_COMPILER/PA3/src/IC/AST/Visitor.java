@@ -5,69 +5,70 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public interface Visitor {
+public interface Visitor<UpType> {
 
-	public Object visit(Program program);
+	public UpType visit(Program program);
 
-	public Object visit(ICClass icClass);
+	public UpType visit(ICClass icClass);
 
-	public Object visit(Field field);
+	public UpType visit(Field field);
 
-	public Object visit(VirtualMethod method);
+	public UpType visit(VirtualMethod method);
 
-	public Object visit(StaticMethod method);
+	public UpType visit(StaticMethod method);
 
-	public Object visit(LibraryMethod method);
+	public UpType visit(LibraryMethod method);
 
-	public Object visit(Formal formal);
+	public UpType visit(Formal formal);
 
-	public Object visit(PrimitiveType type);
+	public UpType visit(PrimitiveType type);
 
-	public Object visit(UserType type);
+	public UpType visit(UserType type);
 
-	public Object visit(Assignment assignment);
+	public UpType visit(Assignment assignment);
 
-	public Object visit(CallStatement callStatement);
+	public UpType visit(CallStatement callStatement);
 
-	public Object visit(Return returnStatement);
+	public UpType visit(Return returnStatement);
 
-	public Object visit(If ifStatement);
+	public UpType visit(If ifStatement);
 
-	public Object visit(While whileStatement);
+	public UpType visit(While whileStatement);
 
-	public Object visit(Break breakStatement);
+	public UpType visit(Break breakStatement);
 
-	public Object visit(Continue continueStatement);
+	public UpType visit(Continue continueStatement);
 
-	public Object visit(StatementsBlock statementsBlock);
+	public UpType visit(StatementsBlock statementsBlock);
 
-	public Object visit(LocalVariable localVariable);
+	public UpType visit(LocalVariable localVariable);
 
-	public Object visit(VariableLocation location);
+	public UpType visit(VariableLocation location);
 
-	public Object visit(ArrayLocation location);
+	public UpType visit(ArrayLocation location);
 
-	public Object visit(StaticCall call);
+	public UpType visit(StaticCall call);
 
-	public Object visit(VirtualCall call);
+	public UpType visit(VirtualCall call);
 
-	public Object visit(This thisExpression);
+	public UpType visit(This thisExpression);
 
-	public Object visit(NewClass newClass);
+	public UpType visit(NewClass newClass);
 
-	public Object visit(NewArray newArray);
+	public UpType visit(NewArray newArray);
 
-	public Object visit(Length length);
+	public UpType visit(Length length);
 
-	public Object visit(MathBinaryOp binaryOp);
+	public UpType visit(MathBinaryOp binaryOp);
 
-	public Object visit(LogicalBinaryOp binaryOp);
+	public UpType visit(LogicalBinaryOp binaryOp);
 
-	public Object visit(MathUnaryOp unaryOp);
+	public UpType visit(MathUnaryOp unaryOp);
 
-	public Object visit(LogicalUnaryOp unaryOp);
+	public UpType visit(LogicalUnaryOp unaryOp);
 
-	public Object visit(Literal literal);
+	public UpType visit(Literal literal);
 
-	public Object visit(ExpressionBlock expressionBlock);
+	public UpType visit(ExpressionBlock expressionBlock);
+	
 }

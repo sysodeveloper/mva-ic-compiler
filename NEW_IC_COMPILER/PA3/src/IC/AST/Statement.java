@@ -6,7 +6,6 @@ package IC.AST;
  * @author Tovi Almozlino
  */
 public abstract class Statement extends ASTNode {
-
 	/**
 	 * Constructs a new statement node. Used by subclasses.
 	 * 

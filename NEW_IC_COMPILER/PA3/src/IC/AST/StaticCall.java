@@ -11,13 +11,15 @@ public class StaticCall extends Call {
 
 	private String className;
 
-	public Object accept(Visitor visitor) {
+	public <UpType> UpType accept(Visitor<UpType> visitor) {
 		return visitor.visit(this);
 	}
-
-	public Object accept(PropagatingVisitor visitor, Object context){
-		return visitor.visit(this, context);
+	
+	public <DownType, UpType> UpType accept(
+			PropagatingVisitor<DownType, UpType> visitor, DownType d) {
+		return visitor.visit(this, d);
 	}
+	
 	/**
 	 * Constructs a new static method call node.
 	 * 

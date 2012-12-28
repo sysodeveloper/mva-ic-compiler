@@ -2,6 +2,8 @@ package IC.AST;
 
 import java.util.List;
 
+import IC.SymbolTable;
+
 /**
  * Class declaration AST node.
  * 
@@ -16,13 +18,53 @@ public class ICClass extends ASTNode {
 	private List<Field> fields;
 
 	private List<Method> methods;
+	
+	/** The symbol table of this class.
+	 */
+	private SymbolTable m_table;
+	
+	/**
+	 * The static symbol table of the class.
+	 */
+	private SymbolTable m_sTable;
 
-	public Object accept(Visitor visitor) {
+	/**
+	 * @return The table.
+	 */
+	public SymbolTable getTable() {
+		return m_table;
+	}
+
+	/**
+	 * @param table The table to set.
+	 */
+	public void setTable(SymbolTable table) {
+		m_table = table;
+	}
+	
+	/**
+	 * @return The sTable.
+	 */
+	public SymbolTable getSTable() {
+		return m_sTable;
+	}
+
+	/**
+	 * @param sTable The table to set.
+	 */
+	public void setSTable(SymbolTable sTable) {
+		m_sTable = sTable;
+	}
+
+	@Override
+	public <UpType> UpType accept(Visitor<UpType> visitor) {
 		return visitor.visit(this);
 	}
 	
-	public Object accept(PropagatingVisitor visitor,Object context){
-		return visitor.visit(this, context);
+	@Override
+	public <DownType, UpType> UpType accept(
+			PropagatingVisitor<DownType, UpType> visitor, DownType d) {
+		return visitor.visit(this, d);
 	}
 
 	/**
@@ -43,6 +85,8 @@ public class ICClass extends ASTNode {
 		this.name = name;
 		this.fields = fields;
 		this.methods = methods;
+		setTable(new SymbolTable(SymbolTable.getNextId()));
+		setSTable(new SymbolTable(SymbolTable.getNextId()));
 	}
 
 	/**

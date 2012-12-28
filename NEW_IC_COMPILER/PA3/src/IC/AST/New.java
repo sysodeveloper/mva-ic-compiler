@@ -5,8 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public abstract class New extends Expression {
-
+public abstract class New extends Expression {	
 	/**
 	 * Constructs a new object creation expression node. Used by subclasses.
 	 * 

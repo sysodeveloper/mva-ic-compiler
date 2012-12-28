@@ -7,9 +7,9 @@ package IC.AST;
  */
 public abstract class ASTNode {
 
-	private int line;
+	protected int line;
 	private int id;
-
+	
 	/**
 	 * Double dispatch method, to allow a visitor to visit a specific subclass.
 	 * 
@@ -17,7 +17,7 @@ public abstract class ASTNode {
 	 *            The visitor.
 	 * @return A value propagated by the visitor.
 	 */
-	public abstract Object accept(Visitor visitor);
+	public abstract <UpType> UpType accept(Visitor<UpType> visitor);
 	
 	/***
 	 * Double dispatch method, to allow a visitor to visit a specific subclass, including holding 
@@ -28,7 +28,8 @@ public abstract class ASTNode {
 	 * 			The object to pass
 	 * @return A value propagated by the visitor
 	 */
-	public abstract Object accept(PropagatingVisitor visitor, Object context);
+	public abstract <DownType, UpType> UpType accept(
+			PropagatingVisitor<DownType, UpType> visitor, DownType d);
 
 	/**
 	 * Constructs an AST node corresponding to a line number in the original

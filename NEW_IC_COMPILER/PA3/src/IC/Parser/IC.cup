@@ -170,7 +170,7 @@ Field ::= Type:t ID:i FieldList:flst SEMI
 			ArrayList<Field> TypedFields = new ArrayList<Field>();
 			
 			for(Field f : lstFields){
-				TypedFields.add(new Field((Type)t,f.getName()));				
+				TypedFields.add(new Field((Type)(((Type)t).clone()),f.getName()));				
 			}
 				
 			TypedFields.add( new Field((Type)t, i.toString()) );  
