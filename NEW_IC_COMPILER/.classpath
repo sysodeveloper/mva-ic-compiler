@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="PA3/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="plugins/java-cup-11a-runtime.jar"/>
+	<classpathentry kind="lib" path="plugins/java-cup-11a.jar"/>
+	<classpathentry kind="lib" path="plugins/JFlex.jar"/>
+	<classpathentry kind="output" path="PA2/bin"/>
+</classpath>
