@@ -10,7 +10,7 @@ public class SymbolTablePrinter implements Visitor<StringBuffer> {
 			output.append(c.accept(this));
 		}
 		StringBuffer children = new StringBuffer();
-		output.append("Global Symbol Table: " + IC.Compiler.getICFileParsed()+"\n");
+		//output.append("Global Symbol Table: " + IC.Compiler.getICFileParsed()+"\n");
 		for(ICClass c : program.getClasses()){
 			output.append("\t Class: " + c.getName() + "\n");
 			if(program.getOuterTable() == c.getOuterTable().getParent()){
