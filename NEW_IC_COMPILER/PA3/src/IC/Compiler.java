@@ -14,6 +14,7 @@ import IC.AST.GrpahNodesPrinter;
 import IC.AST.ICClass;
 import IC.AST.Labeling;
 import IC.AST.Program;
+import IC.AST.SymbolTablePrinter;
 import IC.AST.TreePrinter;
 import IC.Parser.*;
 
@@ -30,6 +31,8 @@ public class Compiler {
 	 *            - The Library file path.
 	 *            - Supports -print-ast command 
 	 */
+	private static String ICFileParsed;
+	
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Error: No input IC file.");
@@ -64,6 +67,10 @@ public class Compiler {
 		}		
 	}
 
+	public static String getICFileParsed(){
+		return Compiler.ICFileParsed;
+	}
+	
 	/**
 	 * 
 	 * @param root - the root of the ast tree
@@ -211,6 +218,7 @@ public class Compiler {
 			parser.printTokens = false;
 			Symbol parsedSymbol = parser.parse();
 			System.out.println("Successfully parsed " +filePath);
+			Compiler.ICFileParsed = filePath;
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
 			System.out.println(filePath + " " + e3.getMessage());
@@ -232,6 +240,8 @@ public class Compiler {
 		SemanticAnalyse sa = SemanticAnalyse.getInstance();
 		sa.setRoot(root);
 		sa.analyze();
+		SymbolTablePrinter tablePrinter = new SymbolTablePrinter();
+		System.out.println(tablePrinter.visit(root).toString());
 		return true;
 		
 	}
