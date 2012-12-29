@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import sun.org.mozilla.javascript.ast.WhileLoop;
-
 import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 import com.sun.org.apache.bcel.internal.generic.PUTSTATIC;
 
