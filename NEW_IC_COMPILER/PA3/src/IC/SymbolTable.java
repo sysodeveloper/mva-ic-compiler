@@ -147,7 +147,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 * @return
 	 */
 	public static int getNextId() {
-		return m_next_id++;
+		return ++m_next_id;
 	}
 	
 	/**
@@ -155,7 +155,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 * @return
 	 */
 	public int getRecordId() {
-		return m_recordID++;
+		return ++m_recordID;
 	}
 
 	/**
@@ -167,12 +167,11 @@ public class SymbolTable implements Visitor<Boolean> {
 		Boolean isOk = true;
 		setParent(null);
 		for (ICClass icClass : program.getClasses()) {
-			putSymbol(icClass.getName(), new SymbolRecord(getRecordId(), this, 
+			isOk &= putSymbol(icClass.getName(), new SymbolRecord(getRecordId(), this, 
 					icClass.getName(), Kind.CLASS, 
 					new UserType(icClass.getLine(), icClass.getName())), icClass);
 			icClass.getInnerTable().setParent(this);
-			SymbolTable inner = icClass.getInnerTable();
-			isOk &= icClass.accept(inner);
+			isOk &= icClass.accept(icClass.getInnerTable());
 		}
 			
 		return isOk;
@@ -202,10 +201,8 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Field field) {
-		putSymbol(field.getName(), new SymbolRecord(getRecordId(), 
+		return putSymbol(field.getName(), new SymbolRecord(getRecordId(), 
 			this, field.getName(), Kind.FIELD, field.getType()), field);
-
-		return true;
 	}
 
 	/**
@@ -215,7 +212,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(VirtualMethod method) {
 		Boolean isOk = true;
-		putSymbol(method.getName(), new SymbolRecord(getRecordId(),
+		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, 
 				method.getType(), null,
 				method.getFormals()), method);
@@ -238,7 +235,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(StaticMethod method) {
 		Boolean isOk = true;
-		putSymbol(method.getName(), new SymbolRecord(getRecordId(),
+		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
 				method.getFormals()), method);
 		method.getInnerTable().setCurrentMethod(method);
@@ -260,7 +257,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(LibraryMethod method) {
 		Boolean isOk = true;
-		putSymbol(method.getName(), new SymbolRecord(getRecordId(),
+		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
 				method.getFormals()), method);
 		method.getInnerTable().setCurrentMethod(method);
@@ -280,9 +277,8 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Formal formal) {
-		putSymbol(formal.getName(), new SymbolRecord(getRecordId(), 
+		return putSymbol(formal.getName(), new SymbolRecord(getRecordId(), 
 				this, formal.getName(), Kind.FORMAL, formal.getType()), formal);
-		return true;
 	}
 
 	/**
@@ -332,8 +328,6 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(Return returnStatement) {
 		if(returnStatement.hasValue())
 		{
-			//causes stack overflow - there is no scope for return
-			//return returnStatement.accept(this);
 			return returnStatement.getValue().accept(this);
 		}
 		return true;
@@ -399,7 +393,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(LocalVariable localVariable) {
 		Boolean isOk = true;
-		putSymbol(localVariable.getName(), new SymbolRecord(
+		isOk &= putSymbol(localVariable.getName(), new SymbolRecord(
 				getRecordId(), this, localVariable.getName(), 
 				Kind.LOCAL_VARIABLE, localVariable.getType()), localVariable);
 		if(localVariable.hasInitValue()) {
@@ -413,11 +407,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(VariableLocation location) {
-		//Added external check, otherwise do nothing
-		if(location.isExternal()){
-			return location.getLocation().accept(this);
-		}
-		return true;
+		return location.getLocation().accept(this);
 	}
 
 	/**
