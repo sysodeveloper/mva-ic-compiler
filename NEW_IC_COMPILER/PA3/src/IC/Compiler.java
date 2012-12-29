@@ -41,7 +41,7 @@ public class Compiler {
 		if(args.length == 1){
 			//only parse the ic file
 			Object root = ParseICFile(args[0]);
-			BuildSymbolTables((Program)root);
+			BuildSymbolTables((Program)root, args[0]);
 		}else{
 			//check which arguments are entered
 			Object root = ParseICFile(args[0]);
@@ -63,7 +63,7 @@ public class Compiler {
 					break;
 				}
 			}
-			BuildSymbolTables((Program)root);
+			BuildSymbolTables((Program)root, args[0]);
 		}		
 	}
 
@@ -236,12 +236,15 @@ public class Compiler {
 		return null;
 	}
 	
-	private static Boolean BuildSymbolTables(Program root){
+	private static Boolean BuildSymbolTables(Program root, String filePath){
 		SemanticAnalyse sa = SemanticAnalyse.getInstance();
 		sa.setRoot(root);
 		sa.analyze();
 		SymbolTablePrinter tablePrinter = new SymbolTablePrinter();
 		System.out.println(tablePrinter.visit(root).toString());
+		TypeTablePrinter typePrinter = new TypeTablePrinter(
+				SymbolTable.getUsedType(), (new File(filePath).getName()));
+		System.out.println(typePrinter);
 		return true;
 		
 	}

@@ -2,6 +2,7 @@ package IC;
 
 import IC.SymbolRecord.Kind;
 import IC.AST.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -200,6 +201,7 @@ public class SymbolTable implements Visitor<Boolean> {
 		Boolean isOk = true;
 		
 		icClass.setOuterTable(this);
+		getUsedType().add(new UserType(icClass.getLine(), icClass.getName()));
 		
 		for (Field field : icClass.getFields()) {
 			isOk &= field.accept(icClass.getInnerTable());
@@ -229,6 +231,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(VirtualMethod method) {
 		Boolean isOk = true;
 		method.setOuterTable(this);
+		getUsedType().add(method.getType());
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
 				this, method.getName(), Kind.VIRTUAL_METHOD, 
 				method.getType()), method);
@@ -252,6 +255,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(StaticMethod method) {
 		Boolean isOk = true;
 		method.setOuterTable(this);
+		getUsedType().add(method.getType());
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType()), method);
 		method.getInnerTable().setCurrentMethod(method);
@@ -274,6 +278,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(LibraryMethod method) {
 		Boolean isOk = true;
 		method.setOuterTable(this);
+		getUsedType().add(method.getType());
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType()), method);
 		method.getInnerTable().setCurrentMethod(method);
