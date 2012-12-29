@@ -331,7 +331,9 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(Return returnStatement) {
 		if(returnStatement.hasValue())
 		{
-			return returnStatement.accept(this);
+			//causes stack overflow - there is no scope for return
+			//return returnStatement.accept(this);
+			return returnStatement.getValue().accept(this);
 		}
 		return true;
 	}
