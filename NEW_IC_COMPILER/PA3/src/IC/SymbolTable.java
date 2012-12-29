@@ -48,7 +48,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	/**
 	 * Hold all the used type. 
 	 */
-	private Set<UserType> m_usedUserType;
+	private static Set<Type> m_usedType = new HashSet<Type>();
 	
 	/**
 	 * The current handled method.
@@ -100,16 +100,16 @@ public class SymbolTable implements Visitor<Boolean> {
 	}
 	
 	/**
-	 * @return The usedUserType.
+	 * @return The usedType.
 	 */
-	public Set<UserType> getUsedUserType() {
-		return m_usedUserType;
+	public static Set<Type> getUsedType() {
+		return m_usedType;
 	}
 	/**
-	 * @param usedUserType The usedUserType to set.
+	 * @param usedType The usedType to set.
 	 */
-	public void setUsedUserType(Set<UserType> usedUserType) {
-		m_usedUserType = usedUserType;
+	public void setUsedType(Set<Type> usedType) {
+		m_usedType = usedType;
 	}
 	
 	/**
@@ -133,7 +133,6 @@ public class SymbolTable implements Visitor<Boolean> {
 	public SymbolTable(int id, SymbolTable parent) {
 		m_recordID = 0;
 		setCurrentMethod(null);
-		setUsedUserType(new HashSet<UserType>());
 		setId(id);
 		setParent(parent);
 		m_entries = new HashMap<String, SymbolRecord>();
@@ -307,6 +306,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(PrimitiveType type) {
 		type.setOuterTable(this);
+		getUsedType().add(type);
 		return true;
 	}
 
@@ -316,7 +316,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(UserType type) {
 		type.setOuterTable(this);
-		getUsedUserType().add(type);
+		getUsedType().add(type);
 		return true;
 	}
 
