@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import sun.org.mozilla.javascript.ast.WhileLoop;
+
 import com.sun.org.apache.bcel.internal.generic.PUTSTATIC;
 
 /**
@@ -168,6 +170,8 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(Program program) {
 		Boolean isOk = true;
 		setParent(null);
+		// The general scope table.
+		program.setOuterTable(this);
 		for (ICClass icClass : program.getClasses()) {
 			isOk &= putSymbol(icClass.getName(), new SymbolRecord(getRecordId(), this, 
 					icClass.getName(), Kind.CLASS, 
@@ -185,14 +189,14 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(ICClass icClass) {
-		// TODO: Check name redefinition + register to parent in TypeTable.
-
+		// TODO: register to parent in TypeTable.
+		icClass.setOuterTable(this);
 		Boolean isOk = true;
 		for (Field field : icClass.getFields()) {
-			isOk &= field.accept(this);
+			isOk &= field.accept(icClass.getInnerTable());
 		}
 		for (Method method : icClass.getMethods()) {
-			isOk &= method.accept(this);
+			isOk &= method.accept(icClass.getInnerTable());
 		}
 		
 		return isOk;
@@ -203,6 +207,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Field field) {
+		field.setOuterTable(this);
 		return putSymbol(field.getName(), new SymbolRecord(getRecordId(), 
 			this, field.getName(), Kind.FIELD, field.getType()), field);
 	}
@@ -214,6 +219,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(VirtualMethod method) {
 		Boolean isOk = true;
+		method.setOuterTable(this);
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, 
 				method.getType(), null,
@@ -237,6 +243,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(StaticMethod method) {
 		Boolean isOk = true;
+		method.setOuterTable(this);
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
 				method.getFormals()), method);
@@ -259,6 +266,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(LibraryMethod method) {
 		Boolean isOk = true;
+		method.setOuterTable(this);
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(),
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
 				method.getFormals()), method);
@@ -279,6 +287,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Formal formal) {
+		formal.setOuterTable(this);
 		return putSymbol(formal.getName(), new SymbolRecord(getRecordId(), 
 				this, formal.getName(), Kind.FORMAL, formal.getType()), formal);
 	}
@@ -288,6 +297,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(PrimitiveType type) {
+		type.setOuterTable(this);
 		return true;
 	}
 
@@ -296,6 +306,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(UserType type) {
+		type.setOuterTable(this);
 		getUsedUserType().add(type);
 		return true;
 	}
@@ -306,6 +317,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(Assignment assignment) {
 		Boolean isOk;
+		assignment.setOuterTable(this);
 		isOk = assignment.getAssignment().accept(this);
 		isOk &= assignment.getVariable().accept(this);
 		return isOk;
@@ -317,6 +329,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(CallStatement callStatement) {
 		Boolean isOk = true;
+		callStatement.setOuterTable(this);
 		for (Expression e : callStatement.getCall().getArguments()) {
 			isOk &= e.accept(this);
 		}
@@ -328,6 +341,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Return returnStatement) {
+		returnStatement.setOuterTable(this);
 		if(returnStatement.hasValue())
 		{
 			return returnStatement.getValue().accept(this);
@@ -341,6 +355,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(If ifStatement) {
 		Boolean isOk;
+		ifStatement.setOuterTable(this);
 		isOk = ifStatement.getCondition().accept(this);
 		isOk &= ifStatement.getOperation().accept(this);
 		isOk &= ifStatement.getElseOperation().accept(this);
@@ -353,6 +368,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(While whileStatement) {
 		Boolean isOk;
+		whileStatement.setOuterTable(this);
 		isOk = whileStatement.getCondition().accept(this);
 		isOk &= whileStatement.getOperation().accept(this);
 		
@@ -364,6 +380,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Break breakStatement) {
+		breakStatement.setOuterTable(this);
 		return true;
 	}
 
@@ -372,6 +389,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Continue continueStatement) {
+		continueStatement.setOuterTable(this);
 		return true;
 	}
 
@@ -381,6 +399,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(StatementsBlock statementsBlock) {
 		Boolean isOk = true;
+		statementsBlock.setOuterTable(this);
 		statementsBlock.getInnerTable().setParent(this);
 		for (Statement s : statementsBlock.getStatements()) {
 			s.accept(statementsBlock.getInnerTable());
@@ -395,6 +414,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(LocalVariable localVariable) {
 		Boolean isOk = true;
+		localVariable.setOuterTable(this);
 		isOk &= putSymbol(localVariable.getName(), new SymbolRecord(
 				getRecordId(), this, localVariable.getName(), 
 				Kind.LOCAL_VARIABLE, localVariable.getType()), localVariable);
@@ -409,6 +429,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(VariableLocation location) {
+		location.setOuterTable(this);
 		return location.getLocation().accept(this);
 	}
 
@@ -418,6 +439,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(ArrayLocation location) {
 		Boolean isOk;
+		location.setOuterTable(this);
 		isOk = location.getArray().accept(this);
 		isOk &= location.getIndex().accept(this);
 		return isOk;
@@ -429,6 +451,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(StaticCall call) {
 		Boolean isOk = true;
+		call.setOuterTable(this);
 		for (Expression e : call.getArguments()) {
 			isOk &= e.accept(this);
 		}
@@ -441,7 +464,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(VirtualCall call) {
 		Boolean isOk = true;
-		
+		call.setOuterTable(this);
 		for (Expression e : call.getArguments()) {
 			isOk &= e.accept(this);
 		}
@@ -458,6 +481,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(This thisExpression) {
+		thisExpression.setOuterTable(this);
 		return true;
 	}
 
@@ -466,6 +490,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(NewClass newClass) {
+		newClass.setOuterTable(this);
 		return true;
 	}
 
@@ -474,6 +499,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(NewArray newArray) {
+		newArray.setOuterTable(this);
 		return newArray.getType().accept(this);
 	}
 
@@ -482,6 +508,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Length length) {
+		length.setOuterTable(this);
 		return length.getArray().accept(this);
 	}
 
@@ -491,6 +518,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(MathBinaryOp binaryOp) {
 		Boolean isOk;
+		binaryOp.setOuterTable(this);
 		isOk = binaryOp.getFirstOperand().accept(this);
 		isOk &= binaryOp.getSecondOperand().accept(this);
 		
@@ -504,6 +532,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(LogicalBinaryOp binaryOp) {
 		Boolean isOk;
+		binaryOp.setOuterTable(this);
 		isOk = binaryOp.getFirstOperand().accept(this);
 		isOk &= binaryOp.getSecondOperand().accept(this);
 		
@@ -517,6 +546,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(MathUnaryOp unaryOp) {
 		Boolean isOk;
+		unaryOp.setOuterTable(this);
 		isOk = unaryOp.getOperand().accept(this);
 		// TODO: Validate unary operation use.
 		return isOk;
@@ -528,6 +558,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(LogicalUnaryOp unaryOp) {
 		Boolean isOk;
+		unaryOp.setOuterTable(this);
 		isOk = unaryOp.getOperand().accept(this);
 		// TODO: Validate unary operation use.
 		return isOk;
@@ -538,6 +569,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(Literal literal) {
+		literal.setOuterTable(this);
 		return true;
 	}
 
@@ -546,6 +578,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(ExpressionBlock expressionBlock) {
+		expressionBlock.setOuterTable(this);
 		return expressionBlock.getExpression().accept(this);
 	}
 }
