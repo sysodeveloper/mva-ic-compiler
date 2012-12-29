@@ -457,4 +457,12 @@ public class PrettyPrinter implements Visitor<String> {
 		--depth;
 		return output.toString();
 	}
+
+	/**
+	 * Not really exist at this point.
+	 */
+	@Override
+	public String visit(MethodType methodType) {
+		return "";
+	}
 }

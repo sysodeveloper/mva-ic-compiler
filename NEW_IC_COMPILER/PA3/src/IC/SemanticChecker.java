@@ -2,6 +2,7 @@ package IC;
 
 import IC.SymbolRecord.Kind;
 import IC.AST.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -645,5 +646,13 @@ public class SemanticChecker implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(ExpressionBlock expressionBlock) {
 		return expressionBlock.getExpression().accept(this);
+	}
+
+	/**
+	 * Handle method type.
+	 */
+	@Override
+	public Boolean visit(MethodType methodType) {
+		return true;
 	}
 }

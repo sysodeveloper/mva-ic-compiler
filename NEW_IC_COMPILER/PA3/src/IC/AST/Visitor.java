@@ -71,4 +71,6 @@ public interface Visitor<UpType> {
 
 	public UpType visit(ExpressionBlock expressionBlock);
 	
+	public UpType visit(MethodType methodType);
+	
 }
