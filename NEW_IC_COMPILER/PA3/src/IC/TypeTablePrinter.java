@@ -40,15 +40,20 @@ public class TypeTablePrinter {
 	@Override
 	public String toString() {
 		StringBuilder sbTypes = new StringBuilder();
+		StringBuilder sbPrimitiveTypes = new StringBuilder();
+		StringBuilder sbUserTypes = new StringBuilder();
+		StringBuilder sbArrayTypes = new StringBuilder();
+		StringBuilder sbMethodTypes = new StringBuilder();
+		
 		sbTypes.append("Type Table: " + m_fileName + "\n");
 		for (Type type : m_types) {
 			if(type instanceof UserType) {
 				UserType ut = (UserType)type;
-				sbTypes.append("    " + type.getLine() + ": Class: " + ut.getName() + "\n");
+				sbUserTypes.append("    " + type.getLine() + ": Class: " + ut.getName() + "\n");
 			}
 			else if(type instanceof MethodType) {
 				MethodType mt = (MethodType)type;
-				sbTypes.append("    " + type.getLine() + ": Method type: " + mt + "\n");
+				sbMethodTypes.append("    " + type.getLine() + ": Method type: " + mt.getName() + "\n");
 			}
 			else {
 				if(type.getDimension() >= 1) {
@@ -56,13 +61,18 @@ public class TypeTablePrinter {
 					for (int i = 0; i < type.getDimension(); i++) {
 						dimentionString.append("[]");
 					}
-					sbTypes.append("    " + type.getLine() + ": Array type: " + type.getName() + dimentionString + "\n");
+					sbArrayTypes.append("    " + type.getLine() + ": Array type: " + type.getName() + dimentionString + "\n");
 				}
 				else {
-					sbTypes.append("    " + type.getLine() + ": Primitive type: " + type.getName() + "\n");
+					sbPrimitiveTypes.append("    " + type.getLine() + ": Primitive type: " + type.getName() + "\n");
 				}
 			}
 		}
+		
+		sbTypes.append(sbPrimitiveTypes);
+		sbTypes.append(sbUserTypes);
+		sbTypes.append(sbArrayTypes);
+		sbTypes.append(sbMethodTypes);
 		
 		return sbTypes.toString();
 	}

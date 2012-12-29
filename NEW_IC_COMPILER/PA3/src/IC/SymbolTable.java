@@ -370,7 +370,9 @@ public class SymbolTable implements Visitor<Boolean> {
 		ifStatement.setOuterTable(this);
 		isOk = ifStatement.getCondition().accept(this);
 		isOk &= ifStatement.getOperation().accept(this);
-		isOk &= ifStatement.getElseOperation().accept(this);
+		if(ifStatement.hasElse()) {
+			isOk &= ifStatement.getElseOperation().accept(this);
+		}
 		return isOk;
 	}
 

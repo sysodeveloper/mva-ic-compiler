@@ -84,12 +84,17 @@ public class MethodType extends Type {
 	public String getName() {
 		StringBuilder formals = new StringBuilder();
 		boolean first = true;
-		for (Type fType : getFormalTypes()) {
-			if(!first) {
-				formals.append(", ");
+		if(getFormalTypes().isEmpty()) {
+			formals.append(" ");
+		}
+		else {
+			for (Type fType : getFormalTypes()) {
+				if(!first) {
+					formals.append(", ");
+				}
+				formals.append(fType.getName());
+				first = false;
 			}
-			formals.append(fType.getName());
-			first = false;
 		}
 		return "{" + formals.toString()  + " -> " + 
 			getReturnType().getName()  + "}";
