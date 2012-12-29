@@ -1,5 +1,6 @@
 package IC;
 
+import IC.AST.ASTNode;
 import IC.AST.Formal;
 import IC.AST.Type;
 import java.util.ArrayList;
@@ -56,6 +57,11 @@ public class SymbolRecord {
 	private List<Object> m_properties;
 	
 	/**
+	 * The node of the record.
+	 */
+	private ASTNode m_node;
+	
+	/**
 	 * @return The id.
 	 */
 	public int getId() {
@@ -66,6 +72,19 @@ public class SymbolRecord {
 	 */
 	public void setId(int id) {
 		m_id = id;
+	}
+	
+	/**
+	 * @return the node
+	 */
+	public ASTNode getNode() {
+		return m_node;
+	}
+	/**
+	 * @param m_node the node to set
+	 */
+	public void setNode(ASTNode m_node) {
+		this.m_node = m_node;
 	}
 	
 	/**
@@ -145,6 +164,7 @@ public class SymbolRecord {
 	/**
 	 * The main constructor.
 	 * @param id The id of the table.
+	 * @param node The node of the record.
 	 * @param table The table contains the record.
 	 * @param symbol The symbol name.
 	 * @param kind The kind of the record (Field, Method, Class).
@@ -152,10 +172,11 @@ public class SymbolRecord {
 	 * @param properties Additionally properties.
 	 * @param parameters The parameters type (if method).
 	 */
-	public SymbolRecord(int id, SymbolTable table, String symbol, Kind kind,
+	public SymbolRecord(int id, ASTNode node, SymbolTable table, String symbol, Kind kind,
 			Type type, List<Object> properties, 
 			List<Formal> parameters) {
 		setId(id);
+		setNode(node);
 		setTable(table);
 		setSymbol(symbol);
 		setKind(kind);
@@ -167,26 +188,28 @@ public class SymbolRecord {
 	/**
 	 * The constructor with no parameters.
 	 * @param id The id of the table.
+	 * @param node The node of the record.
 	 * @param table The table contains the record.
 	 * @param symbol The symbol name.
 	 * @param kind The kind of the record (Field, Method, Class).
 	 * @param type The type if field or return type for method.
 	 * @param properties Additionally properties.
 	 */
-	public SymbolRecord(int id, SymbolTable table, String symbol, Kind kind,
+	public SymbolRecord(int id, ASTNode node, SymbolTable table, String symbol, Kind kind,
 			Type type, List<Object> properties) {
-		this(id, table, symbol, kind, type, properties, null);
+		this(id, node, table, symbol, kind, type, properties, null);
 	}
 	
 	/**
 	 * The constructor for field (with no properties and no parameters).
 	 * @param id The id of the table.
+	 * @param node The node of the record.
 	 * @param table The table contains the record.
 	 * @param symbol The symbol name.
 	 * @param kind The kind of the record (Field, Method, Class).
 	 * @param type The type if field or return type for method.
 	 */
-	public SymbolRecord(int id, SymbolTable table, String symbol, Kind kind, Type type) {
-		this(id, table, symbol, kind, type, null, null);
+	public SymbolRecord(int id, ASTNode node, SymbolTable table, String symbol, Kind kind, Type type) {
+		this(id, node, table, symbol, kind, type, null, null);
 	}
 }
