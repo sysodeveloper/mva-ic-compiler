@@ -171,7 +171,8 @@ public class SymbolTable implements Visitor<Boolean> {
 					icClass.getName(), Kind.CLASS, 
 					new UserType(icClass.getLine(), icClass.getName())), icClass);
 			icClass.getInnerTable().setParent(this);
-			isOk &= icClass.accept(icClass.getInnerTable());
+			SymbolTable inner = icClass.getInnerTable();
+			isOk &= icClass.accept(inner);
 		}
 			
 		return isOk;
@@ -412,7 +413,11 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(VariableLocation location) {
-		return location.getLocation().accept(this);
+		//Added external check, otherwise do nothing
+		if(location.isExternal()){
+			return location.getLocation().accept(this);
+		}
+		return true;
 	}
 
 	/**
