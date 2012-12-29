@@ -211,4 +211,10 @@ public class SymbolTablePrinter implements Visitor<StringBuffer> {
 		return null;
 	}
 
+	@Override
+	public StringBuffer visit(MethodType methodType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
