@@ -1,5 +1,6 @@
 package IC.AST;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import IC.SymbolTable;
@@ -12,6 +13,8 @@ import IC.SymbolTable;
 public abstract class Method extends ASTNode implements SymbolTableContainer {
 
 	protected Type type;
+	
+	protected MethodType methodType;
 
 	protected String name;
 
@@ -57,10 +60,16 @@ public abstract class Method extends ASTNode implements SymbolTableContainer {
 		this.name = name;
 		this.formals = formals;
 		this.statements = statements;
+		List<Type> formalTypes = new ArrayList<Type>();
+		for (Formal f : formals) {
+			formalTypes.add(f.getType());
+		}
+		methodType = new MethodType(line, type, formalTypes);
 	}
 
 	public Type getType() {
-		return type;
+		
+		return methodType;
 	}
 
 	public String getName() {

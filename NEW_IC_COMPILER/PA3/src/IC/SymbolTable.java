@@ -228,8 +228,7 @@ public class SymbolTable implements Visitor<Boolean> {
 		method.setOuterTable(this);
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
 				this, method.getName(), Kind.VIRTUAL_METHOD, 
-				method.getType(), null,
-				method.getFormals()), method);
+				method.getType()), method);
 		method.getInnerTable().setCurrentMethod(method);
 		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
@@ -251,8 +250,7 @@ public class SymbolTable implements Visitor<Boolean> {
 		Boolean isOk = true;
 		method.setOuterTable(this);
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
-				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
-				method.getFormals()), method);
+				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType()), method);
 		method.getInnerTable().setCurrentMethod(method);
 		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
@@ -274,8 +272,7 @@ public class SymbolTable implements Visitor<Boolean> {
 		Boolean isOk = true;
 		method.setOuterTable(this);
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
-				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType(), null,
-				method.getFormals()), method);
+				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType()), method);
 		method.getInnerTable().setCurrentMethod(method);
 		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
@@ -295,7 +292,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(Formal formal) {
 		formal.setOuterTable(this);
 		return putSymbol(formal.getName(), new SymbolRecord(getRecordId(), formal,
-				this, formal.getName(), Kind.FORMAL, formal.getType()), formal);
+				this, formal.getName(), Kind.PARAMETER, formal.getType()), formal);
 	}
 
 	/**

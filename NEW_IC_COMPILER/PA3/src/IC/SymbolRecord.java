@@ -17,7 +17,7 @@ public class SymbolRecord {
 	 */
 	public enum Kind {
 		FIELD,
-		FORMAL,
+		PARAMETER,
 		STATIC_METHOD,
 		VIRTUAL_METHOD,
 		LIBRARY_METHOD,
@@ -43,14 +43,12 @@ public class SymbolRecord {
 	 * The kind of the record. (Field, Method, class).
 	 */
 	private Kind m_kind;
+
 	/**
-	 * The parameters for method.
-	 */
-	private List<Formal> m_parameters;
-	/**
-	 * The type of the symbol or return type of a function.
+	 * The type of the symbol.
 	 */
 	private Type m_type;
+	
 	/**
 	 * Additional properties.
 	 */
@@ -111,18 +109,7 @@ public class SymbolRecord {
 	public void setKind(Kind kind) {
 		m_kind = kind;
 	}
-	/**
-	 * @return The parameters.
-	 */
-	public List<Formal> getParameters() {
-		return m_parameters;
-	}
-	/**
-	 * @param m_parameters The m_parameters to set.
-	 */
-	public void setParameters(List<Formal> parameters) {
-		m_parameters = parameters;
-	}
+	
 	/**
 	 * @return The type.
 	 */
@@ -167,37 +154,22 @@ public class SymbolRecord {
 	 * @param node The node of the record.
 	 * @param table The table contains the record.
 	 * @param symbol The symbol name.
-	 * @param kind The kind of the record (Field, Method, Class).
-	 * @param type The type if field or return type for method.
+	 * @param kind The kind of the record 
+	 *   (Field, Static | Virtual | Library Method, 
+	 *   Class, Local Variable, Parameter).
+	 * @param type The type.
 	 * @param properties Additionally properties.
-	 * @param parameters The parameters type (if method).
 	 */
-	public SymbolRecord(int id, ASTNode node, SymbolTable table, String symbol, Kind kind,
-			Type type, List<Object> properties, 
-			List<Formal> parameters) {
+	public SymbolRecord(int id, ASTNode node, SymbolTable table, 
+			String symbol, Kind kind,
+			Type type, List<Object> properties) {
 		setId(id);
 		setNode(node);
 		setTable(table);
 		setSymbol(symbol);
 		setKind(kind);
-		setParameters(parameters);
 		setType(type);
 		setProperties(properties);
-	}
-	
-	/**
-	 * The constructor with no parameters.
-	 * @param id The id of the table.
-	 * @param node The node of the record.
-	 * @param table The table contains the record.
-	 * @param symbol The symbol name.
-	 * @param kind The kind of the record (Field, Method, Class).
-	 * @param type The type if field or return type for method.
-	 * @param properties Additionally properties.
-	 */
-	public SymbolRecord(int id, ASTNode node, SymbolTable table, String symbol, Kind kind,
-			Type type, List<Object> properties) {
-		this(id, node, table, symbol, kind, type, properties, null);
 	}
 	
 	/**
@@ -207,9 +179,10 @@ public class SymbolRecord {
 	 * @param table The table contains the record.
 	 * @param symbol The symbol name.
 	 * @param kind The kind of the record (Field, Method, Class).
-	 * @param type The type if field or return type for method.
+	 * @param type The type.
 	 */
-	public SymbolRecord(int id, ASTNode node, SymbolTable table, String symbol, Kind kind, Type type) {
-		this(id, node, table, symbol, kind, type, null, null);
+	public SymbolRecord(int id, ASTNode node, SymbolTable table, 
+			String symbol, Kind kind, Type type) {
+		this(id, node, table, symbol, kind, type, null);
 	}
 }
