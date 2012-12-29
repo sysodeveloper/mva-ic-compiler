@@ -21,6 +21,11 @@ public class SemanticAnalyse {
 	private static SemanticAnalyse m_instance = null;
 	
 	/**
+	 * The global root table.
+	 */
+	private SymbolTable m_globalTable;
+	
+	/**
 	 * The internal root reference.
 	 */
 	private Program m_root;
@@ -67,6 +72,20 @@ public class SemanticAnalyse {
 		this.m_errors = new ArrayList<Exception>();
 	}
 	
+	/**
+	 * @return the m_global
+	 */
+	public SymbolTable getGlobalTable() {
+		return m_globalTable;
+	}
+
+	/**
+	 * @param m_global the m_global to set
+	 */
+	private void setGlobalTable(SymbolTable m_global) {
+		this.m_globalTable = m_global;
+	}
+
 	/**
 	 * Create the analyzer.
 	 */
@@ -120,8 +139,8 @@ public class SemanticAnalyse {
 		 */
 		
 		// Phase 1: Symbol table construction.
-		SymbolTable global = new SymbolTable(SymbolTable.getNextId());
-		getRoot().accept(global);		
+		setGlobalTable(new SymbolTable(SymbolTable.getNextId()));
+		getRoot().accept(getGlobalTable());		
 		// Phase 2: Scope checking.
 		// Phase 3: Type checking.
 		// Phase 4: Remaining semantic checks
