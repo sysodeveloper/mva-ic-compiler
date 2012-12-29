@@ -171,11 +171,20 @@ public class SymbolTable implements Visitor<Boolean> {
 		// The general scope table.
 		program.setOuterTable(this);
 		for (ICClass icClass : program.getClasses()) {
-			isOk &= putSymbol(icClass.getName(), new SymbolRecord(getRecordId(), program, this, 
+			isOk &= putSymbol(icClass.getName(), new SymbolRecord(getRecordId(), icClass, this, 
 					icClass.getName(), Kind.CLASS, 
 					new UserType(icClass.getLine(), icClass.getName())), icClass);
 			icClass.getInnerTable().setParent(this);
 			isOk &= icClass.accept(icClass.getInnerTable());
+		}
+		
+		// Fix outerTable references.
+		for (ICClass icClass : program.getClasses()) {
+			if(icClass.hasSuperClass()){
+				ASTNode node = getEntries().get(icClass.getSuperClassName()).getNode();
+				icClass.setOuterTable(
+				((ICClass)(getEntries().get(icClass.getSuperClassName()).getNode())).getInnerTable());
+			}
 		}
 			
 		return isOk;
@@ -190,13 +199,7 @@ public class SymbolTable implements Visitor<Boolean> {
 		// TODO: register to parent in TypeTable.
 		Boolean isOk = true;
 		
-		if(icClass.hasSuperClass()){
-			icClass.setOuterTable(
-			((ICClass)getEntries().get(icClass.getSuperClassName()).getNode()).getInnerTable());
-		}
-		else {
-			icClass.setOuterTable(this);
-		}
+		icClass.setOuterTable(this);
 		
 		for (Field field : icClass.getFields()) {
 			isOk &= field.accept(icClass.getInnerTable());
