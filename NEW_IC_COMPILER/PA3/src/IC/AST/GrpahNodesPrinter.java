@@ -318,4 +318,14 @@ public class GrpahNodesPrinter implements Visitor{
 		output.append(PrintNode(expressionBlock,"ExpressionBlock"));
 		return output.toString();
 	}
+
+	@Override
+	public Object visit(MethodType methodType) {
+		StringBuffer output = new StringBuffer();
+		output.append("MethodType " + methodType.getName());
+		for(int i=1; i <= methodType.getDimension(); ++i){
+			output.append("[]");
+		}
+		return PrintNode(methodType, output.toString());
+	}
 }
