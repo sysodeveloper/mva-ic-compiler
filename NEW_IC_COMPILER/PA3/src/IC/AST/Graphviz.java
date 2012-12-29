@@ -544,4 +544,15 @@ public class Graphviz implements Visitor<Integer>{
 		addEdge(expressionBlock.getID(), children);
 		return expressionBlock.getID();
 	}
+
+	@Override
+	public Integer visit(MethodType methodType) {
+		StringBuffer output = new StringBuffer();
+		output.append(methodType.getName());
+		for(int i = 1; i <= methodType.getDimension(); ++i){
+			output.append("[]");
+		}
+		addNode(methodType.getID(), output.toString());
+		return methodType.getID();
+	}
 }
