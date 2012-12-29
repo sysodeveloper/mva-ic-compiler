@@ -588,4 +588,11 @@ public class SymbolTable implements Visitor<Boolean> {
 		expressionBlock.setOuterTable(this);
 		return expressionBlock.getExpression().accept(this);
 	}
+	@Override
+	public Boolean visit(MethodType methodType) {
+		methodType.setOuterTable(this);
+		return true;
+	}
+	
+	
 }
