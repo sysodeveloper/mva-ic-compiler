@@ -44,11 +44,11 @@ public class TypeTablePrinter {
 		for (Type type : m_types) {
 			if(type instanceof UserType) {
 				UserType ut = (UserType)type;
-				sbTypes.append("    " + type.getID() + ": Class: " + ut.getName() + "\n");
+				sbTypes.append("    " + type.getLine() + ": Class: " + ut.getName() + "\n");
 			}
 			else if(type instanceof MethodType) {
 				MethodType mt = (MethodType)type;
-				sbTypes.append("    " + type.getID() + ": Method type: " + mt + "\n");
+				sbTypes.append("    " + type.getLine() + ": Method type: " + mt + "\n");
 			}
 			else {
 				if(type.getDimension() >= 1) {
@@ -56,10 +56,10 @@ public class TypeTablePrinter {
 					for (int i = 0; i < type.getDimension(); i++) {
 						dimentionString.append("[]");
 					}
-					sbTypes.append("    " + type.getID() + ": Array type: " + type.getName() + dimentionString + "\n");
+					sbTypes.append("    " + type.getLine() + ": Array type: " + type.getName() + dimentionString + "\n");
 				}
 				else {
-					sbTypes.append("    " + type.getID() + ": Primitive type: " + type.getName() + "\n");
+					sbTypes.append("    " + type.getLine() + ": Primitive type: " + type.getName() + "\n");
 				}
 			}
 		}
