@@ -12,18 +12,6 @@ import IC.SymbolTable;
 public class Program extends ASTNode {
 
 	private List<ICClass> classes;
-
-	/** The symbol table of this method.
-	 */
-	private SymbolTable m_InnerTable;
-	
-	/**
-	 * @return The table.
-	 */
-	public SymbolTable getInnerTable() {
-		return m_InnerTable;
-	}
-
 	
 	public <UpType> UpType accept(Visitor<UpType> visitor) {
 		return visitor.visit(this);
@@ -33,11 +21,6 @@ public class Program extends ASTNode {
 			PropagatingVisitor<DownType, UpType> visitor, DownType d) {
 		return visitor.visit(this, d);
 	}
-
-	public void setInnerTable(SymbolTable table) {
-		m_InnerTable = table;		
-	}
-	
 	/**
 	 * Constructs a new program node.
 	 * 
@@ -46,7 +29,6 @@ public class Program extends ASTNode {
 	 */
 	public Program(List<ICClass> classes) {
 		super(0);
-		setInnerTable(new SymbolTable(SymbolTable.getNextId()));
 		this.classes = classes;
 	}
 
