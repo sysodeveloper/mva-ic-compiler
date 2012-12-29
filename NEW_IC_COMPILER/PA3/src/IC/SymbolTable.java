@@ -434,7 +434,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(VariableLocation location) {
 		location.setOuterTable(this);
-		if(location.getLocation() != null){
+		if (location.isExternal()) {
 			return location.getLocation().accept(this);
 		}
 		return true;
