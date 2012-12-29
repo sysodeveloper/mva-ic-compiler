@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.org.apache.bcel.internal.generic.PUTSTATIC;
+
 /**
  * 
  * The symbol table of each scope.
