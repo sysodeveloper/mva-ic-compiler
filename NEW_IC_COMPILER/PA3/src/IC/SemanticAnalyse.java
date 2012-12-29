@@ -1,5 +1,6 @@
 package IC;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java_cup.runtime.Symbol;
@@ -63,6 +64,7 @@ public class SemanticAnalyse {
 	 */
 	public void setRoot(Program root) {
 		m_root = root;
+		this.m_errors = new ArrayList<Exception>();
 	}
 	
 	/**

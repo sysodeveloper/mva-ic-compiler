@@ -37,7 +37,8 @@ public class Compiler {
 		}
 		if(args.length == 1){
 			//only parse the ic file
-			ParseICFile(args[0]);
+			Object root = ParseICFile(args[0]);
+			BuildSymbolTables((Program)root);
 		}else{
 			//check which arguments are entered
 			Object root = ParseICFile(args[0]);
@@ -59,6 +60,7 @@ public class Compiler {
 					break;
 				}
 			}
+			BuildSymbolTables((Program)root);
 		}		
 	}
 
@@ -226,4 +228,11 @@ public class Compiler {
 		return null;
 	}
 	
+	private static Boolean BuildSymbolTables(Program root){
+		SemanticAnalyse sa = SemanticAnalyse.getInstance();
+		sa.setRoot(root);
+		sa.analyze();
+		return true;
+		
+	}
 }
