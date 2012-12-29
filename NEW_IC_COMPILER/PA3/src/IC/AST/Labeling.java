@@ -1,302 +1,276 @@
 package IC.AST;
 
-public class Labeling implements PropagatingVisitor{
+public class Labeling implements PropagatingVisitor<Integer, Integer>{
 
 	@Override
-	public Object visit(Program program, Object context) {
-		int id = (Integer)context;
+	public Integer visit(Program program, Integer id) {
 		for(ICClass c : program.getClasses()){
-			id = (Integer) c.accept(this,id);
+			id =  c.accept(this,id);
 		}
 		program.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(ICClass icClass, Object context) {
-		int id = (Integer)context;
+	public Integer visit(ICClass icClass, Integer id) {
 		for(Field f : icClass.getFields()){
-			id = (Integer)f.accept(this,id);
+			id = f.accept(this,id);
 		}
 		for(Method m : icClass.getMethods()){
-			id = (Integer)m.accept(this,id);
+			id = m.accept(this,id);
 		}
 		icClass.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(Field field, Object context) {
-		int id = (Integer)context;
-		id = (Integer) field.getType().accept(this,id);
+	public Integer visit(Field field, Integer id) {
+		id =  field.getType().accept(this,id);
 		field.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(VirtualMethod method, Object context) {
-		int id = (Integer)context;
-		id = (Integer) method.getType().accept(this,id);
+	public Integer visit(VirtualMethod method, Integer id) {
+		id =  method.getType().accept(this,id);
 		for(Formal f : method.getFormals()){
-			id = (Integer) f.accept(this,id);
+			id =  f.accept(this,id);
 		}
 		for(Statement s : method.getStatements()){
-			id = (Integer) s.accept(this,id);
+			id =  s.accept(this,id);
 		}
 		method.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(StaticMethod method, Object context) {
-		int id = (Integer)context;
-		id = (Integer) method.getType().accept(this,id);
+	public Integer visit(StaticMethod method, Integer id) {
+		id =  method.getType().accept(this,id);
 		for(Formal f : method.getFormals()){
-			id = (Integer) f.accept(this,id);
+			id =  f.accept(this,id);
 		}
 		for(Statement s : method.getStatements()){
-			id = (Integer) s.accept(this,id);
+			id =  s.accept(this,id);
 		}
 		method.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(LibraryMethod method, Object context) {
-		int id = (Integer)context;
-		id = (Integer) method.getType().accept(this,id);
+	public Integer visit(LibraryMethod method, Integer id) {
+		id =  method.getType().accept(this,id);
 		for(Formal f : method.getFormals()){
-			id = (Integer) f.accept(this,id);
+			id =  f.accept(this,id);
 		}
 		method.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(Formal formal, Object context) {
-		int id = (Integer)context;
-		id = (Integer)formal.getType().accept(this,id);
+	public Integer visit(Formal formal, Integer id) {
+		id = formal.getType().accept(this,id);
 		formal.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(PrimitiveType type, Object context) {
-		int id = (Integer)context;
+	public Integer visit(PrimitiveType type, Integer id) {
 		type.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(UserType type, Object context) {
-		int id = (Integer)context;
+	public Integer visit(UserType type, Integer id) {
 		type.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(Assignment assignment, Object context) {
-		int id = (Integer)context;
-		id = (Integer)assignment.getVariable().accept(this,id);
-		id = (Integer)assignment.getAssignment().accept(this,id);
+	public Integer visit(Assignment assignment, Integer id) {
+		id = assignment.getVariable().accept(this,id);
+		id = assignment.getAssignment().accept(this,id);
 		assignment.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(CallStatement callStatement, Object context) {
-		int id = (Integer)context;
-		id = (Integer) callStatement.getCall().accept(this,id);
+	public Integer visit(CallStatement callStatement, Integer id) {
+		id =  callStatement.getCall().accept(this,id);
 		callStatement.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(Return returnStatement, Object context) {
-		int id = (Integer)context;
+	public Integer visit(Return returnStatement, Integer id) {
 		if(returnStatement.hasValue()){
-			id = (Integer) returnStatement.getValue().accept(this,id);
+			id =  returnStatement.getValue().accept(this,id);
 		}
 		returnStatement.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(If ifStatement, Object context) {
-		int id = (Integer)context;
-		id = (Integer) ifStatement.getCondition().accept(this,id);
+	public Integer visit(If ifStatement, Integer id) {
+		id =  ifStatement.getCondition().accept(this,id);
 		if(ifStatement.hasElse()){
-			id = (Integer) ifStatement.getElseOperation().accept(this,id);
+			id =  ifStatement.getElseOperation().accept(this,id);
 		}
-		id = (Integer) ifStatement.getOperation().accept(this,id);
+		id =  ifStatement.getOperation().accept(this,id);
 		ifStatement.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(While whileStatement, Object context) {
-		int id = (Integer)context;
-		id = (Integer) whileStatement.getCondition().accept(this,id);
-		id = (Integer) whileStatement.getOperation().accept(this,id);
+	public Integer visit(While whileStatement, Integer id) {
+		id =  whileStatement.getCondition().accept(this,id);
+		id =  whileStatement.getOperation().accept(this,id);
 		whileStatement.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(Break breakStatement, Object context) {
-		int id = (Integer)context;
+	public Integer visit(Break breakStatement, Integer id) {
 		breakStatement.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(Continue continueStatement, Object context) {
-		int id = (Integer)context;
+	public Integer visit(Continue continueStatement, Integer id) {
 		continueStatement.setID(id+1);
 		return id+1;	
 	}
 
 	@Override
-	public Object visit(StatementsBlock statementsBlock, Object context) {
-		int id = (Integer)context;
+	public Integer visit(StatementsBlock statementsBlock, Integer id) {
 		for(Statement s : statementsBlock.getStatements()){
-			id = (Integer) s.accept(this,id);
+			id =  s.accept(this,id);
 		}
 		statementsBlock.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(LocalVariable localVariable, Object context) {
-		int id = (Integer)context;
-		id = (Integer) localVariable.getType().accept(this,id);
+	public Integer visit(LocalVariable localVariable, Integer id) {
+		id =  localVariable.getType().accept(this,id);
 		if(localVariable.hasInitValue()){
-			id = (Integer) localVariable.getInitValue().accept(this,id);
+			id =  localVariable.getInitValue().accept(this,id);
 		}
 		localVariable.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(VariableLocation location, Object context) {
-		int id = (Integer)context;
+	public Integer visit(VariableLocation location, Integer id) {
 		if(location.isExternal()){
-			id = (Integer) location.getLocation().accept(this,id);
+			id =  location.getLocation().accept(this,id);
 		}
 		location.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(ArrayLocation location, Object context) {
-		int id = (Integer)context;
-		id = (Integer) location.getArray().accept(this,id);
-		id = (Integer) location.getIndex().accept(this,id);
+	public Integer visit(ArrayLocation location, Integer id) {
+		id =  location.getArray().accept(this,id);
+		id =  location.getIndex().accept(this,id);
 		location.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(StaticCall call, Object context) {
-		int id = (Integer)context;
+	public Integer visit(StaticCall call, Integer id) {
 		for(Expression e : call.getArguments()){
-			id = (Integer) e.accept(this,id);
+			id =  e.accept(this,id);
 		}
 		call.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(VirtualCall call, Object context) {
-		int id = (Integer)context;
+	public Integer visit(VirtualCall call, Integer id) {
 		if(call.isExternal()){
-			id = (Integer) call.getLocation().accept(this,id);
+			id =  call.getLocation().accept(this,id);
 		}
 		for(Expression e : call.getArguments()){
-			id = (Integer) e.accept(this,id);
+			id =  e.accept(this,id);
 		}
 		call.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(This thisExpression, Object context) {
-		int id = (Integer)context;
+	public Integer visit(This thisExpression, Integer id) {
 		thisExpression.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(NewClass newClass, Object context) {
-		int id = (Integer)context;
+	public Integer visit(NewClass newClass, Integer id) {
 		newClass.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(NewArray newArray, Object context) {
-		int id = (Integer)context;
-		id = (Integer) newArray.getType().accept(this,id);
-		id = (Integer) newArray.getSize().accept(this,id);
+	public Integer visit(NewArray newArray, Integer id) {
+		id =  newArray.getType().accept(this,id);
+		id =  newArray.getSize().accept(this,id);
 		newArray.setID(id+1);
 		return id+1;	
 	}
 
 	@Override
-	public Object visit(Length length, Object context) {
-		int id = (Integer)context;
-		id = (Integer) length.getArray().accept(this,id);
+	public Integer visit(Length length, Integer id) {
+		id =  length.getArray().accept(this,id);
 		length.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(MathBinaryOp binaryOp, Object context) {
-		int id = (Integer)context;
-		id = (Integer) binaryOp.getFirstOperand().accept(this,id);
-		id = (Integer) binaryOp.getSecondOperand().accept(this,id);
+	public Integer visit(MathBinaryOp binaryOp, Integer id) {
+		id =  binaryOp.getFirstOperand().accept(this,id);
+		id =  binaryOp.getSecondOperand().accept(this,id);
 		binaryOp.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(LogicalBinaryOp binaryOp, Object context) {
-		int id = (Integer)context;
-		id = (Integer) binaryOp.getFirstOperand().accept(this,id);
-		id = (Integer) binaryOp.getSecondOperand().accept(this,id);
+	public Integer visit(LogicalBinaryOp binaryOp, Integer id) {
+		id =  binaryOp.getFirstOperand().accept(this,id);
+		id =  binaryOp.getSecondOperand().accept(this,id);
 		binaryOp.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(MathUnaryOp unaryOp, Object context) {
-		int id = (Integer)context;
-		id = (Integer) unaryOp.getOperand().accept(this,id);
+	public Integer visit(MathUnaryOp unaryOp, Integer id) {
+		id =  unaryOp.getOperand().accept(this,id);
 		unaryOp.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(LogicalUnaryOp unaryOp, Object context) {
-		int id = (Integer)context;
-		id = (Integer) unaryOp.getOperand().accept(this,id);
+	public Integer visit(LogicalUnaryOp unaryOp, Integer id) {
+		id =  unaryOp.getOperand().accept(this,id);
 		unaryOp.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(Literal literal, Object context) {
-		int id = (Integer)context;
+	public Integer visit(Literal literal, Integer id) {
 		literal.setID(id+1);
 		return id+1;
 	}
 
 	@Override
-	public Object visit(ExpressionBlock expressionBlock, Object context) {
-		int id = (Integer)context;
-		id = (Integer) expressionBlock.getExpression().accept(this,id);
+	public Integer visit(ExpressionBlock expressionBlock, Integer id) {
+		id =  expressionBlock.getExpression().accept(this,id);
 		expressionBlock.setID(id+1);
 		return id+1;
+	}
+
+	@Override
+	public Integer visit(MethodType methodType, Integer id) {
+		methodType.setID(id);
+		return id + 1;
 	}
 
 }

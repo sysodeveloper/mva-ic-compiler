@@ -584,4 +584,16 @@ public class GraphEdgesPrinter implements Visitor<String> {
 		output.append("\n");
 		return output.toString();
 	}
+
+	@Override
+	public String visit(MethodType methodType) {
+		StringBuffer output = new StringBuffer();
+		indent(output, methodType);
+		output.append(methodType.getID() );
+		for(int i=1;i<=methodType.getDimension();i++){
+			//output.append("[]");
+		}
+		output.append("\n");
+		return output.toString();
+	}
 }

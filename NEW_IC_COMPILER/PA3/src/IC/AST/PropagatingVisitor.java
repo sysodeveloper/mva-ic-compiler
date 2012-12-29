@@ -37,4 +37,5 @@ public interface PropagatingVisitor<DownType,UpType> {
 	public UpType visit(LogicalUnaryOp unaryOp, DownType d);
 	public UpType visit(Literal literal, DownType d);
 	public UpType visit(ExpressionBlock expressionBlock, DownType d);
+	public UpType visit(MethodType methodType, DownType d);
 }
