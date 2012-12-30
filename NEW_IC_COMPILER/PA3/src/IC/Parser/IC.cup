@@ -321,7 +321,19 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 
 StatementStar ::=  Statement:stm StatementStar:stmList
 							   {:
-							   		((ArrayList<Statement>)stmList).add((Statement)stm);
+							   		
+							   		if(stm instanceof Statement){
+							   			((ArrayList<Statement>)stmList).add((Statement)stm);							   			
+							   		}
+							   		else if (stm instanceof StatementsBlock){
+							   			((ArrayList<Statement>)stmList).add((StatementsBlock)stm);
+							   		}
+							   		else if (stm instanceof List<?>){
+							   			for(Statement s: (ArrayList<Statement>)stm ){
+							   				((ArrayList<Statement>)stmList).add((Statement)s);
+							   			}							   		
+							   		}
+							   		
 							   		RESULT = stmList;	 
 							   :}|
 							   {:RESULT = new ArrayList<Statement>();:} ;
