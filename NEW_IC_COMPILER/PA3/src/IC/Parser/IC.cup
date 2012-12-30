@@ -64,7 +64,7 @@ non terminal Formals,StatmentOrEmpty,Type,TypeList, Statement,InitVariable,Expr,
 non terminal Call,ElseStatement,StaticCall,VirtualCall,Arguments,ArgumentsList;
 non terminal ExprDotOrEmpty, LogicBinop, Binop, Unop, Literal, Location;
 non terminal MethodPrefix,VirtualCallPrefix;
-non terminal StatementStar;
+non terminal StatementStar,StatementStarBlock;
 
 terminal ASSIGN;
 terminal INTEGER;
@@ -314,29 +314,20 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 			    
 			    CONTINUE SEMI {:RESULT = new Continue(parser.getLine());:}|
 			    
-			    LCBR StatementStar:stmList RCBR {: RESULT = stmList; :}|   
+			    LCBR StatementStar:stmList RCBR {: System.out.println((List<Statement>) stmList + " "); RESULT = new StatementsBlock(parser.getLine(),(List<Statement>) stmList); :} |
 			    
 			    Type:t ID:id InitVariable:e SEMI {: if(e!=null) RESULT = new LocalVariable((Type)t, id.toString() , (Expression)e); else RESULT = new LocalVariable((Type)t, id.toString() );  :}
 			    ;
-
 StatementStar ::=  Statement:stm StatementStar:stmList
 							   {:
-							   		
-							   		if(stm instanceof Statement){
-							   			((ArrayList<Statement>)stmList).add((Statement)stm);							   			
-							   		}
-							   		else if (stm instanceof StatementsBlock){
-							   			((ArrayList<Statement>)stmList).add((StatementsBlock)stm);
-							   		}
-							   		else if (stm instanceof List<?>){
-							   			for(Statement s: (ArrayList<Statement>)stm ){
-							   				((ArrayList<Statement>)stmList).add((Statement)s);
-							   			}							   		
-							   		}
-							   		
-							   		RESULT = stmList;	 
+							   
+							   	ArrayList<Statement> lst = new ArrayList<Statement>();
+							   	if(stmList != null) lst.addAll((ArrayList<Statement>)stmList);
+							   if(stm != null) lst.add((Statement)stm);
+							   	System.out.println(lst + " " + parser.getLine());
+							   	RESULT = lst;
 							   :}|
-							   {:RESULT = new ArrayList<Statement>();:} ;
+							   {: RESULT = new ArrayList<Statement>(); :} ;
 
 InitVariable ::= ASSIGN Expr:e {: RESULT = e; :}|{:RESULT = null;:}  ;
 
