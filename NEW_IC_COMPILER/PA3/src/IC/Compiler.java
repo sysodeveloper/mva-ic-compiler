@@ -14,7 +14,6 @@ import IC.AST.GrpahNodesPrinter;
 import IC.AST.ICClass;
 import IC.AST.Labeling;
 import IC.AST.Program;
-import IC.AST.SymbolTablePrinter;
 import IC.AST.TreePrinter;
 import IC.Parser.*;
 
@@ -240,11 +239,11 @@ public class Compiler {
 		SemanticAnalyse sa = SemanticAnalyse.getInstance();
 		sa.setRoot(root);
 		sa.analyze();
-		SymbolTablePrinter tablePrinter = new SymbolTablePrinter();
-		System.out.println(tablePrinter.visit(root).toString());
-		TypeTablePrinter typePrinter = new TypeTablePrinter(
-				SymbolTable.getUsedType(), (new File(filePath).getName()));
-		System.out.println(typePrinter);
+		SymbolTablePrinter tablePrinter = new SymbolTablePrinter(Compiler.ICFileParsed,root);
+		//TypeTablePrinter typePrinter = new TypeTablePrinter(
+		//		SymbolTable.getUsedType(), (new File(filePath).getName()));
+		//System.out.println(typePrinter);
+		System.out.println(tablePrinter);
 		return true;
 		
 	}

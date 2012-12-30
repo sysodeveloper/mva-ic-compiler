@@ -1,6 +1,10 @@
-class Matrix
-{
+class Matrix {
+	int z; 
+	int p(){
+		z = -1;
+	}
 
 }
+
 class A extends Matrix{
 }
