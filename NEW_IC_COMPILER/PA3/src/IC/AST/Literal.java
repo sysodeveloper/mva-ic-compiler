@@ -1,5 +1,6 @@
 package IC.AST;
 
+import IC.DataTypes;
 import IC.LiteralTypes;
 
 /**
@@ -53,6 +54,22 @@ public class Literal extends Expression {
 
 	public LiteralTypes getType() {
 		return type;
+	}
+	
+	public Type getICType() {
+		switch(type) {
+		case FALSE:
+			return new PrimitiveType(line, DataTypes.BOOLEAN);
+		case INTEGER:
+			return new PrimitiveType(line, DataTypes.INT);
+		case NULL:
+			return new PrimitiveType(line, null);
+		case STRING:
+			return new PrimitiveType(line, DataTypes.STRING);
+		case TRUE:
+			return new PrimitiveType(line, DataTypes.BOOLEAN);
+		}
+		return null;
 	}
 
 	public Object getValue() {

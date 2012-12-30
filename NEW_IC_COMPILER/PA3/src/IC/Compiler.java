@@ -240,9 +240,9 @@ public class Compiler {
 		sa.setRoot(root);
 		sa.analyze();
 		SymbolTablePrinter tablePrinter = new SymbolTablePrinter(Compiler.ICFileParsed,root);
-		//TypeTablePrinter typePrinter = new TypeTablePrinter(
-		//		SymbolTable.getUsedType(), (new File(filePath).getName()));
-		//System.out.println(typePrinter);
+		TypeTablePrinter typePrinter = new TypeTablePrinter(
+				SymbolTable.getUsedType(), (new File(filePath).getName()));
+		System.out.println(typePrinter);
 		System.out.println(tablePrinter);
 		return true;
 		

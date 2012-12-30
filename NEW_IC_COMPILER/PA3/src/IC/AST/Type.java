@@ -54,7 +54,6 @@ public abstract class Type extends ASTNode {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		System.out.println("Equals called!");
 		if(o == this) {
 			return true;
 		}

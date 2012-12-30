@@ -67,6 +67,7 @@ public class ICClass extends ASTNode implements SymbolTableContainer {
 		this.fields = fields;
 		this.methods = methods;
 		setInnerTable(new SymbolTable(SymbolTable.getNextId()));
+		UserType.getICClasses().add(this);
 	}
 
 	/**
@@ -108,5 +109,39 @@ public class ICClass extends ASTNode implements SymbolTableContainer {
 	public List<Method> getMethods() {
 		return methods;
 	}
-
+	
+	/**
+	 * The hash code for the type.
+	 */
+	@Override
+	public int hashCode() {
+	    final int prime = 31;
+	    int result = 1;
+	    char[] arrChar = getName().toCharArray();
+	    for (char c : arrChar) {
+	    	result = prime * result + c;
+		}
+	    
+	    return result;
+	}
+	
+	/**
+	 * check if the types are equals.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if(o == this) {
+			return true;
+		}
+		if(!(o instanceof ICClass)) {
+			return false;
+		}
+		else {
+			ICClass c = (ICClass)o;
+			if(getName() == c.getName()) {
+				return true;
+			}
+			return false;
+		}
+	}	
 }
