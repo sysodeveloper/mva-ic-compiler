@@ -299,8 +299,10 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(Formal formal) {
 		formal.setOuterTable(this);
-		return putSymbol(formal.getName(), new SymbolRecord(getRecordId(), formal,
+		Boolean retVal = putSymbol(formal.getName(), new SymbolRecord(getRecordId(), formal,
 				this, formal.getName(), Kind.PARAMETER, formal.getType()), formal);
+		retVal &= formal.getType().accept(this);
+		return true;
 	}
 
 	/**
@@ -587,6 +589,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(Literal literal) {
 		literal.setOuterTable(this);
+		literal.getType().
 		return true;
 	}
 

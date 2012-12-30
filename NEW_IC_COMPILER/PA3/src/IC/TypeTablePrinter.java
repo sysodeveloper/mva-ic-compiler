@@ -5,6 +5,7 @@ package IC;
 
 import java.util.Set;
 
+import IC.AST.ICClass;
 import IC.AST.MethodType;
 import IC.AST.PrimitiveType;
 import IC.AST.Type;
@@ -49,11 +50,21 @@ public class TypeTablePrinter {
 		for (Type type : m_types) {
 			if(type instanceof UserType) {
 				UserType ut = (UserType)type;
-				sbUserTypes.append("    " + type.getLine() + ": Class: " + ut.getName() + "\n");
+				ICClass superClass = null;
+				if(ut.getICClass().hasSuperClass()) {
+					for (ICClass c : UserType.getICClasses()) {
+						if(ut.getICClass().getSuperClassName().equals(c.getName())) {
+							superClass = c;
+						}
+					}
+				}
+				sbUserTypes.append("    " + ut.getICClass().getID() + ": Class: " + ut.getName() + 
+						(ut.getICClass().hasSuperClass()?", Superclass ID: " + superClass.getID():"")
+						+ "\n");
 			}
 			else if(type instanceof MethodType) {
 				MethodType mt = (MethodType)type;
-				sbMethodTypes.append("    " + type.getLine() + ": Method type: " + mt.getName() + "\n");
+				sbMethodTypes.append("    " + type.getID() + ": Method type: " + mt.getName() + "\n");
 			}
 			else {
 				if(type.getDimension() >= 1) {
@@ -61,10 +72,10 @@ public class TypeTablePrinter {
 					for (int i = 0; i < type.getDimension(); i++) {
 						dimentionString.append("[]");
 					}
-					sbArrayTypes.append("    " + type.getLine() + ": Array type: " + type.getName() + dimentionString + "\n");
+					sbArrayTypes.append("    " + type.getID() + ": Array type: " + type.getName() + dimentionString + "\n");
 				}
 				else {
-					sbPrimitiveTypes.append("    " + type.getLine() + ": Primitive type: " + type.getName() + "\n");
+					sbPrimitiveTypes.append("    " + type.getID() + ": Primitive type: " + type.getName() + "\n");
 				}
 			}
 		}
