@@ -55,6 +55,11 @@ public class SymbolTable implements Visitor<Boolean> {
 	private Method m_currentMethod;
 	
 	/**
+	 * The id's for the used types.
+	 */
+	private static int UsedTypeId = 1;
+	
+	/**
 	 * @return The id.
 	 */
 	public int getId() {
@@ -96,6 +101,24 @@ public class SymbolTable implements Visitor<Boolean> {
 		}
 		getEntries().put(key, record);
 		return true;
+	}
+	
+	/**
+	 * Put the current type in the used type.
+	 * Add also all the lower dimensions.
+	 * @param type
+	 * @return
+	 */
+	public void putUsedType(Type type) {
+		for (int d = 0; d <= type.getDimension(); ++d) {
+			Type t = (Type)type.clone();
+			if(!getUsedType().contains(t))
+			{
+				t.setDimension(d);
+				t.setID(UsedTypeId++);
+				getUsedType().add(t);
+			}
+		}
 	}
 	
 	/**
@@ -201,7 +224,7 @@ public class SymbolTable implements Visitor<Boolean> {
 		Boolean isOk = true;
 		
 		icClass.setOuterTable(this);
-		getUsedType().add(new UserType(icClass.getLine(), icClass.getName()));
+		putUsedType(new UserType(icClass.getLine(), icClass.getName()));
 		
 		for (Field field : icClass.getFields()) {
 			isOk &= field.accept(icClass.getInnerTable());
@@ -231,7 +254,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(VirtualMethod method) {
 		Boolean isOk = true;
 		method.setOuterTable(this);
-		getUsedType().add(method.getType());
+		putUsedType(method.getType());
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
 				this, method.getName(), Kind.VIRTUAL_METHOD, 
 				method.getType()), method);
@@ -243,6 +266,8 @@ public class SymbolTable implements Visitor<Boolean> {
 		for (Statement s : method.getStatements()) {
 			isOk &= s.accept(method.getInnerTable());
 		}
+		
+		method.getType().accept(this);
 
 		return isOk;
 	}
@@ -255,7 +280,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(StaticMethod method) {
 		Boolean isOk = true;
 		method.setOuterTable(this);
-		getUsedType().add(method.getType());
+		putUsedType(method.getType());
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType()), method);
 		method.getInnerTable().setCurrentMethod(method);
@@ -266,6 +291,8 @@ public class SymbolTable implements Visitor<Boolean> {
 		for (Statement s : method.getStatements()) {
 			isOk &= s.accept(method.getInnerTable());
 		}
+		
+		method.getType().accept(this);
 
 		return isOk;
 	}
@@ -278,7 +305,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(LibraryMethod method) {
 		Boolean isOk = true;
 		method.setOuterTable(this);
-		getUsedType().add(method.getType());
+		putUsedType(method.getType());
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
 				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType()), method);
 		method.getInnerTable().setCurrentMethod(method);
@@ -289,6 +316,8 @@ public class SymbolTable implements Visitor<Boolean> {
 		for (Statement s : method.getStatements()) {
 			isOk &= s.accept(method.getInnerTable());
 		}
+		
+		method.getType().accept(this);
 		
 		return isOk;
 	}
@@ -311,7 +340,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(PrimitiveType type) {
 		type.setOuterTable(this);
-		getUsedType().add(type);
+		putUsedType(type);
 		return true;
 	}
 
@@ -321,7 +350,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(UserType type) {
 		type.setOuterTable(this);
-		getUsedType().add(type);
+		putUsedType(type);
 		return true;
 	}
 
@@ -437,6 +466,8 @@ public class SymbolTable implements Visitor<Boolean> {
 		if(localVariable.hasInitValue()) {
 			isOk = localVariable.getInitValue().accept(this);
 		}
+		
+		localVariable.getType().accept(this);
 		return isOk;
 	}
 
@@ -589,7 +620,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(Literal literal) {
 		literal.setOuterTable(this);
-		literal.getType().
+		literal.getICType().accept(this);
 		return true;
 	}
 
@@ -604,6 +635,12 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(MethodType methodType) {
 		methodType.setOuterTable(this);
+		
+		for (Type t : methodType.getFormalTypes()) {
+			t.accept(this);
+		}
+		methodType.getReturnType().accept(this);
+		
 		return true;
 	}
 	

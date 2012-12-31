@@ -28,6 +28,10 @@ public abstract class Type extends ASTNode {
 	public int getDimension() {
 		return dimension;
 	}
+	
+	public void setDimension(int dim) {
+		dimension = dim;
+	}
 
 	public void incrementDimension() {
 		++dimension;
@@ -68,6 +72,18 @@ public abstract class Type extends ASTNode {
 			}
 			return false;
 		}
+	}
+	
+	/**
+	 * @return The dimension of the type.
+	 */
+	public  String dimPostFix() {
+		StringBuilder dimentionString = new StringBuilder();
+		for (int i = 0; i < getDimension(); i++) {
+			dimentionString.append("[]");
+		}
+		
+		return dimentionString.toString();
 	}
 	
 	/**
