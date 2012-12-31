@@ -92,11 +92,11 @@ public class MethodType extends Type {
 				if(!first) {
 					formals.append(", ");
 				}
-				formals.append(fType.getName());
+				formals.append(fType.getName() + fType.dimPostFix());
 				first = false;
 			}
 		}
 		return "{" + formals.toString()  + " -> " + 
-			getReturnType().getName()  + "}";
+			getReturnType().getName() + getReturnType().dimPostFix()  + "}";
 	}
 }

@@ -48,34 +48,30 @@ public class TypeTablePrinter {
 		
 		sbTypes.append("Type Table: " + m_fileName + "\n");
 		for (Type type : m_types) {
-			if(type instanceof UserType) {
-				UserType ut = (UserType)type;
-				ICClass superClass = null;
-				if(ut.getICClass().hasSuperClass()) {
-					for (ICClass c : UserType.getICClasses()) {
-						if(ut.getICClass().getSuperClassName().equals(c.getName())) {
-							superClass = c;
-						}
-					}
-				}
-				sbUserTypes.append("    " + ut.getICClass().getID() + ": Class: " + ut.getName() + 
-						(ut.getICClass().hasSuperClass()?", Superclass ID: " + superClass.getID():"")
-						+ "\n");
-			}
-			else if(type instanceof MethodType) {
-				MethodType mt = (MethodType)type;
-				sbMethodTypes.append("    " + type.getID() + ": Method type: " + mt.getName() + "\n");
+			if(type.getDimension() >= 1) {
+				sbArrayTypes.append("    " + type.getID() + ": Array type: " + type.getName() + type.dimPostFix() + "\n");
 			}
 			else {
-				if(type.getDimension() >= 1) {
-					StringBuilder dimentionString = new StringBuilder();
-					for (int i = 0; i < type.getDimension(); i++) {
-						dimentionString.append("[]");
+				if(type instanceof UserType) {
+					UserType ut = (UserType)type;
+					ICClass superClass = null;
+					if(ut.getICClass().hasSuperClass()) {
+						for (ICClass c : UserType.getICClasses()) {
+							if(ut.getICClass().getSuperClassName().equals(c.getName())) {
+								superClass = c;
+							}
+						}
 					}
-					sbArrayTypes.append("    " + type.getID() + ": Array type: " + type.getName() + dimentionString + "\n");
+					sbUserTypes.append("    " + ut.getICClass().getID() + ": Class: " + ut.getName() + 
+							(ut.getICClass().hasSuperClass()?", Superclass ID: " + superClass.getID():"")
+							+ "\n");
+				}
+				else if(type instanceof MethodType) {
+					MethodType mt = (MethodType)type;
+					sbMethodTypes.append("    " + type.getID() + ": Method type: " + mt.getName() + "\n");
 				}
 				else {
-					sbPrimitiveTypes.append("    " + type.getID() + ": Primitive type: " + type.getName() + "\n");
+						sbPrimitiveTypes.append("    " + type.getID() + ": Primitive type: " + type.getName() + "\n");
 				}
 			}
 		}
