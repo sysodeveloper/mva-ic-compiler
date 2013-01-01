@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 
@@ -270,8 +271,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	@Override
 	public Boolean visit(Program program) {
 		Boolean isOk = true;
-		m_root = this;
-		setParent(null);
+		this.setParent(null);			
 		setParentNode(program);
 		program.setInnerTable(this);
 		program.setOuterTable(null);
@@ -282,7 +282,7 @@ public class SymbolTable implements Visitor<Boolean> {
 			icClass.getInnerTable().setParent(this);
 			isOk &= icClass.accept(this);
 		}
-			
+		SymbolTable.m_root = this;		
 		return isOk;
 	}
 
@@ -295,13 +295,16 @@ public class SymbolTable implements Visitor<Boolean> {
 		// TODO: register to parent in TypeTable.
 		Boolean isOk = true;
 		m_classTables.put(icClass.getName(), icClass);
+		
 		if(icClass.hasSuperClass()){
 			SymbolTable superTable = (m_classTables.get(icClass.getSuperClassName())).getInnerTable();
 			icClass.setOuterTable(superTable);
 			superTable.getChildTables().add(icClass.getInnerTable());
+			icClass.getInnerTable().setParent(superTable);
 		}
 		else {
 			icClass.setOuterTable(this);
+			icClass.getInnerTable().setParent(getRoot());
 			getChildTables().add(icClass.getInnerTable());
 		}
 		
@@ -310,11 +313,24 @@ public class SymbolTable implements Visitor<Boolean> {
 		
 		for (Field field : icClass.getFields()) {
 			isOk &= field.accept(icClass.getInnerTable());
+			field.setOuterTable(this);
 		}
 		for (Method method : icClass.getMethods()) {
 			isOk &= method.accept(icClass.getInnerTable());
+			method.setOuterTable(this);
 		}
 		
+		if(icClass.hasSuperClass()){			
+			try {
+				checkShadowing(icClass.getInnerTable());		
+					
+				
+			} catch (SemanticError e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.toString());
+				return false;
+			}
+		}
 		return isOk;
 	}
 
@@ -695,6 +711,47 @@ public class SymbolTable implements Visitor<Boolean> {
 		}
 		methodType.getReturnType().accept(this);
 		
+		return true;
+	}
+	
+	/**
+	 * Shadowing semantic check in build time
+	 * @throws SemanticError 
+	 */
+	private boolean checkShadowing(SymbolTable classTable) throws SemanticError{
+		
+		SymbolTable extendedClassTable = classTable.getParent();
+		Map<String,SymbolRecord> c_symbols = classTable.getEntries(); 
+		Map<String,SymbolRecord> ex_symbols = extendedClassTable.getEntries();
+		Set<Entry<String,SymbolRecord>> c_entries = c_symbols.entrySet();
+		Set<Entry<String,SymbolRecord>> ex_entries = c_symbols.entrySet();
+		
+		while(extendedClassTable != null){
+			//check fields and methods shadowing and correct overriding
+			
+			for(Entry<String,SymbolRecord> symbol : c_entries){
+				if(ex_symbols.containsKey(symbol.getKey())){ // field or method with the same name as in extended class
+					if(symbol.getValue().getKind()==Kind.FIELD){
+						throw new SemanticError("Field or method with the field name "+symbol.getKey()+" already defined in extended classes", 
+								symbol.getValue().getNode().getLine());
+						// shadowing with a filed name is not allowed 
+					}
+					if(symbol.getValue().getKind() == Kind.VIRTUAL_METHOD || symbol.getValue().getKind() == Kind.STATIC_METHOD){
+						SymbolRecord ex_symbol_rec = ex_symbols.get(symbol.getKey());
+						SymbolRecord symbol_rec = symbol.getValue();
+						if(ex_symbol_rec.getKind()!=symbol_rec.getKind()) // method name shadows a field or method with different type(static/virtual)
+							throw new SemanticError("Method or field with the method name "+symbol.getKey()+" already defined in extended classes", 
+									symbol.getValue().getNode().getLine());						
+						//check method signatures
+						if(! symbol_rec.getType().equals(ex_symbol_rec.getType()))
+							throw new SemanticError("Method with the method name "+symbol.getKey()+" already defined in extended classes. Overloading is not allowed.", 
+									symbol.getValue().getNode().getLine());	
+					}
+				}
+			}
+			
+			extendedClassTable = extendedClassTable.getParent();
+		}
 		return true;
 	}
 }
