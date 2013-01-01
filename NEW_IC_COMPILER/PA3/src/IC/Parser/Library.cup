@@ -68,11 +68,11 @@ libic ::= CLASS CLASS_ID:id LCBR libmethod:lstMethods RCBR
 libmethod ::= STATIC type:t ID:i LP formals:lstFormals RP SEMI libmethod:lstMethods
 {:  ArrayList<LibraryMethod> methods = (ArrayList<LibraryMethod>)lstMethods;
 	LibraryMethod sm = new LibraryMethod((Type)t,i.toString(), (ArrayList<Formal>)lstFormals); 
-	methods.add(sm);
+	methods.add(0, sm);
 	RESULT = methods; :} | 
 STATIC VOID ID:i LP formals:lstFormals RP SEMI libmethod:lstMethods 
 {:  ArrayList<LibraryMethod> methods = (ArrayList<LibraryMethod>)lstMethods;
-	methods.add(new LibraryMethod(new PrimitiveType(parser.getLine(),DataTypes.VOID), i.toString(), (ArrayList<Formal>)lstFormals));
+	methods.add(0, new LibraryMethod(new PrimitiveType(parser.getLine(),DataTypes.VOID), i.toString(), (ArrayList<Formal>)lstFormals));
 	RESULT = methods; :}
 |  {: RESULT = new ArrayList<LibraryMethod>(); :};
 type::= INT 
@@ -87,10 +87,10 @@ type:t LB RB
 {:((Type)t).incrementDimension(); RESULT = t; :};
 formals::= type:t ID:i typelist:lst 
 {:	ArrayList<Formal> lstFormals = (ArrayList<Formal>)lst;
-	lstFormals.add(new Formal((Type)t,i.toString()));
+	lstFormals.add(0, new Formal((Type)t,i.toString()));
 	RESULT = lstFormals;
 :} | {: RESULT = new ArrayList<Formal>(); :}; 
 typelist::=  COMMA type:t ID:i typelist:lst 
 {: 	ArrayList<Formal> lstFormals = (ArrayList<Formal>)lst;
-	lstFormals.add(new Formal((Type)t,i.toString()));
+	lstFormals.add(0, new Formal((Type)t,i.toString()));
 	RESULT = lstFormals; :} | {: RESULT = new ArrayList<Formal>(); :} ;
