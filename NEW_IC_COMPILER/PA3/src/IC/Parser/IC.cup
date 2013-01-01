@@ -144,14 +144,14 @@ FieldOrMethod ::= Field:field FieldOrMethod:fom 		 {: Object[] arr = new Object[
  				  StaticMethod:method FieldOrMethod:fom  {: 
  				  											Object[] arr = new Object[2];
   				  											arr = (Object[])fom;		
-  				  											((ArrayList<Method>)arr[1]).add((Method)method);
+  				  											((ArrayList<Method>)arr[1]).add(0, (Method)method);
  				  											RESULT = arr;  
  				  										 :}|
  				  
   				  VirtualMethod:method FieldOrMethod:fom {: 
   				  											Object[] arr = new Object[2];
   				  											arr = (Object[])fom;		
-  				  											((ArrayList<Method>)arr[1]).add((Method)method);
+  				  											((ArrayList<Method>)arr[1]).add(0, (Method)method);
  				  											RESULT = arr; 
  				  										 :}|
   				  
@@ -225,14 +225,14 @@ StaticMethod ::= STATIC MethodPrefix:mPrefix Formals:formals RP LCBR StatementSt
 
 Formals::= Type:t ID:i TypeList:lst 
 			{:	ArrayList<Formal> lstFormals = (ArrayList<Formal>)lst;
-				lstFormals.add(new Formal((Type)t,i.toString()));
+				lstFormals.add(0, new Formal((Type)t,i.toString()));
 				RESULT = lstFormals;:} |
 			{:  RESULT = new ArrayList<Formal>(); :}; 
 
 
 TypeList::=  COMMA Type:t ID:i TypeList:lst 
 			{: 	ArrayList<Formal> lstFormals = (ArrayList<Formal>)lst;
-				lstFormals.add(new Formal((Type)t,i.toString()));
+				lstFormals.add(0, new Formal((Type)t,i.toString()));
 				RESULT = lstFormals; :} |
 			{:  RESULT = new ArrayList<Formal>(); :} ;
 
@@ -248,6 +248,7 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 				
 				IF LP Expr:condition RP Statement:ifStm ELSE Statement:elseStm 
 					{:
+						/*
 						List<Statement> ifStmList  = new ArrayList<Statement>();
 						List<Statement> elseStmList  = new ArrayList<Statement>();
 						
@@ -274,11 +275,21 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 						   elseStmList = (ArrayList<Statement>)elseStm;	
 						}   				 	
 						RESULT = new If((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)ifStmList), new StatementsBlock(parser.getLine(), (List<Statement>)elseStmList));
-					
+						*/
+						if(ifStm instanceof LocalVariable){
+							  String msg = "definition of local variable " +((LocalVariable)ifStm).getName() + " is not allowed ";
+     						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
+     					}
+     					if(elseStm instanceof LocalVariable){
+							  String msg = "definition of local variable " +((LocalVariable)elseStm).getName() + " is not allowed ";
+     						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
+     					}
+						RESULT = new If((Expression)condition, (Statement)ifStm, (Statement)elseStm);
 					:}|
 				
 				IF LP Expr:condition RP Statement:ifStm
 					 {:
+					 /*
 					 	List<Statement> stmList  = new ArrayList<Statement>();
 					  	if(!(ifStm instanceof List<?>)){ 
 							if(ifStm instanceof LocalVariable){
@@ -291,10 +302,17 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 						else 
 							stmList = (ArrayList<Statement>)ifStm;
 					 	RESULT = new If((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stmList));
+					 	*/
+					 	if(ifStm instanceof LocalVariable){
+							  String msg = "definition of local variable " +((LocalVariable)ifStm).getName() + " is not allowed ";
+     						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
+     					}
+					 	RESULT = new If((Expression)condition, (Statement)ifStm);
 					 :} |
 				
 				WHILE LP Expr:condition RP Statement:stm 
 					 {: 
+						/*
 						List<Statement> stmList  = new ArrayList<Statement>();
 						if(!(stm instanceof List<?>)){ 
 						
@@ -307,7 +325,13 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 						}	
 						else 
 							stmList = (ArrayList<Statement>)stm;
-						RESULT = new While((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stmList)); 
+						RESULT = new While((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stmList));
+						*/
+						if(stm instanceof LocalVariable){
+							String msg = "definition of local variable " +((LocalVariable)stm).getName() + " is not allowed ";
+     						throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
+     					} 
+						RESULT = new While((Expression)condition, (Statement)stm);
 					 :}|	    
 			    
 			    BREAK SEMI {:RESULT = new Break(parser.getLine());:}|
@@ -323,7 +347,7 @@ StatementStar ::=  Statement:stm StatementStar:stmList
 							   
 							   	ArrayList<Statement> lst = new ArrayList<Statement>();
 							   	if(stmList != null) lst.addAll((ArrayList<Statement>)stmList);
-							   if(stm != null) lst.add((Statement)stm);
+							   if(stm != null) lst.add(0, (Statement)stm);
 							   	System.out.println(lst + " " + parser.getLine());
 							   	RESULT = lst;
 							   :}|
@@ -359,11 +383,11 @@ VirtualCallPrefix ::= Expr:e DOT ID:id LP {:
 									     :};
 
 Arguments ::= Expr:argument ArgumentsList:arglist 
-				{: ((ArrayList<Expression>)arglist).add((Expression)argument); RESULT = arglist;  :}|
+				{: ((ArrayList<Expression>)arglist).add(0, (Expression)argument); RESULT = arglist;  :}|
 				{: RESULT = new ArrayList<Expression>(); :} ;
 
 ArgumentsList ::= COMMA Expr:argument ArgumentsList:arglist 
-				{:  ((ArrayList<Expression>)arglist).add((Expression)argument); RESULT = arglist; :}|
+				{:  ((ArrayList<Expression>)arglist).add(0, (Expression)argument); RESULT = arglist; :}|
 			    {:  RESULT = new ArrayList<Expression>(); :}; 
 
 Binop ::= PLUS      {: RESULT = BinaryOps.PLUS;  :} |

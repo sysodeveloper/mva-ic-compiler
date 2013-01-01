@@ -10,7 +10,7 @@ import IC.SymbolTable;
  * 
  * @author Tovi Almozlino
  */
-public abstract class Method extends ASTNode implements SymbolTableContainer {
+public abstract class Method extends ASTNode implements SymbolTableContainer, INameable {
 
 	protected Type type;
 	

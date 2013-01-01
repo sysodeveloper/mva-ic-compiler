@@ -9,6 +9,7 @@ import IC.SymbolTable;
 import IC.AST.ASTNode;
 import IC.AST.Field;
 import IC.AST.ICClass;
+import IC.AST.INameable;
 import IC.AST.Method;
 import IC.AST.Program;
 import IC.AST.StatementsBlock;
@@ -25,23 +26,7 @@ public class SymbolTablePrinter{
 	}
 	
 	public String toString(){
-		output.append("Global Symbol Table: " + icFile + "\n");
-		for (SymbolRecord record : SymbolTable.getRoot().getEntries().values()) {
-			output.append("    Class: " + 
-					((ICClass)record.getNode()).getName() + "\n");
-		}
-		
-		output.append("Children tables: ");
-		
-		boolean first = true;
-		for (SymbolTable table : SymbolTable.getRoot().getChildTables()) {
-			if(!first) {
-				output.append(", ");
-			}
-			output.append(((ICClass)table.getParentNode()).getName());
-			first = false;
-		}
-		output.append("\n");
+		printTable(SymbolTable.getRoot());
 		
 		return output.toString();
 	}
@@ -67,90 +52,123 @@ public class SymbolTablePrinter{
 	private String tableName(SymbolTable table) {
 		String name = "";
 		if(table.getParentNode() instanceof Program) {
-			name = icFile;
+			name = ": " + icFile;
 		}
 		else if(table.getParentNode() instanceof ICClass) {
-			name = ((ICClass)table.getParentNode()).getName();
+			name = ": " + ((ICClass)table.getParentNode()).getName();
 		}
 		else if(table.getParentNode() instanceof Method) {
-			name = ((Method)table.getParentNode()).getName();
+			name = ": " + ((Method)table.getParentNode()).getName();
 		}
 		else if(table.getParentNode() instanceof StatementsBlock) {
-			StringBuilder located = new StringBuilder("( located ");
-			SymbolTableContainer c = (SymbolTableContainer)table.getParentNode();
-			while(!(c instanceof Method)) {
-				if(c instanceof StatementsBlock) {
-					located.append("in statement block");
-					c = ((StatementsBlock) c).getOuterTable().getParentNode();
-				}
-			}
-			located.append("in " + ((Method)c).getName() + " )");
-			name = located.toString();
+			name = " ( located" + getStatementName(table) + " )";
 		}
 		
 		return name;
 	}
+
+	/**
+	 * Get the statement block name of the current nested Symbol table.
+	 * @param table The statement block table.
+	 * @return The string name.
+	 */
+	private String getStatementName(SymbolTable table) {
+		String name;
+		StringBuilder located = new StringBuilder();
+		SymbolTableContainer c = (SymbolTableContainer)table.getParentNode();
+		c = ((StatementsBlock) c).getOuterTable().getParentNode();
+		while(!(c instanceof Method)) {
+			if(c instanceof StatementsBlock) {
+				located.append(" in statement block");
+				c = ((StatementsBlock) c).getOuterTable().getParentNode();
+			}
+		}		
+		located.append(" in " + ((Method)c).getName());
+		name = located.toString();
+		return name;
+	}
 	
+	/**
+	 * Print the current table.
+	 * @param table The table to print.
+	 */
 	private void printTable(SymbolTable table) {
-		output.append(typeName(table) + " Symbol Table: " + tableName(table) + "\n");
+		output.append(typeName(table) + " Symbol Table" + tableName(table) + "\n");
 		SymbolTableContainer parent = table.getParentNode();
 		
 		if(parent instanceof Program) {
 			for (SymbolRecord record : table.getEntries().values()) {
 				output.append("    Class: " + 
-						((ICClass)record.getNode()).getName() + "\n");
+						((INameable)record.getNode()).getName() + "\n");
 			}
 		}
 		else if(parent instanceof ICClass) {
 			for (SymbolRecord record : table.getEntries().values()) {
 				if(record.getKind() == Kind.FIELD) {
-					output.append("Field: " + record.getType().getName()
-							+ " " + ((Field)record.getNode()).getName());
+					output.append("    Field: " + record.getType().getFullName()
+							+ " " + ((INameable)record.getNode()).getName() + "\n");
 				}
 			}
 			for (SymbolRecord record : table.getEntries().values()) {
 				if(record.getKind() == Kind.STATIC_METHOD) {
-					output.append("Static method: " 
-				            + ((Method)record.getNode()).getName() 
-							+ " " + record.getType().getName());
+					output.append("    Static method: " 
+				            + ((INameable)record.getNode()).getName() 
+							+ " " + record.getType().getName() + "\n");
 				}
 			}
 			for (SymbolRecord record : table.getEntries().values()) {
 				if(record.getKind() == Kind.VIRTUAL_METHOD) {
-					output.append("Virtual method: " 
-							+ ((Method)record.getNode()).getName() 
-							+ " " + record.getType().getName());
+					output.append("    Virtual method: " 
+							+ ((INameable)record.getNode()).getName() 
+							+ " " + record.getType().getName() + "\n");
 				}
 			}
 			for (SymbolRecord record : table.getEntries().values()) {
-				if(record.getKind() == Kind.VIRTUAL_METHOD) {
-					output.append("Library method: " 
-							+ ((Method)record.getNode()).getName() 
-							+ " " + record.getType().getName());
+				if(record.getKind() == Kind.LIBRARY_METHOD) {
+					output.append("    Library method: " 
+							+ ((INameable)record.getNode()).getName() 
+							+ " " + record.getType().getName() + "\n");
 				}
 			}
 		}
 		else if(parent instanceof Method) {
 			for (SymbolRecord record : table.getEntries().values()) {
-				
+				if(record.getKind() == Kind.PARAMETER) {
+					output.append("    Parameter: " + record.getType().getFullName()
+							+ " " + ((INameable)record.getNode()).getName() + "\n");
+				}
+			}
+			
+			for (SymbolRecord record : table.getEntries().values()) {
+				if(record.getKind() == Kind.LOCAL_VARIABLE) {
+					output.append("    Local variable: " + record.getType().getFullName()
+							+ " " + ((INameable)record.getNode()).getName() + "\n");
+				}
 			}
 		}
 		else if(parent instanceof StatementsBlock) {
 			for (SymbolRecord record : table.getEntries().values()) {
-				
+				if(record.getKind() == Kind.LOCAL_VARIABLE) {
+					output.append("    Local variable: " + record.getType().getFullName()
+							+ " " + ((INameable)record.getNode()).getName() + "\n");
+				}
 			}
 		}
+		if(!table.getChildTables().isEmpty()) {
+			printChildren(table);
+		}
 		
-		printChildren(table);
-		/*
-    Field: string str
-    Field: int i
-    Static method: sfunc {boolean -> int}
-    Virtual method: vfunc {A, int, int -> void}
-Children tables: sfunc, vfunc, B	    
-*/
+		output.append("\n");
+		
+		for (SymbolTable t : table.getChildTables()) {
+			printTable(t);
+		}
 	}
 
+	/**
+	 * Print the children of the current table.
+	 * @param table The table which contains the children.
+	 */
 	private void printChildren(SymbolTable table) {
 		boolean first = true;
 		output.append("Children tables: ");
@@ -158,7 +176,14 @@ Children tables: sfunc, vfunc, B
 			if(!first) {
 				output.append(", ");
 			}
-			//output.append(((SymbolTableContainer)t.getParentNode()).getName());
+			
+			if(t.getParentNode() instanceof INameable) {
+				output.append(((INameable)t.getParentNode()).getName());
+			}
+			else // Statement block.
+			{
+				output.append("statement block" + getStatementName(t));
+			}
 			first = false;
 		}
 		output.append("\n");

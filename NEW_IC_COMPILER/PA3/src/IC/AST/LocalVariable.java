@@ -5,7 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public class LocalVariable extends Statement {
+public class LocalVariable extends Statement  implements INameable {
 
 	private Type type;
 

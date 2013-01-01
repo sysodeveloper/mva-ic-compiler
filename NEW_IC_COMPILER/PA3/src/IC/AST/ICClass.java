@@ -9,7 +9,7 @@ import IC.SymbolTable;
  * 
  * @author Tovi Almozlino
  */
-public class ICClass extends ASTNode implements SymbolTableContainer {
+public class ICClass extends ASTNode implements SymbolTableContainer, INameable {
 
 	private String name;
 

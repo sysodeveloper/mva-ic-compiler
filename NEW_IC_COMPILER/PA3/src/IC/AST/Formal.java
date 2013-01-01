@@ -5,7 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public class Formal extends ASTNode {
+public class Formal extends ASTNode implements INameable {
 
 	private Type type;
 

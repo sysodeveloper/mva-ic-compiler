@@ -49,7 +49,7 @@ public class TypeTablePrinter {
 		sbTypes.append("Type Table: " + m_fileName + "\n");
 		for (Type type : m_types) {
 			if(type.getDimension() >= 1) {
-				sbArrayTypes.append("    " + type.getID() + ": Array type: " + type.getName() + type.dimPostFix() + "\n");
+				sbArrayTypes.append("    " + type.getID() + ": Array type: " + type.getFullName() + "\n");
 			}
 			else {
 				if(type instanceof UserType) {
