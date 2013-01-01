@@ -60,6 +60,12 @@ public class SymbolRecord {
 	private ASTNode m_node;
 	
 	/**
+	 * Flag which indicates whether the symbol has been declared previously in the program
+	 * Used in semantic checks 
+	 */
+	private boolean declared = false;
+	
+	/**
 	 * @return The id.
 	 */
 	public int getId() {
@@ -148,6 +154,14 @@ public class SymbolRecord {
 		m_table = table;
 	}
 	
+	public boolean is_declared(){
+		return this.declared;
+	}
+	
+	public void declared(){
+		this.declared = true;
+	}
+	
 	/**
 	 * The main constructor.
 	 * @param id The id of the table.
@@ -184,5 +198,6 @@ public class SymbolRecord {
 	public SymbolRecord(int id, ASTNode node, SymbolTable table, 
 			String symbol, Kind kind, Type type) {
 		this(id, node, table, symbol, kind, type, null);
+		this.declared = true;
 	}
 }
