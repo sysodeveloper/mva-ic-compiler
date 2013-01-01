@@ -269,8 +269,8 @@ public class Labeling implements PropagatingVisitor<Integer, Integer>{
 
 	@Override
 	public Integer visit(MethodType methodType, Integer id) {
-		methodType.setID(id);
-		return id + 1;
+		methodType.setID(id+1);
+		return id +1;
 	}
 
 }

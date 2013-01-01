@@ -2,8 +2,6 @@ package IC;
 
 import java.util.Map;
 
-import sun.org.mozilla.javascript.ast.AstNode;
-
 import IC.SymbolRecord.Kind;
 import IC.SymbolTable;
 import IC.AST.ASTNode;

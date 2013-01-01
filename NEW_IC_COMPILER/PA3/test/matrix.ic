@@ -1,9 +1,19 @@
 class Matrix {
 	int z; 
-	int p(){
+	int[] p(int[][] y){
 		z = -1;
+		if(1)
+		
+			break;
+		{
+			int block;
+		}
+		while(x){
+		
+		}
+		
 	}
-
+	
 }
 
 class A extends Matrix{

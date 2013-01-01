@@ -1,6 +1,6 @@
 package IC.Parser;
 
-import com.sun.java_cup.internal.runtime.Symbol;
+
 
 /**
  * Represent a token parsed by the lexer.

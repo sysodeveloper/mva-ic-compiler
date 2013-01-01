@@ -1,0 +1,47 @@
+digraph G{
+   1
+2 -> {1}
+    3
+     4
+    5 -> {4}
+      6 -> {}
+       7
+      8 -> {7}
+    9 -> {6 8}
+      10
+      11    12 -> {10 11}
+       13
+      14 -> {13}
+    15 -> {14}
+      16 -> {}
+      17 -> {}
+    18 -> {16 17}
+  19 -> {3 5 9 12 15 18}
+20 -> {2 19}
+21 -> {}
+22 -> {20 21}
+
+1[label="PrimitiveType int"]
+2[label="Field  z"]
+3[label="MethodType {int[][] -> int[]}"]
+4[label="PrimitiveType int[][]"]
+5[label="Formal y"]
+6[label="VariableLocation z"]
+7[label="Literal 1"]
+8[label="LogicalUnaryOp unary subtraction"]
+9[label="Assignment"]
+10[label="Literal 1"]
+11[label="BreakStatement"]
+12[label="IfStatement"]
+13[label="PrimitiveType int"]
+14[label="LocalVariable block"]
+15[label="StatementsBlock"]
+16[label="VariableLocation x"]
+17[label="StatementsBlock"]
+18[label="whileStatement"]
+19[label="VirtualMethod p"]
+20[label="Class Matrix"]
+21[label="Class A has super classMatrix"]
+22[label="Program"]
+
+}
