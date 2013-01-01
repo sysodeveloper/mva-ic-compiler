@@ -66,7 +66,7 @@ public class ICClass extends ASTNode implements SymbolTableContainer {
 		this.name = name;
 		this.fields = fields;
 		this.methods = methods;
-		setInnerTable(new SymbolTable(SymbolTable.getNextId()));
+		setInnerTable(new SymbolTable(SymbolTable.getNextId(), null, this));
 		UserType.getICClasses().add(this);
 	}
 

@@ -50,7 +50,7 @@ public class StatementsBlock extends Statement implements SymbolTableContainer {
 	 */
 	public StatementsBlock(int line, List<Statement> statements) {
 		super(line);
-		setInnerTable(new SymbolTable(SymbolTable.getNextId()));
+		setInnerTable(new SymbolTable(SymbolTable.getNextId(), null, this));
 		this.statements = statements;
 	}
 

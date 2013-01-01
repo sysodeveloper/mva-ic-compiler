@@ -34,9 +34,19 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	private int m_recordID;
 	
+	/**
+	 * The parent node of this table.
+	 */
+	private SymbolTableContainer m_parentNode;
+	
 	/** The parent table.
 	 */
 	private SymbolTable m_parent;
+	
+	/**
+	 * Get the direct children symbol tables.
+	 */
+	private List<SymbolTable> m_childTables;
 
 	/**
 	 * The entries of the table.
@@ -50,9 +60,9 @@ public class SymbolTable implements Visitor<Boolean> {
 	private static Set<Type> m_usedType = new HashSet<Type>();
 	
 	/**
-	 * The current handled method.
+	 * The root symbol table of the program.
 	 */
-	private Method m_currentMethod;
+	private static SymbolTable m_root;
 	
 	/**
 	 * The id's for the used types.
@@ -60,10 +70,34 @@ public class SymbolTable implements Visitor<Boolean> {
 	private static int UsedTypeId = 1;
 	
 	/**
+	 * Map all the defined classes.
+	 */
+	private static Map<String, ICClass> m_classTables = new HashMap<String, ICClass>();
+	
+	/**
 	 * @return The id.
 	 */
 	public int getId() {
 		return m_id;
+	}
+	/**
+	 * @return the m_root
+	 */
+	public static SymbolTable getRoot() {
+		return m_root;
+	}
+	
+	/**
+	 * @return the m_parentNode
+	 */
+	public SymbolTableContainer getParentNode() {
+		return m_parentNode;
+	}
+	/**
+	 * @param m_parentNode the m_parentNode to set
+	 */
+	public void setParentNode(SymbolTableContainer m_parentNode) {
+		this.m_parentNode = m_parentNode;
 	}
 	/**
 	 * @param id The id to set.
@@ -112,9 +146,10 @@ public class SymbolTable implements Visitor<Boolean> {
 	public void putUsedType(Type type) {
 		for (int d = 0; d <= type.getDimension(); ++d) {
 			Type t = (Type)type.clone();
+			
+			t.setDimension(d);
 			if(!getUsedType().contains(t))
 			{
-				t.setDimension(d);
 				t.setID(UsedTypeId++);
 				getUsedType().add(t);
 			}
@@ -135,29 +170,18 @@ public class SymbolTable implements Visitor<Boolean> {
 	}
 	
 	/**
-	 * @return The currentMethod.
-	 */
-	public Method getCurrentMethod() {
-		return m_currentMethod;
-	}
-	/**
-	 * @param currentMethod The currentMethod to set.
-	 */
-	public void setCurrentMethod(Method currentMethod) {
-		m_currentMethod = currentMethod;
-	}
-	
-	/**
 	 * Create the symbol table for the given record.
 	 * @param id The id of the table.
 	 * @param parent The parent of the scope.
+	 * @param parentNode The node own the table.
 	 */
-	public SymbolTable(int id, SymbolTable parent) {
+	public SymbolTable(int id, SymbolTable parent, SymbolTableContainer parentNode) {
 		m_recordID = 0;
-		setCurrentMethod(null);
 		setId(id);
 		setParent(parent);
 		m_entries = new HashMap<String, SymbolRecord>();
+		setChildTables(new ArrayList<SymbolTable>());
+		setParentNode(parentNode);
 	}
 	
 	/**
@@ -165,7 +189,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 * @param id The id of the table.
 	 */
 	public SymbolTable(int id) {
-		this(id, null);
+		this(id, null, null);
 	}
 	
 	/**
@@ -183,32 +207,80 @@ public class SymbolTable implements Visitor<Boolean> {
 	public int getRecordId() {
 		return ++m_recordID;
 	}
+	
+	/**
+	 * @return the childTables
+	 */
+	public List<SymbolTable> getChildTables() {
+		return m_childTables;
+	}
+	/**
+	 * @param childTables the childTables to set
+	 */
+	public void setChildTables(List<SymbolTable> m_childTables) {
+		this.m_childTables = m_childTables;
+	}
+	
+	/**
+	 * Reorder The classes so it could iterate as defined.
+	 * @param classes The original list.
+	 * @return The new list.
+	 */
+	private List<ICClass> orderClasses(List<ICClass> classes) {
+		List<ICClass> tmpClasses = new ArrayList<ICClass>();
+		List<ICClass> orderedClasses = new ArrayList<ICClass>();
+		List<String> defined = new ArrayList<String>();
+		ICClass tmpClass;
+		// Keep the first class in case of an error.
+		ICClass firstClass;
+		
+		for (ICClass icClass : classes) {
+			tmpClasses.add(icClass);
+		}
+		
+		while(!tmpClasses.isEmpty()) {
+			tmpClass = null;
+			firstClass = null;
+			for (ICClass icClass : tmpClasses) {
+				if(firstClass == null) {
+					firstClass = icClass;
+				}
+				if(!icClass.hasSuperClass() || defined.contains(icClass.getSuperClassName())) {
+					orderedClasses.add(icClass);
+					defined.add(icClass.getName());
+					tmpClass = icClass;
+					break;
+				}
+			}
+			
+			if(tmpClass == null) {
+				SemanticAnalyse.getInstance().getErrors().add(new SemanticError(
+						"cannot find symbol\nsymbol: class " + firstClass.getName(), firstClass.getLine()));
+				break;
+			}
+			tmpClasses.remove(tmpClass);
+		}
+		
+		return orderedClasses;
+	}
 
 	/**
 	 * Create a new Symbol Record for each class.
 	 */
-	
 	@Override
 	public Boolean visit(Program program) {
 		Boolean isOk = true;
+		m_root = this;
 		setParent(null);
-		// The general scope table.
-		program.setOuterTable(this);
-		for (ICClass icClass : program.getClasses()) {
+		setParentNode(program);
+		program.setInnerTable(this);
+		program.setOuterTable(null);
+		for (ICClass icClass : orderClasses(program.getClasses())) {
 			isOk &= putSymbol(icClass.getName(), new SymbolRecord(getRecordId(), icClass, this, 
 					icClass.getName(), Kind.CLASS, 
 					new UserType(icClass.getLine(), icClass.getName())), icClass);
 			icClass.getInnerTable().setParent(this);
-			isOk &= icClass.accept(icClass.getInnerTable());
-		}
-		
-		// Fix outerTable references.
-		for (ICClass icClass : program.getClasses()) {
-			if(icClass.hasSuperClass()){
-				ASTNode node = getEntries().get(icClass.getSuperClassName()).getNode();
-				icClass.setOuterTable(
-				((ICClass)(getEntries().get(icClass.getSuperClassName()).getNode())).getInnerTable());
-			}
+			isOk &= icClass.accept(this);
 		}
 			
 		return isOk;
@@ -222,9 +294,19 @@ public class SymbolTable implements Visitor<Boolean> {
 	public Boolean visit(ICClass icClass) {
 		// TODO: register to parent in TypeTable.
 		Boolean isOk = true;
+		m_classTables.put(icClass.getName(), icClass);
+		if(icClass.hasSuperClass()){
+			SymbolTable superTable = (m_classTables.get(icClass.getSuperClassName())).getInnerTable();
+			icClass.setOuterTable(superTable);
+			superTable.getChildTables().add(icClass.getInnerTable());
+		}
+		else {
+			icClass.setOuterTable(this);
+			getChildTables().add(icClass.getInnerTable());
+		}
 		
-		icClass.setOuterTable(this);
 		putUsedType(new UserType(icClass.getLine(), icClass.getName()));
+
 		
 		for (Field field : icClass.getFields()) {
 			isOk &= field.accept(icClass.getInnerTable());
@@ -245,20 +327,15 @@ public class SymbolTable implements Visitor<Boolean> {
 		return putSymbol(field.getName(), new SymbolRecord(getRecordId(), field, 
 			this, field.getName(), Kind.FIELD, field.getType()), field);
 	}
-
-	/**
-	 * Add a method to the symbol table and recursively 
-	 * call on it's statements.
-	 */
-	@Override
-	public Boolean visit(VirtualMethod method) {
+	
+	private Boolean methodVisit(Method method, Kind kind) {
 		Boolean isOk = true;
 		method.setOuterTable(this);
+		this.getChildTables().add(method.getInnerTable());
 		putUsedType(method.getType());
 		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
-				this, method.getName(), Kind.VIRTUAL_METHOD, 
+				this, method.getName(), kind, 
 				method.getType()), method);
-		method.getInnerTable().setCurrentMethod(method);
 		method.getInnerTable().setParent(this);
 		for (Formal e : method.getFormals()) {
 			e.accept(method.getInnerTable());
@@ -266,10 +343,19 @@ public class SymbolTable implements Visitor<Boolean> {
 		for (Statement s : method.getStatements()) {
 			isOk &= s.accept(method.getInnerTable());
 		}
-		
 		method.getType().accept(this);
-
+		
+		getChildTables().add(method.getInnerTable());
 		return isOk;
+	}
+
+	/**
+	 * Add a method to the symbol table and recursively 
+	 * call on it's statements.
+	 */
+	@Override
+	public Boolean visit(VirtualMethod method) {
+		return methodVisit(method, Kind.VIRTUAL_METHOD);
 	}
 
 	/**
@@ -278,23 +364,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(StaticMethod method) {
-		Boolean isOk = true;
-		method.setOuterTable(this);
-		putUsedType(method.getType());
-		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
-				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType()), method);
-		method.getInnerTable().setCurrentMethod(method);
-		method.getInnerTable().setParent(this);
-		for (Formal e : method.getFormals()) {
-			e.accept(method.getInnerTable());
-		}
-		for (Statement s : method.getStatements()) {
-			isOk &= s.accept(method.getInnerTable());
-		}
-		
-		method.getType().accept(this);
-
-		return isOk;
+		return methodVisit(method, Kind.STATIC_METHOD);
 	}
 
 	/**
@@ -303,23 +373,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	@Override
 	public Boolean visit(LibraryMethod method) {
-		Boolean isOk = true;
-		method.setOuterTable(this);
-		putUsedType(method.getType());
-		isOk &= putSymbol(method.getName(), new SymbolRecord(getRecordId(), method,
-				this, method.getName(), Kind.VIRTUAL_METHOD, method.getType()), method);
-		method.getInnerTable().setCurrentMethod(method);
-		method.getInnerTable().setParent(this);
-		for (Formal e : method.getFormals()) {
-			e.accept(method.getInnerTable());
-		}
-		for (Statement s : method.getStatements()) {
-			isOk &= s.accept(method.getInnerTable());
-		}
-		
-		method.getType().accept(this);
-		
-		return isOk;
+		return methodVisit(method, Kind.LIBRARY_METHOD);
 	}
 
 	/**
@@ -449,6 +503,8 @@ public class SymbolTable implements Visitor<Boolean> {
 		for (Statement s : statementsBlock.getStatements()) {
 			s.accept(statementsBlock.getInnerTable());
 		}
+		
+		getChildTables().add(statementsBlock.getInnerTable());
 		
 		return isOk;
 	}
@@ -643,6 +699,4 @@ public class SymbolTable implements Visitor<Boolean> {
 		
 		return true;
 	}
-	
-	
 }

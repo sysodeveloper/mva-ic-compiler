@@ -351,7 +351,7 @@ public class SemanticChecker implements Visitor<Boolean> {
 	public Boolean visit(LibraryMethod method) {
 		Boolean isOk = true;
 		
-		method.getInnerTable().setCurrentMethod(method);
+		setCurrentMethod(method);
 		for (Formal e : method.getFormals()) {
 			e.accept(method.getInnerTable());
 		}
