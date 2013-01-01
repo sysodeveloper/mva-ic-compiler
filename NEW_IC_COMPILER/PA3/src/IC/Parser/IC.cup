@@ -94,7 +94,7 @@ Program ::= ClassIC:icClass Program:program
 						Program p = new Program(new ArrayList<ICClass>());
 						p = (Program)program;
 						List<ICClass> classes = p.getClasses();
-						classes.add((ICClass)icClass);
+						classes.add(0, (ICClass)icClass);
 						RESULT = new Program(classes);
 					:}|
 					
@@ -103,7 +103,7 @@ ClassICEx:icClass Program:program
 						Program p = new Program(new ArrayList<ICClass>());
 						p = (Program)program;
 						List<ICClass> classes = p.getClasses();
-						classes.add((ICClass)icClass);
+						classes.add(0, (ICClass)icClass);
 						RESULT = new Program(classes);
 					:}|
 					
@@ -136,7 +136,7 @@ FieldOrMethod ::= Field:field FieldOrMethod:fom 		 {: Object[] arr = new Object[
   				  											ArrayList<Field> fieldList = (ArrayList<Field>)field;
   				  											ArrayList<Field> prevList = (ArrayList<Field>)arr[0];
   				  											for(Field f:fieldList)
-  				  												prevList.add(f);
+  				  												prevList.add(0, f);
   				  											arr[0]=prevList;
  				  											RESULT = arr; :}|
 														 
@@ -170,16 +170,16 @@ Field ::= Type:t ID:i FieldList:flst SEMI
 			ArrayList<Field> TypedFields = new ArrayList<Field>();
 			
 			for(Field f : lstFields){
-				TypedFields.add(new Field((Type)(((Type)t).clone()),f.getName()));				
+				TypedFields.add(0, new Field((Type)(((Type)t).clone()),f.getName()));				
 			}
 				
-			TypedFields.add( new Field((Type)t, i.toString()) );  
+			TypedFields.add(0, new Field((Type)t, i.toString()) );  
 			RESULT = TypedFields;	:};
 
 
 FieldList ::= COMMA ID:i FieldList:flst
 			 {: ArrayList<Field> lstFields = (ArrayList<Field>)flst;
-			 	lstFields.add(new Field(new PrimitiveType(parser.getLine(), DataTypes.INT) ,i.toString()) );
+			 	lstFields.add(0, new Field(new PrimitiveType(parser.getLine(), DataTypes.INT) ,i.toString()) );
 			 	RESULT = lstFields; :}|
 			 {: RESULT = new ArrayList<Field>();  :} ;
 			 
