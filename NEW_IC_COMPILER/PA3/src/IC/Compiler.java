@@ -244,7 +244,7 @@ public class Compiler {
 		TypeTablePrinter typePrinter = new TypeTablePrinter(
 				SymbolTable.getUsedType(), fileName);
 		System.out.println(tablePrinter);
-		//System.out.println(typePrinter);
+		System.out.println(typePrinter);
 		return true;
 		
 	}
