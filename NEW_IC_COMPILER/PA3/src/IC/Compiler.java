@@ -58,7 +58,7 @@ public class Compiler {
 				if(args[i].compareTo("-print-ast") == 0){
 					LabelAST(root, 0);
 					PrintASTCommand(root);
-					//GraphvizAST((Program)root);
+					GraphvizAST((Program)root);
 					break;
 				}
 			}

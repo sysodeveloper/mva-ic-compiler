@@ -71,6 +71,7 @@ public class TreePrinter implements Visitor<String>{
 		++depth;
 		output.append(field.getType().accept(this));
 		--depth;
+		indent(output,field);
 		output.append(field.getID() + " - Field " + field.getName());
 		output.append(" -> {");
 		output.append(field.getType().getID());
@@ -296,6 +297,7 @@ public class TreePrinter implements Visitor<String>{
 		StringBuffer output = new StringBuffer();
 		indent(output, breakStatement);
 		output.append(breakStatement.getID() + " - BreakStatement");
+		output.append("\n");
 		return output.toString();
 	}
 
@@ -590,7 +592,12 @@ public class TreePrinter implements Visitor<String>{
 	 */
 	@Override
 	public String visit(MethodType methodType) {
-		return "";
+		StringBuffer output = new StringBuffer();
+		indent(output, methodType);
+		output.append(methodType.getID() + " - MethodType " + methodType.getName());
+		output.append("\n");
+		return output.toString();
+		
 	}
 
 }
