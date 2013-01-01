@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	/**
 	 * Hold all the used type. 
 	 */
-	private static Set<Type> m_usedType = new HashSet<Type>();
+	private static Set<Type> m_usedType = new LinkedHashSet<Type>();
 	
 	/**
 	 * The root symbol table of the program.
@@ -73,7 +74,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	/**
 	 * Map all the defined classes.
 	 */
-	private static Map<String, ICClass> m_classTables = new HashMap<String, ICClass>();
+	private static Map<String, ICClass> m_classTables = new LinkedHashMap<String, ICClass>();
 	
 	/**
 	 * @return The id.
@@ -144,7 +145,7 @@ public class SymbolTable implements Visitor<Boolean> {
 	 * @param type
 	 * @return
 	 */
-	public void putUsedType(Type type) {
+	public static void putUsedType(Type type) {
 		for (int d = 0; d <= type.getDimension(); ++d) {
 			Type t = (Type)type.clone();
 			

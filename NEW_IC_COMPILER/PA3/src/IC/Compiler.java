@@ -157,7 +157,7 @@ public class Compiler {
 	 */
 	private static void AddLibraryToRoot(Object root, Object lib){
 		try{
-			((Program)root).getClasses().add((ICClass)lib);
+			((Program)root).getClasses().add(0, (ICClass)lib);
 		}catch(ClassCastException e){
 			System.out.println("Error adding Library as class to the root program: " + e.getMessage());
 		}catch(NullPointerException e1){
