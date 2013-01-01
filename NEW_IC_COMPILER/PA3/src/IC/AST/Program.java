@@ -9,7 +9,7 @@ import IC.SymbolTable;
  * 
  * @author Tovi Almozlino
  */
-public class Program extends ASTNode {
+public class Program extends ASTNode implements SymbolTableContainer {
 
 	private List<ICClass> classes;
 	
@@ -34,6 +34,19 @@ public class Program extends ASTNode {
 
 	public List<ICClass> getClasses() {
 		return classes;
+	}
+
+	@Override
+	public SymbolTable getInnerTable() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * The global symbolTable.
+	 */
+	@Override
+	public void setInnerTable(SymbolTable table) {
 	}
 
 }

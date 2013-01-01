@@ -239,11 +239,12 @@ public class Compiler {
 		SemanticAnalyse sa = SemanticAnalyse.getInstance();
 		sa.setRoot(root);
 		sa.analyze();
-		SymbolTablePrinter tablePrinter = new SymbolTablePrinter(Compiler.ICFileParsed,root);
+		String fileName = (new File(filePath).getName());
+		SymbolTablePrinter tablePrinter = new SymbolTablePrinter(fileName, root);
 		TypeTablePrinter typePrinter = new TypeTablePrinter(
-				SymbolTable.getUsedType(), (new File(filePath).getName()));
-		System.out.println(typePrinter);
+				SymbolTable.getUsedType(), fileName);
 		System.out.println(tablePrinter);
+		//System.out.println(typePrinter);
 		return true;
 		
 	}

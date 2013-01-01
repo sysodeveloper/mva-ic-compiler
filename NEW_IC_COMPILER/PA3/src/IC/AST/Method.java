@@ -55,7 +55,7 @@ public abstract class Method extends ASTNode implements SymbolTableContainer {
 	protected Method(Type type, String name, List<Formal> formals,
 			List<Statement> statements) {
 		super(type.getLine());
-		setInnerTable(new SymbolTable(SymbolTable.getNextId()));
+		setInnerTable(new SymbolTable(SymbolTable.getNextId(), null, this));
 		this.type = type;
 		this.name = name;
 		this.formals = formals;
