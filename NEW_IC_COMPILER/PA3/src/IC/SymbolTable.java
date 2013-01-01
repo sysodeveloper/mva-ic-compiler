@@ -6,6 +6,7 @@ import IC.AST.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -179,7 +180,7 @@ public class SymbolTable implements Visitor<Boolean> {
 		m_recordID = 0;
 		setId(id);
 		setParent(parent);
-		m_entries = new HashMap<String, SymbolRecord>();
+		m_entries = new LinkedHashMap<String, SymbolRecord>();
 		setChildTables(new ArrayList<SymbolTable>());
 		setParentNode(parentNode);
 	}

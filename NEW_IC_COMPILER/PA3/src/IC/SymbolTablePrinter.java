@@ -93,7 +93,7 @@ public class SymbolTablePrinter{
 	 * @param table The table to print.
 	 */
 	private void printTable(SymbolTable table) {
-		output.append(typeName(table) + " Symbol Table" + tableName(table) + "\n");
+		output.append("\n" + typeName(table) + " Symbol Table" + tableName(table) + "\n");
 		SymbolTableContainer parent = table.getParentNode();
 		
 		if(parent instanceof Program) {
@@ -157,8 +157,6 @@ public class SymbolTablePrinter{
 		if(!table.getChildTables().isEmpty()) {
 			printChildren(table);
 		}
-		
-		output.append("\n");
 		
 		for (SymbolTable t : table.getChildTables()) {
 			printTable(t);
