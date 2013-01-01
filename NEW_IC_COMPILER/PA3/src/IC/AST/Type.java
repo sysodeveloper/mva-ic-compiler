@@ -5,7 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public abstract class Type extends ASTNode {
+public abstract class Type extends ASTNode implements INameable {
 
 	/**
 	 * Number of array 'dimensions' in data type. For example, int[][] ->
@@ -27,6 +27,10 @@ public abstract class Type extends ASTNode {
 
 	public int getDimension() {
 		return dimension;
+	}
+	
+	public String getFullName() {
+		return getName() + dimPostFix();
 	}
 	
 	public void setDimension(int dim) {

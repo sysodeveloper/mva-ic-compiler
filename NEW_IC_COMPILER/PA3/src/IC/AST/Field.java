@@ -5,7 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public class Field extends ASTNode {
+public class Field extends ASTNode  implements INameable {
 
 	private Type type;
 

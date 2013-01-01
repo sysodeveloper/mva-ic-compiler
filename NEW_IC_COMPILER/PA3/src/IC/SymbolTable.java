@@ -344,8 +344,6 @@ public class SymbolTable implements Visitor<Boolean> {
 			isOk &= s.accept(method.getInnerTable());
 		}
 		method.getType().accept(this);
-		
-		getChildTables().add(method.getInnerTable());
 		return isOk;
 	}
 

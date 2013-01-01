@@ -7,7 +7,7 @@ import java.util.List;
  * 
  * @author Tovi Almozlino
  */
-public abstract class Call extends Expression {
+public abstract class Call extends Expression implements INameable {
 
 	private String name;
 

@@ -5,7 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public class NewClass extends New {
+public class NewClass extends New implements INameable{
 
 	private String name;
 

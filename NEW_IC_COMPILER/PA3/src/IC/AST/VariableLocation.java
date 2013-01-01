@@ -5,7 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public class VariableLocation extends Location {
+public class VariableLocation extends Location implements INameable {
 
 	private Expression location = null;
 
