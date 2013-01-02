@@ -123,6 +123,9 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 				return Boolean.FALSE;
 			}
 		}
+		for(Field f : icClass.getFields()){
+			returnValue &= f.accept(this,table);
+		}
 		for(Method m : icClass.getMethods()){
 			returnValue &= m.accept(this,table);
 		}
