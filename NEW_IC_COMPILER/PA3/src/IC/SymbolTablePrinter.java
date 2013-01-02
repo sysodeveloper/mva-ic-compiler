@@ -107,7 +107,7 @@ public class SymbolTablePrinter{
 							+ " " + ((INameable)record.getNode()).getName() + "\n");
 				}
 			}
-			for (SymbolRecord record : table.getEntries().values()) {
+			for (SymbolRecord record : ((ICClass)table.getParentNode()).getStaticTable().getEntries().values()) {
 				if(record.getKind() == Kind.STATIC_METHOD) {
 					output.append("    Static method: " 
 				            + ((INameable)record.getNode()).getName() 
@@ -121,9 +121,9 @@ public class SymbolTablePrinter{
 							+ " " + record.getType().getName() + "\n");
 				}
 			}
-			for (SymbolRecord record : table.getEntries().values()) {
+			for (SymbolRecord record : ((ICClass)table.getParentNode()).getStaticTable().getEntries().values()) {
 				if(record.getKind() == Kind.LIBRARY_METHOD) {
-					output.append("    Library method: " 
+					output.append("    Static method: " 
 							+ ((INameable)record.getNode()).getName() 
 							+ " " + record.getType().getName() + "\n");
 				}

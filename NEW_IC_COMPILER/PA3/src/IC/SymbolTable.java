@@ -146,9 +146,12 @@ public class SymbolTable implements Visitor<Boolean> {
 	 */
 	public static void putUsedType(Type type) {
 		for (int d = 0; d <= type.getDimension(); ++d) {
-			Type t = (Type)type.clone();
+			Type t = type;
+			if(d > 0) {
+				t = (Type)type.clone();
+				t.setDimension(d);			 
+			}
 			
-			t.setDimension(d);
 			if(!getUsedType().contains(t))
 			{
 				t.setID(UsedTypeId++);
@@ -279,7 +282,6 @@ public class SymbolTable implements Visitor<Boolean> {
 			isOk &= putSymbol(icClass.getName(), new SymbolRecord(getRecordId(), icClass, this, 
 					icClass.getName(), Kind.CLASS, 
 					new UserType(icClass.getLine(), icClass.getName())), icClass);
-			icClass.getInnerTable().setParent(this);
 			isOk &= icClass.accept(this);
 		}
 		SymbolTable.m_root = this;		
@@ -297,18 +299,19 @@ public class SymbolTable implements Visitor<Boolean> {
 		m_classTables.put(icClass.getName(), icClass);
 		
 		if(icClass.hasSuperClass()){
-			SymbolTable superTable = (m_classTables.get(icClass.getSuperClassName())).getInnerTable();
+			SymbolTable superTable = (m_classTables.get(
+					icClass.getSuperClassName())).getInnerTable();
 			icClass.setOuterTable(superTable);
 			superTable.getChildTables().add(icClass.getInnerTable());
 			icClass.getInnerTable().setParent(superTable);
 		}
 		else {
 			icClass.setOuterTable(this);
-			icClass.getInnerTable().setParent(getRoot());
+			icClass.getInnerTable().setParent(this);
 			getChildTables().add(icClass.getInnerTable());
 		}
 		
-		putUsedType(new UserType(icClass.getLine(), icClass.getName()));
+		putUsedType(icClass.getUserType());
 
 		
 		for (Field field : icClass.getFields()) {
@@ -316,8 +319,15 @@ public class SymbolTable implements Visitor<Boolean> {
 			field.setOuterTable(this);
 		}
 		for (Method method : icClass.getMethods()) {
-			isOk &= method.accept(icClass.getInnerTable());
-			method.setOuterTable(this);
+			if(method instanceof VirtualMethod) {
+				method.setOuterTable(this);
+				isOk &= method.accept(icClass.getInnerTable());
+			}
+			else {
+				method.setOuterTable(icClass.getStaticTable());
+				isOk &= method.accept(icClass.getStaticTable());
+			}
+				
 		}
 		
 		if(icClass.hasSuperClass()){			

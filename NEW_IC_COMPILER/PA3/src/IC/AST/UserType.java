@@ -41,6 +41,16 @@ public class UserType extends Type {
 		super(line);
 		this.name = name;
 	}
+	
+	/**
+	 * Create and bind the user type with the ICClass - 
+	 *   This instance is the main type of the class.
+	 */
+	public UserType(ICClass c) {
+		this(c.getLine(), c.getName());
+		getICClasses().add(c);
+		
+	}
 
 	public String getName() {
 		return name;

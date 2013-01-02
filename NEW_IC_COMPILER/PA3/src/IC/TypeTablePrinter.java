@@ -62,8 +62,8 @@ public class TypeTablePrinter {
 							}
 						}
 					}
-					sbUserTypes.append("    " + ut.getICClass().getID() + ": Class: " + ut.getName() + 
-							(ut.getICClass().hasSuperClass()?", Superclass ID: " + superClass.getID():"")
+					sbUserTypes.append("    " + ut.getID() + ": Class: " + ut.getName() + 
+							(ut.getICClass().hasSuperClass()?", Superclass ID: " + superClass.getUserType().getID():"")
 							+ "\n");
 				}
 				else if(type instanceof MethodType) {
