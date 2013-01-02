@@ -90,8 +90,10 @@ public class MySymbolTable {
 		}
 		output.append("Children tables: ");
 		for(MySymbolTable child : this.children){
-			
+			output.append(children.get(child.getId()));
+			output.append(",");
 		}
+		output.deleteCharAt(output.length()-1);
 		output.append("\n");
 		return output.toString();
 	}
