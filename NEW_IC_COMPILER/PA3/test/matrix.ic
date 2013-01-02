@@ -1,5 +1,4 @@
-class C extends C{
-}
+
 class B extends A{
 }
 
@@ -7,20 +6,9 @@ class A extends Matrix{
 }
 
 class Matrix {
-	int z; 
-	int[] p(int[][] y){
-		z = -1;
-		if(1)
-		
-			break;
+	int p(){
 		{
-			int block;
 		}
-		while(x){
-		
-		}
-		
 	}
-	
 }
 
