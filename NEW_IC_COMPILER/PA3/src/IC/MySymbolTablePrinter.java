@@ -67,11 +67,11 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 		output.append(icClass.getName());
 		output.append("\n");
 		output.append(icClass.enclosingScope());
-		for(Method m : icClass.getMethods()){
-			output.append(m.accept(this));
-		}
 		for(Field f : icClass.getFields()){
 			output.append(f.accept(this));
+		}
+		for(Method m : icClass.getMethods()){
+			output.append(m.accept(this));
 		}
 		return output;
 	}
@@ -79,115 +79,115 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 	@Override
 	public StringBuffer visit(Field field) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(VirtualMethod method) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(StaticMethod method) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(LibraryMethod method) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(Formal formal) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(PrimitiveType type) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(UserType type) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(Assignment assignment) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(CallStatement callStatement) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(Return returnStatement) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(If ifStatement) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(While whileStatement) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(Break breakStatement) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(Continue continueStatement) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(StatementsBlock statementsBlock) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(LocalVariable localVariable) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(VariableLocation location) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(ArrayLocation location) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(StaticCall call) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override

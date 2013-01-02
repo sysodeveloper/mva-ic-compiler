@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import IC.AST.ASTNode;
+import IC.AST.INameable;
 import IC.AST.LocalVariable;
 import IC.AST.StaticMethod;
 import IC.AST.Type;
@@ -81,8 +82,8 @@ public class MySymbolTable {
 	
 	public String toString(){
 		StringBuffer output = new StringBuffer();
-		String[] chunks = new String[6];
-		Map<Integer, String> children = new HashMap<Integer, String>();
+		StringBuffer[] chunks = { new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer() };
+		Map<Integer, String> childrenMap = new HashMap<Integer, String>();
 		int i = 0;
 		for(String key : entries.keySet()){
 			switch(this.entries.get(key).getKind()){
@@ -107,22 +108,20 @@ public class MySymbolTable {
 				}
 				break;
 			}
-			StringBuffer helper = new StringBuffer();
-			helper.append("\t");
-			helper.append(entries.get(key).getKind());
-			helper.append(": ");
-			helper.append(key);
-			helper.append("\n");
-			chunks[i] += helper.toString();
-			children.put(entries.get(key).getId(),key);
+			chunks[i].append("\t");
+			chunks[i].append(entries.get(key).getKind());
+			chunks[i].append(": ");
+			chunks[i].append(key);
+			chunks[i].append("\n");
+			childrenMap.put(entries.get(key).getNode().enclosingScope().getId(),key);
 		}
 		for(int j=0;j<chunks.length;j++){
 			output.append(chunks[j]);
 		}
-		output.append("Children tables: ");
+		output.append("Children tables ("+this.children.size()+"): " );
+		MySymbolRecord rec;
 		for(MySymbolTable child : this.children){
-			output.append(children.get(child.getId()));
-			output.append(",");
+			
 		}
 		output.deleteCharAt(output.length()-1);
 		output.append("\n");
