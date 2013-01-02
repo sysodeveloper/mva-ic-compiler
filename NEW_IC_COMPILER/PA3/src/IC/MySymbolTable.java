@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import IC.AST.ASTNode;
 import IC.AST.Type;
@@ -76,13 +77,21 @@ public class MySymbolTable {
 		return null;
 	}
 	
+	public String GetNameByID(int id){
+		for(Entry<String,MySymbolRecord> entry : this.entries.entrySet()){
+			if(entry.getValue().getId() == id){
+				return entry.getKey();
+			}
+		}
+		return "Unkown";
+	}
 	
 	public String toString(){
 		StringBuffer output = new StringBuffer();
 		for(String key : entries.keySet()){
 			output.append(entries.get(key).getKind());
-			output.append(":");
-			output.append(entries.get(key).getNode().getID());
+			output.append(": ");
+			output.append(key);
 			output.append("\n");
 		}
 		output.append("Children tables: " + children.size());
