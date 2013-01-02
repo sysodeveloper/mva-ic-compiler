@@ -17,11 +17,13 @@ public class MySymbolRecord {
 	private ASTNode node;	
 	private Kind kind;
 	private List<Object> properties;
+	private Type type;
 	
-	public MySymbolRecord(int id, ASTNode node, Kind kind){
+	public MySymbolRecord(int id, ASTNode node, Kind kind, Type type){
 		this.id = id;
 		this.node = node;
 		this.kind = kind;
+		this.type = type;
 		properties = new ArrayList<Object>();
 	}
 	
@@ -43,5 +45,9 @@ public class MySymbolRecord {
 	
 	public List<Object> getProperties(){
 		return this.properties;
+	}
+	
+	public Type getType(){
+		return this.type;
 	}
 }
