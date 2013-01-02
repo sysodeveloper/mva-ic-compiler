@@ -9,15 +9,21 @@ import IC.AST.Type;
 public class MySymbolRecord {
 	public enum Kind{
 		Class,
-		Method,
-		Variable,
-		Field
+		Local_Variable,
+		Parameter,
+		Field,
+		Static_Method,
+		Virtual_Method,
+		Library_Method
+		
 	}
 	private int id;
 	private ASTNode node;	
 	private Kind kind;
 	private List<Object> properties;
 	private Type type;
+	private boolean declared = true;
+	private boolean initialized = false;
 	
 	public MySymbolRecord(int id, ASTNode node, Kind kind, Type type){
 		this.id = id;
@@ -25,6 +31,8 @@ public class MySymbolRecord {
 		this.kind = kind;
 		this.type = type;
 		properties = new ArrayList<Object>();
+		if(kind == Kind.Local_Variable || kind == Kind.Parameter)
+			this.declared = false;
 	}
 	
 	public int getId(){
@@ -49,5 +57,13 @@ public class MySymbolRecord {
 	
 	public Type getType(){
 		return this.type;
+	}
+	
+	public void setAsDeclared(){
+		this.declared = true;
+	}
+	
+	public void setAsInitialized(){
+		this.initialized = true;
 	}
 }
