@@ -257,7 +257,7 @@ public class Compiler {
 	}
 	
 	
-	private static Boolean BuildSymbolTables(Program root, String filePath){
+	/*private static Boolean BuildSymbolTables(Program root, String filePath){
 		SemanticAnalyse sa = SemanticAnalyse.getInstance();
 		sa.setRoot(root);
 		sa.analyze();
@@ -271,8 +271,9 @@ public class Compiler {
 		
 		return true;
 	}
+	*/
 	
-	/*
+	
 	private static Boolean BuildSymbolTables(Program root, String filePath){
 			BuildMySymbolTable buider = new BuildMySymbolTable();
 			boolean success = buider.visit(root, null);
@@ -282,7 +283,7 @@ public class Compiler {
 			return true;
 			
 	}
-	*/
+	
 	/**
 	 * Dump the symbol and type table.
 	 */

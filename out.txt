@@ -1,51 +1,34 @@
 digraph G{
-1 -> {}
-2 -> {}
-3 -> {}
-   4
-5 -> {4}
-    6
-     7
-    8 -> {7}
-      9 -> {}
-       10
-      11 -> {10}
-    12 -> {9 11}
-      13
-      14    15 -> {13 14}
-       16
-      17 -> {16}
-    18 -> {17}
-      19 -> {}
-      20 -> {}
-    21 -> {19 20}
-  22 -> {6 8 12 15 18 21}
-23 -> {5 22}
-24 -> {1 2 3 23}
+   1
+2 -> {1}
+   3
+4 -> {3}
+    5
+  6 -> {5}
+    7
+  8 -> {7}
+9 -> {2 4 6 8}
+10 -> {}
+    11
+    12 -> {}
+  13 -> {11 12}
+14 -> {13}
+15 -> {9 10 14}
 
-1[label="Class C has super classC"]
-2[label="Class B has super classA"]
-3[label="Class A has super classMatrix"]
-4[label="PrimitiveType int"]
-5[label="Field  z"]
-6[label="MethodType {int[][] -> int[]}"]
-7[label="PrimitiveType int[][]"]
-8[label="Formal y"]
-9[label="VariableLocation z"]
-10[label="Literal 1"]
-11[label="LogicalUnaryOp unary subtraction"]
-12[label="Assignment"]
-13[label="Literal 1"]
-14[label="BreakStatement"]
-15[label="IfStatement"]
-16[label="PrimitiveType int"]
-17[label="LocalVariable block"]
-18[label="StatementsBlock"]
-19[label="VariableLocation x"]
-20[label="StatementsBlock"]
-21[label="whileStatement"]
-22[label="VirtualMethod p"]
-23[label="Class Matrix"]
-24[label="Program"]
+1[label="PrimitiveType int"]
+2[label="Field  b1"]
+3[label="PrimitiveType int"]
+4[label="Field  b2"]
+5[label="MethodType {  -> void}"]
+6[label="VirtualMethod funcy"]
+7[label="MethodType {  -> string}"]
+8[label="StaticMethod funcu"]
+9[label="Class B has super classA"]
+10[label="Class A has super classMatrix"]
+11[label="MethodType {  -> int}"]
+12[label="StatementsBlock"]
+13[label="VirtualMethod p"]
+14[label="Class Matrix"]
+15[label="Program"]
 
 }

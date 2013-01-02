@@ -29,6 +29,10 @@ public class MySymbolTable {
 		return this.entries;
 	}
 	
+	public String getDescription(){
+		return this.description;
+	}
+	
 	public int getId(){
 		return this.id;
 	}
@@ -94,23 +98,24 @@ public class MySymbolTable {
 			case Field:
 				i = 1;
 				break;
-			case Method:
-				if(this.entries.get(key).getNode() instanceof StaticMethod){
-					i = 2;
-				}else{
-					i = 3;
-				}
+			case Static_Method:
+				i = 2;
 				break;
-			case Variable:
-				if(this.entries.get(key).getNode() instanceof LocalVariable){
-					i = 5;
-				}else{
+			case Library_Method:
+				i = 2;
+				break;
+			case Virtual_Method:
+				i = 3;
+				break;
+			case Parameter:
 					i = 4;
-				}
+					break;
+			case Local_Variable:
+				i = 5;
 				break;
 			}
 			chunks[i].append("\t");
-			chunks[i].append(entries.get(key).getKind());
+			chunks[i].append(entries.get(key).getKindToString());
 			chunks[i].append(": ");
 			chunks[i].append(key);
 			chunks[i].append("\n");
@@ -119,13 +124,15 @@ public class MySymbolTable {
 		for(int j=0;j<chunks.length;j++){
 			output.append(chunks[j]);
 		}
-		output.append("Children tables ("+this.children.size()+"): " );
-		MySymbolRecord rec;
-		for(MySymbolTable child : this.children){
-			
+		if(this.children.size() > 0){
+			output.append("Children tables: " );
+			for(MySymbolTable child : this.children){
+				output.append(child.getDescription());
+				output.append(", ");
+			}
+			output.deleteCharAt(output.length()-1);
+			output.append("\n");
 		}
-		output.deleteCharAt(output.length()-1);
-		output.append("\n");
 		return output.toString();
 	}
 }

@@ -52,7 +52,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(Program program, MySymbolTable d) {
 		//build current symbol table
-		MySymbolTable table = new MySymbolTable(uniqueTable++,"");
+		MySymbolTable table = new MySymbolTable(uniqueTable++,"Global");
 		table.setParent(null);
 		boolean returnValue = true;
 		//list to hold all the classes, each time we deal with a class we delete it
@@ -114,7 +114,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(ICClass icClass, MySymbolTable d) {
 		//d is the symbol table of the parent symbol class
 		boolean returnValue = true;
-		MySymbolTable table = new MySymbolTable(uniqueTable++,"");
+		MySymbolTable table = new MySymbolTable(uniqueTable++,icClass.getName());
 		table.setParent(d);
 		for(Field f : icClass.getFields()){
 			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,f,Kind.Field,f.getType()))){
@@ -149,7 +149,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(Method method,MySymbolTable d){
 		boolean returnValue = true;
 		//d is the symbol table of the parent symbol class
-		MySymbolTable table = new MySymbolTable(uniqueTable++,"");
+		MySymbolTable table = new MySymbolTable(uniqueTable++,method.getName());
 		table.setParent(d);
 		for(Formal f : method.getFormals()){
 			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,f,Kind.Parameter,f.getType()))){
@@ -264,7 +264,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		System.out.println("STATEMENT BLOCK");
 		boolean returnValue = true;
 		//d is the symbol table of the parent symbol class
-		MySymbolTable table = new MySymbolTable(uniqueTable++,"");
+		MySymbolTable table = new MySymbolTable(uniqueTable++,"statement block in " + d.getDescription());
 		table.setParent(d);
 		System.out.println("ACCEPT " + table.getId());
 		System.out.println("LIST SIZE = " + statementsBlock.getStatements().size());

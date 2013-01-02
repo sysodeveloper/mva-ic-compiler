@@ -32,6 +32,7 @@ import IC.AST.NewClass;
 import IC.AST.PrimitiveType;
 import IC.AST.Program;
 import IC.AST.Return;
+import IC.AST.Statement;
 import IC.AST.StatementsBlock;
 import IC.AST.StaticCall;
 import IC.AST.StaticMethod;
@@ -84,20 +85,56 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 
 	@Override
 	public StringBuffer visit(VirtualMethod method) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append("\n");
+		output.append("Method Symbol Table: ");
+		output.append(method.getName());
+		output.append("\n");
+		output.append(method.enclosingScope());
+		output.append(method.getType().accept(this));
+		for(Formal f : method.getFormals()){
+			output.append(f.accept(this));
+		}
+		for(Statement s : method.getStatements()){
+			output.append(s.accept(this));
+		}
+		return output;
 	}
 
 	@Override
 	public StringBuffer visit(StaticMethod method) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append("\n");
+		output.append("Method Symbol Table: ");
+		output.append(method.getName());
+		output.append("\n");
+		output.append(method.enclosingScope());
+		output.append(method.getType().accept(this));
+		for(Formal f : method.getFormals()){
+			output.append(f.accept(this));
+		}
+		for(Statement s : method.getStatements()){
+			output.append(s.accept(this));
+		}
+		return output;
 	}
 
 	@Override
 	public StringBuffer visit(LibraryMethod method) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append("\n");
+		output.append("Method Symbol Table: ");
+		output.append(method.getName());
+		output.append("\n");
+		output.append(method.enclosingScope());
+		output.append(method.getType().accept(this));
+		for(Formal f : method.getFormals()){
+			output.append(f.accept(this));
+		}
+		for(Statement s : method.getStatements()){
+			output.append(s.accept(this));
+		}
+		return output;
 	}
 
 	@Override
@@ -162,8 +199,16 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 
 	@Override
 	public StringBuffer visit(StatementsBlock statementsBlock) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append("\n");
+		output.append("Statement Block Symbol Table: (located in ");
+		output.append(statementsBlock.enclosingScope().getParent().getDescription()+")");
+		output.append("\n");
+		output.append(statementsBlock.enclosingScope());
+		for(Statement s : statementsBlock.getStatements()){
+			output.append(s.accept(this));
+		}
+		return output;
 	}
 
 	@Override
@@ -193,73 +238,72 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 	@Override
 	public StringBuffer visit(VirtualCall call) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(This thisExpression) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(NewClass newClass) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(NewArray newArray) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(Length length) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(MathBinaryOp binaryOp) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(LogicalBinaryOp binaryOp) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(MathUnaryOp unaryOp) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(LogicalUnaryOp unaryOp) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(Literal literal) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(ExpressionBlock expressionBlock) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
 
 	@Override
 	public StringBuffer visit(MethodType methodType) {
 		// TODO Auto-generated method stub
-		return null;
+		return new StringBuffer();
 	}
-
 }
