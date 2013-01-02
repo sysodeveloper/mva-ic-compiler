@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import IC.AST.ASTNode;
+import IC.AST.LocalVariable;
+import IC.AST.StaticMethod;
 import IC.AST.Type;
 
 public class MySymbolTable {
@@ -79,14 +81,43 @@ public class MySymbolTable {
 	
 	public String toString(){
 		StringBuffer output = new StringBuffer();
+		String[] chunks = new String[6];
 		Map<Integer, String> children = new HashMap<Integer, String>();
+		int i = 0;
 		for(String key : entries.keySet()){
-			output.append("\t");
-			output.append(entries.get(key).getKind());
-			output.append(": ");
-			output.append(key);
-			output.append("\n");
+			switch(this.entries.get(key).getKind()){
+			case Class:
+				i = 0;
+				break;
+			case Field:
+				i = 1;
+				break;
+			case Method:
+				if(this.entries.get(key).getNode() instanceof StaticMethod){
+					i = 2;
+				}else{
+					i = 3;
+				}
+				break;
+			case Variable:
+				if(this.entries.get(key).getNode() instanceof LocalVariable){
+					i = 5;
+				}else{
+					i = 4;
+				}
+				break;
+			}
+			StringBuffer helper = new StringBuffer();
+			helper.append("\t");
+			helper.append(entries.get(key).getKind());
+			helper.append(": ");
+			helper.append(key);
+			helper.append("\n");
+			chunks[i] += helper.toString();
 			children.put(entries.get(key).getId(),key);
+		}
+		for(int j=0;j<chunks.length;j++){
+			output.append(chunks[j]);
 		}
 		output.append("Children tables: ");
 		for(MySymbolTable child : this.children){
