@@ -47,6 +47,11 @@ public class MySymbolRecord {
 		return kind;
 	}
 	
+	public String getKindToString(){
+		String strKind = kind.toString();
+		return strKind.replace('_', ' ');
+	}
+	
 	public void insertProperty(Object p){
 		this.properties.add(p);
 	}

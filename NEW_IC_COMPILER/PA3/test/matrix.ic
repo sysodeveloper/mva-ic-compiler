@@ -1,5 +1,11 @@
 
 class B extends A{
+	int b1;
+	int b2;
+	void funcy(){
+	}
+	static string funcu(){
+	}
 }
 
 class A extends Matrix{
