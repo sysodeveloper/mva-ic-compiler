@@ -2,6 +2,9 @@ package IC;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import IC.MySymbolRecord.Kind;
 import IC.AST.ArrayLocation;
@@ -56,7 +59,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		List<ICClass> allClasses = new ArrayList<ICClass>();
 		
 		for(ICClass c : program.getClasses()){
-			if(!table.InsertRecord(c.getName(), new MySymbolRecord(uniqueRecord++,c,Kind.Class))){
+			if(!table.InsertRecord(c.getName(), new MySymbolRecord(uniqueRecord++,c,Kind.Class,new UserType(c.getLine(), c.getName())))){
 				return Boolean.FALSE;
 			}
 		}
@@ -114,12 +117,12 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		MySymbolTable table = new MySymbolTable(uniqueTable++);
 		table.setParent(d);
 		for(Field f : icClass.getFields()){
-			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,f,Kind.Field))){
+			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,f,Kind.Field,f.getType()))){
 				return Boolean.FALSE;
 			}
 		}
 		for(Method m : icClass.getMethods()){
-			if(!table.InsertRecord(m.getName(), new MySymbolRecord(uniqueRecord++,m,Kind.Method))){
+			if(!table.InsertRecord(m.getName(), new MySymbolRecord(uniqueRecord++,m,Kind.Method,m.getType()))){
 				return Boolean.FALSE;
 			}
 		}
@@ -131,6 +134,14 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		}
 		icClass.setEnclosingScope(table);
 		d.addChild(table);
+		try {
+			String m = icClass.getName();
+			checkShadowing(table);
+		} catch (SemanticError e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.toString());
+			return false;
+		}
 		return new Boolean(returnValue);
 	}
 
@@ -146,7 +157,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		MySymbolTable table = new MySymbolTable(uniqueTable++);
 		table.setParent(d);
 		for(Formal f : method.getFormals()){
-			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Method))){
+			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Method,f.getType()))){
 				return Boolean.FALSE;
 			}
 		}
@@ -268,7 +279,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(LocalVariable localVariable, MySymbolTable d) {
 		localVariable.setEnclosingScope(d);
-		boolean returnValue = d.InsertRecord(localVariable.getName(), new MySymbolRecord(uniqueRecord++,localVariable,Kind.Variable));
+		boolean returnValue = d.InsertRecord(localVariable.getName(), new MySymbolRecord(uniqueRecord++,localVariable,Kind.Variable,localVariable.getType()));
 		if(!returnValue){
 			System.out.println("ERROR INSERTING " + localVariable.getName() + " to table " + d.getId());
 		}
@@ -400,4 +411,46 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		returnValue &= methodType.getReturnType().accept(this, d);
 		return new Boolean(returnValue);
 	}
+	
+	/**
+	 * Shadowing semantic check in build time
+	 * @throws SemanticError 
+	 */
+	private void checkShadowing(MySymbolTable classTable) throws SemanticError{
+		
+		MySymbolTable extendedClassTable = classTable.getParent();
+		Map<String,MySymbolRecord> c_symbols = classTable.getEntries(); 
+		Map<String,MySymbolRecord> ex_symbols = extendedClassTable.getEntries();
+		Set<Entry<String,MySymbolRecord>> c_entries = c_symbols.entrySet();
+		Set<Entry<String,MySymbolRecord>> ex_entries = c_symbols.entrySet();
+		
+		while(extendedClassTable.getParent() != null){
+			//check fields and methods shadowing and correct overriding
+			
+			for(Entry<String,MySymbolRecord> symbol : c_entries){
+				if(ex_symbols.containsKey(symbol.getKey())){ // field or method with the same name as in extended class
+					if(symbol.getValue().getKind()==Kind.Field){
+						throw new SemanticError("Field or method with the field name "+symbol.getKey()+" already defined in extended classes", 
+								symbol.getValue().getNode().getLine());
+						// shadowing with a filed name is not allowed 
+					}
+					if(symbol.getValue().getKind() == Kind.Method){
+						MySymbolRecord ex_symbol_rec = ex_symbols.get(symbol.getKey());
+						MySymbolRecord symbol_rec = symbol.getValue();
+						if(ex_symbol_rec.getKind()!=symbol_rec.getKind()) // method name shadows a field or method with different type(static/virtual)
+							throw new SemanticError("Method or field with the method name "+symbol.getKey()+" already defined in extended classes", 
+									symbol.getValue().getNode().getLine());						
+						//check method signatures
+						if(! symbol_rec.getType().equals(ex_symbol_rec.getType()))
+							throw new SemanticError("Method with the method name "+symbol.getKey()+" already defined in extended classes. Overloading is not allowed.", 
+									symbol.getValue().getNode().getLine());	
+					}
+				}
+			}
+			
+			extendedClassTable = extendedClassTable.getParent();
+		}
+		
+	}
+
 }
