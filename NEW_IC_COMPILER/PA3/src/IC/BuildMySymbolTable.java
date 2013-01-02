@@ -1,5 +1,8 @@
 package IC;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import IC.MySymbolRecord.Kind;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
@@ -49,29 +52,55 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		MySymbolTable table = new MySymbolTable(uniqueTable++);
 		table.setParent(null);
 		boolean returnValue = true;
+		//list to hold all the classes, each time we deal with a class we delete it
+		List<ICClass> allClasses = new ArrayList<ICClass>();
 		
 		for(ICClass c : program.getClasses()){
 			if(!table.InsertRecord(c.getName(), new MySymbolRecord(uniqueRecord++,c,Kind.Class))){
 				return Boolean.FALSE;
 			}
 		}
+
+		
 		for(ICClass c : program.getClasses()){
 			//directly connected classes
 			if(!c.hasSuperClass()){
 				returnValue &= c.accept(this, table);
+			}else{
+				allClasses.add(c);
 			}
 		}
 		MySymbolRecord rec;
-		for(ICClass c : program.getClasses()){
-			//connected to other classes
-			if(c.hasSuperClass()){
-				rec = table.Lookup(c.getSuperClassName());
-				if(rec != null){
-					returnValue &= c.accept(this,rec.getNode().enclosingScope());	
-				}else{
-					System.out.println("Error! class " + c.getName() + " has no superclass in program");
-					return Boolean.FALSE;
+		boolean changed = false;
+		List<ICClass> removeClasses = new ArrayList<ICClass>();
+		while(allClasses.size() > 0){
+			changed = false;
+			for(ICClass c : allClasses){
+				//connected to other classes
+				if(c.hasSuperClass()){
+					rec = table.Lookup(c.getSuperClassName());
+					if(rec != null){
+						//check if we already accepted
+						//rec.getNode() is the parent class
+						if(!allClasses.contains((ICClass)rec.getNode()))
+						{
+							returnValue &= c.accept(this,rec.getNode().enclosingScope());
+							removeClasses.add(c);
+							changed = true;
+						}
+					}else{
+						System.out.println("Undefined Class " + c.getSuperClassName());
+						return Boolean.FALSE;
+					}
 				}
+			}
+			if(!changed){
+				System.out.println("Undefined Classes " + allClasses.toString());
+				return Boolean.FALSE;
+			}else{
+				//update list
+				allClasses.removeAll(removeClasses);
+				removeClasses.clear();
 			}
 		}
 		program.setEnclosingScope(table);
@@ -188,7 +217,9 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		ifStatement.setEnclosingScope(d);
 		boolean returnValue = true;
 		returnValue &= ifStatement.getOperation().accept(this, d);
-		returnValue &= ifStatement.getElseOperation().accept(this, d);
+		if(ifStatement.hasElse()){
+			returnValue &= ifStatement.getElseOperation().accept(this, d);
+		}
 		returnValue &= ifStatement.getCondition().accept(this, d);
 		return new Boolean(returnValue);
 	}

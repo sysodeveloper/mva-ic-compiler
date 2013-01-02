@@ -236,7 +236,7 @@ public class Compiler {
 	}
 	
 	private static Boolean BuildSymbolTables(Program root, String filePath){
-		SemanticAnalyse sa = SemanticAnalyse.getInstance();
+	/*	SemanticAnalyse sa = SemanticAnalyse.getInstance();
 		sa.setRoot(root);
 		sa.analyze();
 		String fileName = (new File(filePath).getName());
@@ -244,7 +244,12 @@ public class Compiler {
 		TypeTablePrinter typePrinter = new TypeTablePrinter(
 				SymbolTable.getUsedType(), fileName);
 		System.out.println(tablePrinter);
-		System.out.println(typePrinter);
+		System.out.println(typePrinter);*/
+		BuildMySymbolTable buider = new BuildMySymbolTable();
+		boolean success = buider.visit(root, null);
+		System.out.println("Symbol tables builded? " + success);
+		System.out.println("Global table: ");
+		System.out.println(root.enclosingScope());
 		return true;
 		
 	}
