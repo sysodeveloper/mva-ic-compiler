@@ -79,13 +79,20 @@ public class MySymbolTable {
 	
 	public String toString(){
 		StringBuffer output = new StringBuffer();
+		Map<Integer, String> children = new HashMap<Integer, String>();
 		for(String key : entries.keySet()){
+			output.append("\t");
 			output.append(entries.get(key).getKind());
 			output.append(": ");
 			output.append(key);
 			output.append("\n");
+			children.put(entries.get(key).getId(),key);
 		}
-		output.append("Children tables: " + children.size());
+		output.append("Children tables: ");
+		for(MySymbolTable child : this.children){
+			
+		}
+		output.append("\n");
 		return output.toString();
 	}
 }

@@ -1,5 +1,6 @@
 package IC;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,17 +50,18 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 		Map<Integer, String> children = new HashMap<Integer, String>();
 		StringBuffer output = new StringBuffer();
 		output.append("Global Symbol Table: ");
-		output.append(Compiler.getICFileParsed());
+		output.append(new File(Compiler.getICFileParsed()).getName());
 		output.append("\n");
-		for(Entry<String, MySymbolRecord> entry : program.enclosingScope().getEntries().entrySet()){
+/*		for(Entry<String, MySymbolRecord> entry : program.enclosingScope().getEntries().entrySet()){
 			output.append("\t");
 			output.append(entry.getValue().getKind()+": ");
 			output.append(entry.getKey());
 			output.append("\n");
 			children.put(entry.getValue().getId(),entry.getKey());
-		}
+		}*/
+		output.append(program.enclosingScope());
 
-		output.append("Children tables: ");
+		/*output.append("Children tables: ");
 		for(MySymbolTable child : program.enclosingScope().getChildren()){
 			output.append(children.get(child.getId()));
 			output.append(",");
@@ -68,7 +70,7 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 		output.append("\n");
 		for(ICClass c : program.getClasses()){
 			output.append(c.accept(this));
-		}
+		}*/
 		return output;
 	}
 
