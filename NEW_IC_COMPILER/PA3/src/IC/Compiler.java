@@ -38,23 +38,23 @@ public class Compiler {
 			System.exit(1);
 		}
 		if(args.length == 1){
-			//only parse the ic file
+			// Only parse the ic file.
 			Object root = ParseICFile(args[0]);
 			BuildSymbolTables((Program)root, args[0]);
 		}else{
-			//check which arguments are entered
+			// Check which arguments are entered.
 			Object root = ParseICFile(args[0]);
 			Object libraryClass = null;
-			//check if the library needs to be parsed
-			for(int i=1;i<args.length;i++){
+			// Check if the library needs to be parsed.
+			for(int i = 1;i < args.length; ++i){
 				if(args[i].startsWith("-L")){
 					libraryClass = ParseLibraryFile(args[i].substring(2));
 					AddLibraryToRoot(root,libraryClass);
 					break;
 				}
 			}
-			//check if needs to be printed
-			for(int i=1;i<args.length;i++){
+			// Check if needs to be printed.
+			for(int i = 1; i < args.length; ++i){
 				if(args[i].compareTo("-print-ast") == 0){
 					LabelAST(root, 0);
 					PrintASTCommand(root);
@@ -63,6 +63,14 @@ public class Compiler {
 				}
 			}
 			BuildSymbolTables((Program)root, args[0]);
+			
+			// Check if needs to dump symbol table and type table.
+			for(int i = 1; i < args.length; ++i){
+				if(args[i].compareTo("-dump-symtab") == 0){
+					dumpTable(args[0]);
+					break;
+				}
+			}
 		}		
 	}
 
@@ -235,22 +243,44 @@ public class Compiler {
 		return null;
 	}
 	
+	/*
 	private static Boolean BuildSymbolTables(Program root, String filePath){
-	/*	SemanticAnalyse sa = SemanticAnalyse.getInstance();
+		SemanticAnalyse sa = SemanticAnalyse.getInstance();
 		sa.setRoot(root);
 		sa.analyze();
-		String fileName = (new File(filePath).getName());
-		SymbolTablePrinter tablePrinter = new SymbolTablePrinter(fileName, root);
+		return true;
+		
+	}
+	*/
+	
+	private static Boolean BuildSymbolTables(Program root, String filePath){
+		/*	SemanticAnalyse sa = SemanticAnalyse.getInstance();
+			sa.setRoot(root);
+			sa.analyze();
+			String fileName = (new File(filePath).getName());
+			SymbolTablePrinter tablePrinter = new SymbolTablePrinter(fileName, root);
+			TypeTablePrinter typePrinter = new TypeTablePrinter(
+					SymbolTable.getUsedType(), fileName);
+			System.out.println(tablePrinter);
+			System.out.println(typePrinter);*/
+			BuildMySymbolTable buider = new BuildMySymbolTable();
+			boolean success = buider.visit(root, null);
+			System.out.println("Symbol tables builded? " + success);
+			MySymbolTablePrinter printer = new MySymbolTablePrinter();
+			System.out.println(printer.visit(root));
+			return true;
+			
+	}
+	
+	/**
+	 * Dump the symbol and type table.
+	 */
+	private static void dumpTable(String fileName) {
+		SymbolTablePrinter tablePrinter = new SymbolTablePrinter(fileName, 
+				(Program)(SymbolTable.getRoot().getParentNode()));
 		TypeTablePrinter typePrinter = new TypeTablePrinter(
 				SymbolTable.getUsedType(), fileName);
 		System.out.println(tablePrinter);
-		System.out.println(typePrinter);*/
-		BuildMySymbolTable buider = new BuildMySymbolTable();
-		boolean success = buider.visit(root, null);
-		System.out.println("Symbol tables builded? " + success);
-		MySymbolTablePrinter printer = new MySymbolTablePrinter();
-		System.out.println(printer.visit(root));
-		return true;
-		
+		System.out.println(typePrinter);
 	}
 }
