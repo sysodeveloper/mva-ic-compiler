@@ -52,7 +52,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(Program program, MySymbolTable d) {
 		//build current symbol table
-		MySymbolTable table = new MySymbolTable(uniqueTable++);
+		MySymbolTable table = new MySymbolTable(uniqueTable++,"");
 		table.setParent(null);
 		boolean returnValue = true;
 		//list to hold all the classes, each time we deal with a class we delete it
@@ -114,24 +114,19 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(ICClass icClass, MySymbolTable d) {
 		//d is the symbol table of the parent symbol class
 		boolean returnValue = true;
-		MySymbolTable table = new MySymbolTable(uniqueTable++);
+		MySymbolTable table = new MySymbolTable(uniqueTable++,"");
 		table.setParent(d);
 		for(Field f : icClass.getFields()){
 			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,f,Kind.Field,f.getType()))){
 				return Boolean.FALSE;
 			}
-		}
-		for(Method m : icClass.getMethods()){
-			if(!table.InsertRecord(m.getName(), new MySymbolRecord(uniqueRecord++,m,Kind.Method,m.getType()))){
-				return Boolean.FALSE;
-			}
-		}
+		}		
 		for(Field f : icClass.getFields()){
 			returnValue &= f.accept(this,table);
 		}
 		for(Method m : icClass.getMethods()){
 			returnValue &= m.accept(this,table);
-		}
+		}				
 		icClass.setEnclosingScope(table);
 		d.addChild(table);
 		try {
@@ -154,17 +149,17 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(Method method,MySymbolTable d){
 		boolean returnValue = true;
 		//d is the symbol table of the parent symbol class
-		MySymbolTable table = new MySymbolTable(uniqueTable++);
+		MySymbolTable table = new MySymbolTable(uniqueTable++,"");
 		table.setParent(d);
 		for(Formal f : method.getFormals()){
-			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Method,f.getType()))){
+			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,f,Kind.Parameter,f.getType()))){
 				return Boolean.FALSE;
 			}
 		}
 		for(Statement s : method.getStatements()){
 			returnValue &= s.accept(this, table);
 		}
-		returnValue &= method.getType().accept(this, table);
+		//returnValue &= method.getType().accept(this, table);
 		method.setEnclosingScope(table);
 		d.addChild(table);
 		return new Boolean(returnValue);
@@ -172,17 +167,23 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	
 	@Override
 	public Boolean visit(VirtualMethod method, MySymbolTable d) {
-		return visit((Method)method,d);
+		boolean visited = visit((Method)method,d);		
+		boolean returnValue = d.InsertRecord(method.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Virtual_Method,method.getType())) ; 
+		return visited&&returnValue;
 	}
 
 	@Override
 	public Boolean visit(StaticMethod method, MySymbolTable d) {
-		return visit((Method)method,d);
+		boolean visited = visit((Method)method,d);
+		boolean returnValue = d.InsertRecord(method.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Static_Method,method.getType())) ; 
+		return visited&&returnValue;
 	}
 
 	@Override
 	public Boolean visit(LibraryMethod method, MySymbolTable d) {
-		return visit((Method)method,d);
+		boolean visited =visit((Method)method,d);
+		boolean returnValue = d.InsertRecord(method.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Library_Method,method.getType())) ; 
+		return visited&&returnValue;
 	}
 
 	@Override
@@ -263,7 +264,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		System.out.println("STATEMENT BLOCK");
 		boolean returnValue = true;
 		//d is the symbol table of the parent symbol class
-		MySymbolTable table = new MySymbolTable(uniqueTable++);
+		MySymbolTable table = new MySymbolTable(uniqueTable++,"");
 		table.setParent(d);
 		System.out.println("ACCEPT " + table.getId());
 		System.out.println("LIST SIZE = " + statementsBlock.getStatements().size());
@@ -279,7 +280,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(LocalVariable localVariable, MySymbolTable d) {
 		localVariable.setEnclosingScope(d);
-		boolean returnValue = d.InsertRecord(localVariable.getName(), new MySymbolRecord(uniqueRecord++,localVariable,Kind.Variable,localVariable.getType()));
+		boolean returnValue = d.InsertRecord(localVariable.getName(), new MySymbolRecord(uniqueRecord++,localVariable,Kind.Local_Variable,localVariable.getType()));
 		if(!returnValue){
 			System.out.println("ERROR INSERTING " + localVariable.getName() + " to table " + d.getId());
 		}
@@ -420,12 +421,13 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		
 		MySymbolTable extendedClassTable = classTable.getParent();
 		Map<String,MySymbolRecord> c_symbols = classTable.getEntries(); 
-		Map<String,MySymbolRecord> ex_symbols = extendedClassTable.getEntries();
+		Map<String,MySymbolRecord> ex_symbols ;
 		Set<Entry<String,MySymbolRecord>> c_entries = c_symbols.entrySet();
-		Set<Entry<String,MySymbolRecord>> ex_entries = c_symbols.entrySet();
+		
 		
 		while(extendedClassTable.getParent() != null){
 			//check fields and methods shadowing and correct overriding
+			ex_symbols = extendedClassTable.getEntries();
 			
 			for(Entry<String,MySymbolRecord> symbol : c_entries){
 				if(ex_symbols.containsKey(symbol.getKey())){ // field or method with the same name as in extended class
@@ -434,7 +436,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 								symbol.getValue().getNode().getLine());
 						// shadowing with a filed name is not allowed 
 					}
-					if(symbol.getValue().getKind() == Kind.Method){
+					if(symbol.getValue().getKind() == Kind.Virtual_Method || symbol.getValue().getKind() == Kind.Static_Method ){
 						MySymbolRecord ex_symbol_rec = ex_symbols.get(symbol.getKey());
 						MySymbolRecord symbol_rec = symbol.getValue();
 						if(ex_symbol_rec.getKind()!=symbol_rec.getKind()) // method name shadows a field or method with different type(static/virtual)
