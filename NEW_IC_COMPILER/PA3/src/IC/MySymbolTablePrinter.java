@@ -25,6 +25,7 @@ import IC.AST.LogicalBinaryOp;
 import IC.AST.LogicalUnaryOp;
 import IC.AST.MathBinaryOp;
 import IC.AST.MathUnaryOp;
+import IC.AST.Method;
 import IC.AST.MethodType;
 import IC.AST.NewArray;
 import IC.AST.NewClass;
@@ -47,46 +48,30 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 
 	@Override
 	public StringBuffer visit(Program program) {
-		Map<Integer, String> children = new HashMap<Integer, String>();
 		StringBuffer output = new StringBuffer();
 		output.append("Global Symbol Table: ");
 		output.append(new File(Compiler.getICFileParsed()).getName());
 		output.append("\n");
-/*		for(Entry<String, MySymbolRecord> entry : program.enclosingScope().getEntries().entrySet()){
-			output.append("\t");
-			output.append(entry.getValue().getKind()+": ");
-			output.append(entry.getKey());
-			output.append("\n");
-			children.put(entry.getValue().getId(),entry.getKey());
-		}*/
 		output.append(program.enclosingScope());
-
-		/*output.append("Children tables: ");
-		for(MySymbolTable child : program.enclosingScope().getChildren()){
-			output.append(children.get(child.getId()));
-			output.append(",");
-		}
-		output.deleteCharAt(output.length()-1);
-		output.append("\n");
 		for(ICClass c : program.getClasses()){
 			output.append(c.accept(this));
-		}*/
+		}
 		return output;
 	}
 
 	@Override
 	public StringBuffer visit(ICClass icClass) {
-		Map<Integer, String> children = new HashMap<Integer, String>();
 		StringBuffer output = new StringBuffer();
+		output.append("\n");
 		output.append("Class Symbol Table: ");
 		output.append(icClass.getName());
 		output.append("\n");
-		for(Entry<String, MySymbolRecord> entry : icClass.enclosingScope().getEntries().entrySet()){
-			output.append("\t");
-			output.append(entry.getValue().getKind()+": ");
-			output.append(entry.getKey());
-			output.append("\n");
-			children.put(entry.getValue().getId(),entry.getKey());
+		output.append(icClass.enclosingScope());
+		for(Method m : icClass.getMethods()){
+			output.append(m.accept(this));
+		}
+		for(Field f : icClass.getFields()){
+			output.append(f.accept(this));
 		}
 		return output;
 	}
