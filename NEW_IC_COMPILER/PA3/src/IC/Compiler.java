@@ -40,7 +40,13 @@ public class Compiler {
 		if(args.length == 1){
 			// Only parse the ic file.
 			Object root = ParseICFile(args[0]);
-			BuildSymbolTables((Program)root, args[0]);
+			if(BuildSymbolTables((Program)root, args[0])) {
+				System.out.println("Build symbol table complete.");
+			}
+			else {
+				System.err.println("Build symbol table failed.");
+				return;
+			}
 		}else{
 			// Check which arguments are entered.
 			Object root = ParseICFile(args[0]);
@@ -62,7 +68,14 @@ public class Compiler {
 					break;
 				}
 			}
-			BuildSymbolTables((Program)root, args[0]);
+			
+			if(BuildSymbolTables((Program)root, args[0])) {
+				System.out.println("Build symbol table complete.");
+			}
+			else {
+				System.err.println("Build symbol table failed.");
+				return;
+			}
 			
 			// Check if needs to dump symbol table and type table.
 			for(int i = 1; i < args.length; ++i){
@@ -243,26 +256,24 @@ public class Compiler {
 		return null;
 	}
 	
-	/*
+	
 	private static Boolean BuildSymbolTables(Program root, String filePath){
 		SemanticAnalyse sa = SemanticAnalyse.getInstance();
 		sa.setRoot(root);
 		sa.analyze();
-		return true;
 		
+		if(!sa.getErrors().isEmpty()) {
+			for (Exception e : sa.getErrors()) {
+				System.err.println(e.getMessage());
+			}
+			return false;
+		}
+		
+		return true;
 	}
-	*/
 	
+	/*
 	private static Boolean BuildSymbolTables(Program root, String filePath){
-		/*	SemanticAnalyse sa = SemanticAnalyse.getInstance();
-			sa.setRoot(root);
-			sa.analyze();
-			String fileName = (new File(filePath).getName());
-			SymbolTablePrinter tablePrinter = new SymbolTablePrinter(fileName, root);
-			TypeTablePrinter typePrinter = new TypeTablePrinter(
-					SymbolTable.getUsedType(), fileName);
-			System.out.println(tablePrinter);
-			System.out.println(typePrinter);*/
 			BuildMySymbolTable buider = new BuildMySymbolTable();
 			boolean success = buider.visit(root, null);
 			System.out.println("Symbol tables builded? " + success);
@@ -271,7 +282,7 @@ public class Compiler {
 			return true;
 			
 	}
-	
+	*/
 	/**
 	 * Dump the symbol and type table.
 	 */
