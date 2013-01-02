@@ -17,9 +17,10 @@ public class MySymbolTable {
 	private int id;
 	private MySymbolTable parent;
 	private List<MySymbolTable> children;
-	
-	public MySymbolTable(int id){
+	private String description;
+	public MySymbolTable(int id, String description){
 		this.id = id;
+		this.description = description;
 		entries = new HashMap<String, MySymbolRecord>();
 		children = new ArrayList<MySymbolTable>();
 	}
