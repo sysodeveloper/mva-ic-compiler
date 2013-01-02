@@ -14,6 +14,8 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 	private String name;
 
 	private String superClassName = null;
+	
+	private UserType m_userType;
 
 	private List<Field> fields;
 
@@ -22,6 +24,11 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 	/** The symbol table of this class.
 	 */
 	private SymbolTable m_InnerTable;
+	
+	/**
+	 * The static table of that class;
+	 */
+	private SymbolTable m_staticTable;
 
 	/**
 	 * @return The table.
@@ -67,7 +74,8 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 		this.fields = fields;
 		this.methods = methods;
 		setInnerTable(new SymbolTable(SymbolTable.getNextId(), null, this));
-		UserType.getICClasses().add(this);
+		setStaticTable(new SymbolTable(SymbolTable.getNextId(), null, this));
+		setUserType(new UserType(this));
 	}
 
 	/**
@@ -110,6 +118,34 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 		return methods;
 	}
 	
+	/**
+	 * @return the m_userType
+	 */
+	public UserType getUserType() {
+		return m_userType;
+	}
+
+	/**
+	 * @param m_userType the m_userType to set
+	 */
+	public void setUserType(UserType m_userType) {
+		this.m_userType = m_userType;
+	}
+	
+	/**
+	 * @return the m_staticTable
+	 */
+	public SymbolTable getStaticTable() {
+		return m_staticTable;
+	}
+
+	/**
+	 * @param m_staticTable the m_staticTable to set
+	 */
+	public void setStaticTable(SymbolTable m_staticTable) {
+		this.m_staticTable = m_staticTable;
+	}
+
 	/**
 	 * The hash code for the type.
 	 */
