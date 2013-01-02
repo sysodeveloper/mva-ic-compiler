@@ -77,15 +77,6 @@ public class MySymbolTable {
 		return null;
 	}
 	
-	public String GetNameByID(int id){
-		for(Entry<String,MySymbolRecord> entry : this.entries.entrySet()){
-			if(entry.getValue().getId() == id){
-				return entry.getKey();
-			}
-		}
-		return "Unkown";
-	}
-	
 	public String toString(){
 		StringBuffer output = new StringBuffer();
 		for(String key : entries.keySet()){
