@@ -1,8 +1,5 @@
-                                                                     
-                                                                     
-                                                                     
-                                             
-class IhateCom{
+                                        
+/*class IhateCom{
 	int x,t;
 	int foo(){
 	}
@@ -46,4 +43,73 @@ class IhateCom{
 			}	
 		}		
 	}
+}*/
+
+class A{
+	void test(int r, string name){
+		while(r>0){
+		x=x+1;			
+		continue;
+		break;	
+		}
+		
+		if( p > 0)
+			p=1;
+		else{
+			p = t;
+			break;
+		}	
+	}
+	
+	int field;
+	string p;
+	
+	void func(){
+		int un = 9;
+		return un;
+		p= new String[5];
+		l = p.length;
+		int l;
+	}
+	
+	int f(int u){
+		int rre;
+		rre =8;
+		u=5;
+	}
+	
+	void g(){
+		
+		{
+			int x;
+			x=9;
+			x = new RR();
+		}
+		
+	}
+}
+
+class B extends A {
+	Y k;
+	void gt(int a1, int a2){
+		a1 =1;
+		int a3;
+		{
+			a1 =6;
+			a3 =5;
+			a6 =6;
+			a1 = new C();
+			int a6;
+		}
+	}
+}
+
+class C extends B{
+	string p;
+	void g(int t){
+		
+		t = 5;		
+	}
+	
+	int t(){}
 }
