@@ -160,7 +160,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(Return returnStatement, MySymbolTable d) {
 		// TODO Auto-generated method stub
-		return true;
+		return returnStatement.getValue().accept(this, d) ;
 	}
 
 	@Override
@@ -221,13 +221,13 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(VariableLocation location, MySymbolTable d) {
 		boolean result = true;
-		if(!location.isExternal()){
+		/*if(!location.isExternal()){
 			result = checkVariable(location.getName(), d);
 			if(!result){
 				semanticErrors.add(new SemanticError("undefined variable with the name "+location.getName() , location.getLine()));
 				return false;
 			}
-		}
+		}*/
 		if(location.isExternal()){ // need to think what to do here !!!
 			result &= location.getLocation().accept(this, d);
 			result &= checkVariable(location.getName(), location.getLocation().enclosingScope()); // need to check for location in another scope
