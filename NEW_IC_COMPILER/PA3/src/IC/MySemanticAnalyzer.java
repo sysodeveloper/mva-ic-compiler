@@ -53,17 +53,18 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(Program program, MySymbolTable d) {
 		globalScope = program.enclosingScope();
 		Boolean result = true;
-		for(ICClass c:program.getClasses()){
-			result &= c.accept(this,program.enclosingScope());
-			
-		}
+		for(ICClass c:program.getClasses())
+			putAllClasseScopes(c.enclosingScope());
+		
+		for(ICClass c:program.getClasses())			
+			result &= c.accept(this,program.enclosingScope());		
 		return result;
 	}
 
 	@Override
 	public Boolean visit(ICClass icClass, MySymbolTable d) {
 		MySymbolTable scope = icClass.enclosingScope();		
-		putAllClasseScopes(scope);		
+				
 		boolean result =true;
 		for(Field f:icClass.getFields()){
 			result &= f.accept(this,scope);			
@@ -274,9 +275,9 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		// TODO Auto-generated method stub
 		boolean result = true;
 		if(!call.isExternal()){ // direct calling
-			result = checkFunction(call.getName(), d);
+			result = checkFunction(call.getName(), d, Kind.Virtual_Method);
 			if(!result){
-				semanticErrors.add(new SemanticError("call to undefined function "+call.getName(), call.getLine()));			
+				semanticErrors.add(new SemanticError("call to undefined virtual function "+call.getName(), call.getLine()));			
 				return false;
 			}
 			
@@ -287,9 +288,9 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 				return false;
 			
 			if(call.getLocation() instanceof This){ // calling to virtual method of current class
-				result = checkFunction(call.getName(), d);
+				result = checkFunction(call.getName(), d, Kind.Virtual_Method);
 				if(!result){
-					semanticErrors.add(new SemanticError("call to undefined function "+call.getName(), call.getLine()));			
+					semanticErrors.add(new SemanticError("call to undefined virtual function "+call.getName(), call.getLine()));			
 					return false;
 				}
 				
@@ -309,6 +310,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(This thisExpression, MySymbolTable d) {
 		// TODO Auto-generated method stub
+		
 		return true;
 	}
 
@@ -402,12 +404,12 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		return false;
 	}
 	
-private boolean checkFunction(String varName, MySymbolTable scope){
+private boolean checkFunction(String varName, MySymbolTable scope ,Kind functionKind){
 		
 		while(scope.getParent()!=null){
 			Map<String,MySymbolRecord> records = scope.getEntries();
 			if(records.containsKey(varName) && 
-					(records.get(varName).getKind()== Kind.Virtual_Method || records.get(varName).getKind()== Kind.Static_Method) && 
+					(records.get(varName).getKind()== functionKind) && 
 					records.get(varName).isDeclared())
 				return true;
 			scope = scope.getParent();
@@ -418,6 +420,7 @@ private boolean checkFunction(String varName, MySymbolTable scope){
 	
 	private void putAllClasseScopes(MySymbolTable scope){
 		classScopes.put(scope.getDescription(), scope);
+		System.out.println("puting scope "+scope.getDescription());
 		if(scope.getChildren().size() == 0)
 			return;
 		
