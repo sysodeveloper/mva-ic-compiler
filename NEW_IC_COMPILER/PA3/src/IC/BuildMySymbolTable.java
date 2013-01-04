@@ -59,7 +59,9 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		List<ICClass> allClasses = new ArrayList<ICClass>();
 		
 		for(ICClass c : program.getClasses()){
-			if(!table.InsertRecord(c.getName(), new MySymbolRecord(uniqueRecord++,c,Kind.Class,new UserType(c.getLine(), c.getName())))){
+			MySymbolRecord record =  new MySymbolRecord(uniqueRecord++,c,Kind.Class,new UserType(c.getLine(), c.getName()));
+			if(!table.InsertRecord(c.getName(),record)){
+				c.setRecord(record);
 				return Boolean.FALSE;
 			}
 		}
@@ -117,7 +119,9 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		MySymbolTable table = new MySymbolTable(uniqueTable++,icClass.getName());
 		table.setParent(d);
 		for(Field f : icClass.getFields()){
-			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,f,Kind.Field,f.getType()))){
+			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,f,Kind.Field,f.getType());
+			if(!table.InsertRecord(f.getName(),record )){
+				f.setRecord(record);
 				return Boolean.FALSE;
 			}
 		}		
@@ -148,41 +152,67 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 
 	public Boolean visit(Method method,MySymbolTable d){
 		boolean returnValue = true;
-		//d is the symbol table of the parent symbol class
+		if(method instanceof VirtualMethod)
+			returnValue = ((VirtualMethod)method).accept(this, d);
+		else
+			returnValue = ((StaticMethod)method).accept(this, d);
+		return returnValue;
+	}
+	
+	@Override
+	public Boolean visit(VirtualMethod method, MySymbolTable d) {
+		boolean returnValue = true;	
+		MySymbolRecord trecord = new MySymbolRecord(uniqueRecord++,method,Kind.Virtual_Method,method.getType());
+		returnValue = d.InsertRecord(method.getName(),trecord) ;
+		method.setRecord(trecord);	
+		
 		MySymbolTable table = new MySymbolTable(uniqueTable++,method.getName());
 		table.setParent(d);
 		for(Formal f : method.getFormals()){
-			if(!table.InsertRecord(f.getName(), new MySymbolRecord(uniqueRecord++,f,Kind.Parameter,f.getType()))){
-				return Boolean.FALSE;
+			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,f,Kind.Parameter,f.getType());
+			if(!table.InsertRecord(f.getName(), record)){
+				f.setRecord(record);
 			}
 		}
 		for(Statement s : method.getStatements()){
 			returnValue &= s.accept(this, table);
 		}
-		//returnValue &= method.getType().accept(this, table);
+		
 		method.setEnclosingScope(table);
 		d.addChild(table);
-		return new Boolean(returnValue);
-	}
-	
-	@Override
-	public Boolean visit(VirtualMethod method, MySymbolTable d) {
-		boolean visited = visit((Method)method,d);		
-		boolean returnValue = d.InsertRecord(method.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Virtual_Method,method.getType())) ; 
-		return visited&&returnValue;
+		return returnValue;
 	}
 
 	@Override
 	public Boolean visit(StaticMethod method, MySymbolTable d) {
-		boolean visited = visit((Method)method,d);
-		boolean returnValue = d.InsertRecord(method.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Static_Method,method.getType())) ; 
-		return visited&&returnValue;
+		boolean returnValue = true;	
+		MySymbolRecord trecord = new MySymbolRecord(uniqueRecord++,method,Kind.Static_Method,method.getType());
+		returnValue = d.InsertRecord(method.getName(),trecord) ;
+		method.setRecord(trecord);	
+		
+		MySymbolTable table = new MySymbolTable(uniqueTable++,method.getName());
+		table.setParent(d);
+		for(Formal f : method.getFormals()){
+			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,f,Kind.Parameter,f.getType());
+			if(!table.InsertRecord(f.getName(), record)){
+				f.setRecord(record);
+			}
+		}
+		for(Statement s : method.getStatements()){
+			returnValue &= s.accept(this, table);
+		}
+		
+		method.setEnclosingScope(table);
+		d.addChild(table);
+		return returnValue;
 	}
 
 	@Override
 	public Boolean visit(LibraryMethod method, MySymbolTable d) {
 		boolean visited =visit((Method)method,d);
-		boolean returnValue = d.InsertRecord(method.getName(), new MySymbolRecord(uniqueRecord++,method,Kind.Library_Method,method.getType())) ; 
+		MySymbolRecord record = new MySymbolRecord(uniqueRecord++,method,Kind.Library_Method,method.getType());
+		boolean returnValue = d.InsertRecord(method.getName(), record) ; 
+		method.setRecord(record);
 		return visited&&returnValue;
 	}
 
@@ -190,6 +220,12 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(Formal formal, MySymbolTable d) {
 		formal.setEnclosingScope(d);
 		boolean returnValue = formal.getType().accept(this, d);
+		if(returnValue){
+			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,formal,Kind.Parameter,formal.getType());
+			record.setAsDeclared();
+			d.InsertRecord(formal.getName(),record );
+			formal.setRecord(record);
+		}
 		return new Boolean(returnValue);
 	}
 
@@ -208,9 +244,12 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(Assignment assignment, MySymbolTable d) {
 		assignment.setEnclosingScope(d);
-		boolean returnValue = assignment.getVariable().accept(this,d);
-		returnValue &= assignment.getAssignment().accept(this,d);
-		return new Boolean(returnValue);
+		boolean var = assignment.getVariable().accept(this,d);
+		
+		boolean assign =  assignment.getAssignment().accept(this,d);
+		if(assign)
+			setInitialization(((VariableLocation)assignment.getVariable()).getName(), d);
+		return var&&assign;
 	}
 
 	@Override
@@ -241,9 +280,13 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(While whileStatement, MySymbolTable d) {
+		boolean returnValue = whileStatement.getCondition().accept(this, d);
 		whileStatement.setEnclosingScope(d);
-		boolean returnValue = whileStatement.getOperation().accept(this, d);
-		returnValue &= whileStatement.getCondition().accept(this, d);
+		MySymbolTable table = new MySymbolTable(uniqueTable++,"while in " + d.getDescription());
+		table.setParent(d);
+		whileStatement.setEnclosingScope(table);
+		d.getChildren().add(table);		
+		returnValue = whileStatement.getOperation().accept(this, table);		
 		return new Boolean(returnValue);
 	}
 
@@ -280,10 +323,15 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(LocalVariable localVariable, MySymbolTable d) {
 		localVariable.setEnclosingScope(d);
-		boolean returnValue = d.InsertRecord(localVariable.getName(), new MySymbolRecord(uniqueRecord++,localVariable,Kind.Local_Variable,localVariable.getType()));
-		if(!returnValue){
+		MySymbolRecord record = new MySymbolRecord(uniqueRecord++,localVariable,Kind.Local_Variable,localVariable.getType());
+		boolean returnValue = d.InsertRecord(localVariable.getName(), record);
+		if(!returnValue){			
 			System.out.println("ERROR INSERTING " + localVariable.getName() + " to table " + d.getId());
 		}
+		record.setAsDeclared();
+		if(localVariable.hasInitValue())
+			record.setAsInitialized();
+		localVariable.setRecord(record);
 		return new Boolean(returnValue);
 	}
 
@@ -293,6 +341,15 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		boolean returnValue = true;
 		if(location.isExternal()){
 			returnValue = location.getLocation().accept(this,d);
+			if(!returnValue)
+				return false;
+		}
+		try {
+			checkVariableDeclaration(location, d);
+		} catch (SemanticError e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.toString());
+			return false;
 		}
 		return new Boolean(returnValue);
 	}
@@ -453,6 +510,33 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 			extendedClassTable = extendedClassTable.getParent();
 		}
 		
+	}
+	
+	private void checkVariableDeclaration(VariableLocation var, MySymbolTable scope) throws SemanticError{
+		String varName = var.getName();
+		while(scope.getParent()!=null){
+			if(scope.getEntries().containsKey(varName) && 
+					(scope.getEntries().get(varName).getKind() == Kind.Local_Variable || scope.getEntries().get(varName).getKind() == Kind.Field || scope.getEntries().get(varName).getKind() == Kind.Parameter))
+			{
+				if(scope.getEntries().get(varName).getKind() == Kind.Local_Variable && !scope.getEntries().get(varName).isInitialized()) // check for initialization
+					throw new SemanticError("variable "+varName+" has not been initialized",var.getLine());
+				else
+					return;
+			}
+			scope = scope.getParent();
+		}
+		
+		throw new SemanticError("use of undefined variable "+varName,var.getLine());
+	}
+	
+	private void setInitialization(String varName,  MySymbolTable scope ){
+		while(scope.getParent()!=null){
+			if(scope.getEntries().containsKey(varName)){
+				scope.getEntries().get(varName).setAsInitialized();
+				break;
+			}
+			scope = scope.getParent();
+		}
 	}
 
 }
