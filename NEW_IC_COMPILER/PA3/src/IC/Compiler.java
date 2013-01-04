@@ -278,8 +278,14 @@ public class Compiler {
 			BuildMySymbolTable buider = new BuildMySymbolTable();
 			boolean success = buider.visit(root, null);
 			System.out.println("Symbol tables builded? " + success);
-			MySymbolTablePrinter printer = new MySymbolTablePrinter();
-			System.out.println(printer.visit(root));
+			MySemanticAnalyzer analyzer = new MySemanticAnalyzer();
+			boolean analyze = analyzer.visit(root,null);
+			if(!analyze)				
+					analyzer.printErrorStack();
+				
+				
+			//MySymbolTablePrinter printer = new MySymbolTablePrinter();
+			//System.out.println(printer.visit(root));
 			return true;
 			
 	}
