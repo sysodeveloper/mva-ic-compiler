@@ -88,7 +88,7 @@ public class MySymbolTable {
 	public String toString(){
 		StringBuffer output = new StringBuffer();
 		StringBuffer[] chunks = { new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer() };
-		Map<Integer, String> childrenMap = new HashMap<Integer, String>();
+		//Map<Integer, String> childrenMap = new HashMap<Integer, String>();
 		int i = 0;
 		for(String key : entries.keySet()){
 			switch(this.entries.get(key).getKind()){
@@ -119,7 +119,7 @@ public class MySymbolTable {
 			chunks[i].append(": ");
 			chunks[i].append(key);
 			chunks[i].append("\n");
-			childrenMap.put(entries.get(key).getNode().enclosingScope().getId(),key);
+			//childrenMap.put(entries.get(key).getNode().enclosingScope().getId(),key);
 		}
 		for(int j=0;j<chunks.length;j++){
 			output.append(chunks[j]);
