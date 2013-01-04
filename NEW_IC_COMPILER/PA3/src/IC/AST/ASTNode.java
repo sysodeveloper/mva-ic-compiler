@@ -1,5 +1,6 @@
 package IC.AST;
 
+import IC.MySymbolRecord;
 import IC.MySymbolTable;
 import IC.SymbolTable;
 
@@ -15,7 +16,16 @@ public abstract class ASTNode {
 	
 	private MySymbolTable enclosingScope;
 	
+	private MySymbolRecord record;
 	
+	public MySymbolRecord getRecord() {
+		return record;
+	}
+
+	public void setRecord(MySymbolRecord record) {
+		this.record = record;
+	}
+
 	public MySymbolTable enclosingScope(){
 		return this.enclosingScope;
 	}
@@ -23,6 +33,7 @@ public abstract class ASTNode {
 	public void setEnclosingScope(MySymbolTable scope){
 		this.enclosingScope = scope;
 	}
+	
 	
 	private SymbolTable m_OuterTable;
 	
