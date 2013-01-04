@@ -296,7 +296,21 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 				
 			}
 			else{ // calling to virtual method of other class, need to change the scope ???
-				
+				//System.out.println("classname = " + call.getLocation().toString());
+				if(call.getLocation() instanceof ExpressionBlock){ // something like (new MyClass).m
+					Expression newExp= ((ExpressionBlock)call.getLocation()).getExpression();
+					if(newExp instanceof NewClass){
+						result = checkFunction(call.getName(), classScopes.get(((NewClass)newExp).getName()), Kind.Virtual_Method);
+						if(!result){
+							semanticErrors.add(new SemanticError("call to undefined virtual function "+call.getName()+ " of class "+ ((NewClass)newExp).getName(), call.getLine()));			
+							return false;
+						}
+					}
+						
+				}
+				else if(call.getLocation() instanceof VariableLocation ){
+					return true;
+				}
 			}
 		}
 		
@@ -420,7 +434,7 @@ private boolean checkFunction(String varName, MySymbolTable scope ,Kind function
 	
 	private void putAllClasseScopes(MySymbolTable scope){
 		classScopes.put(scope.getDescription(), scope);
-		System.out.println("puting scope "+scope.getDescription());
+		//System.out.println("puting scope "+scope.getDescription());
 		if(scope.getChildren().size() == 0)
 			return;
 		
