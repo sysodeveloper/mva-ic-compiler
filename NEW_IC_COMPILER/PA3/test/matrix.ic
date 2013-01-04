@@ -1,20 +1,12 @@
+class A{
+	int f(int x){
+	}
+}
 
 class B extends A{
-	int b1;
-	int b2;
-	void funcy(){
-	}
-	static string funcu(){
-	}
+	string k;
 }
 
-class A extends Matrix{
+class C extends B{
+	string p;
 }
-
-class Matrix {
-	int p(){
-		{
-		}
-	}
-}
-
