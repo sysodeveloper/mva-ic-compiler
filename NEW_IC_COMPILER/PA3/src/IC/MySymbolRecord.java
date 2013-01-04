@@ -71,4 +71,12 @@ public class MySymbolRecord {
 	public void setAsInitialized(){
 		this.initialized = true;
 	}
+	
+	public boolean isDeclared(){
+		return this.declared;
+	}
+	
+	public boolean isInitialized(){
+		return this.initialized;
+	}
 }
