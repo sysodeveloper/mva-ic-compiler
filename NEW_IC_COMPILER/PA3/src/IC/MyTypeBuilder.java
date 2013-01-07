@@ -75,7 +75,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, Type> {
 	@Override
 	public Type visit(Field field, Object d) {
 		// TODO Auto-generated method stub
-		Type t = field.accept(this, d);
+		Type t = field.getType().accept(this, d);
 		types.insertType(t);
 		field.setTypeFromTable(t);
 		return t;
