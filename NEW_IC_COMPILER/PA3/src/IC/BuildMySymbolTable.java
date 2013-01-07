@@ -235,8 +235,10 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		assignment.setEnclosingScope(d);
 		boolean var = assignment.getVariable().accept(this,d);
 		boolean assign =  assignment.getAssignment().accept(this,d);
-		if(assign)
-			setInitialization(((VariableLocation)assignment.getVariable()).getName(), d);
+		if(assign){
+			//Does not work!
+			//setInitialization(((VariableLocation)assignment.getVariable()).getName(), d);
+		}
 		return var&&assign;
 	}
 

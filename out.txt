@@ -1,130 +1,178 @@
 digraph G{
    1
-    2
-   3 -> {2}
-  4 -> {1 3}
-   5
-    6
-   7 -> {6}
-  8 -> {5 7}
-   9
-    10
-   11 -> {10}
-  12 -> {9 11}
-   13
-    14
-   15 -> {14}
-  16 -> {13 15}
-   17
-  18 -> {17}
-   19
-  20 -> {19}
-   21
-  22 -> {21}
-   23
-    24
-   25 -> {24}
-    26
-   27 -> {26}
-  28 -> {23 25 27}
-   29
-    30
-   31 -> {30}
-  32 -> {29 31}
-   33
-    34
-   35 -> {34}
-  36 -> {33 35}
-   37
-    38
-   39 -> {38}
-  40 -> {37 39}
-   41
-    42
-   43 -> {42}
-  44 -> {41 43}
-   45
-  46 -> {45}
-   47
-    48
-   49 -> {48}
-  50 -> {47 49}
-51 -> {4 8 12 16 18 20 22 28 32 36 40 44 46 50}
-    52
-     53
-    54 -> {53}
-  55 -> {52 54}
-56 -> {55}
-   57
-58 -> {57}
-59 -> {58}
-   60
-61 -> {60}
-62 -> {61}
-63 -> {51 56 59 62}
+2 -> {1}
+   3
+4 -> {3}
+    5
+     6
+    7 -> {6}
+      8 -> {}
+            23
+            24
+          25 -> {23 24}
+        26 -> {25}
+         27
+        28 -> {27}
+      29 -> {26 28}
+          9
+          10        11 -> {9 10}
+           12 -> {}
+          13 in external scope -> {12}
+          14
+        15 -> {13 14}
+           16 -> {}
+          17 in external scope -> {16}
+          18
+        19 -> {17 18}
+         20
+        21 -> {20}
+      22 -> {11 15 19 21}
+    30 -> {8 29 22}
+  31 -> {5 7 30}
+    32
+     33
+    34 -> {33}
+     35
+    36 -> {35}
+     37
+    38 -> {37}
+      39
+        40
+        41 -> {}
+      42 -> {40 41}
+    43 -> {39 42}
+      44
+      45
+    46 -> {44 45}
+        47 -> {}
+        48 -> {}
+      49 -> {47 48}
+            50 -> {}
+            51 -> {}
+          52 -> {50 51}
+          53 -> {}
+        54 -> {52 53}
+          55 -> {}
+            56 -> {}
+            57
+          58 -> {56 57}
+        59 -> {55 58}
+            60 -> {}
+            61
+          62 -> {60 61}
+          63        64 -> {62 63}
+      65 -> {54 59 64}
+    66 -> {49 65}
+  67 -> {32 34 36 38 43 46 66}
+68 -> {2 4 31 67}
+   69
+70 -> {69}
+    71
+     72
+    73 -> {72}
+     74
+    75 -> {74}
+     76
+    77 -> {76}
+  78 -> {71 73 75 77}
+79 -> {70 78}
+    80
+     81
+    82 -> {81}
+     83
+    84 -> {83}
+  85 -> {80 82 84}
+86 -> {85}
+87 -> {68 79 86}
 
-1[label="MethodType {string -> void}"]
-2[label="PrimitiveType string"]
-3[label="Formal s"]
-4[label="LibraryMethod println"]
-5[label="MethodType {string -> void}"]
-6[label="PrimitiveType string"]
-7[label="Formal s"]
-8[label="LibraryMethod print"]
-9[label="MethodType {int -> void}"]
-10[label="PrimitiveType int"]
-11[label="Formal i"]
-12[label="LibraryMethod printi"]
-13[label="MethodType {boolean -> void}"]
-14[label="PrimitiveType boolean"]
-15[label="Formal b"]
-16[label="LibraryMethod printb"]
-17[label="MethodType {  -> int}"]
-18[label="LibraryMethod readi"]
-19[label="MethodType {  -> string}"]
-20[label="LibraryMethod readln"]
-21[label="MethodType {  -> boolean}"]
-22[label="LibraryMethod eof"]
-23[label="MethodType {string, int -> int}"]
-24[label="PrimitiveType string"]
-25[label="Formal s"]
-26[label="PrimitiveType int"]
-27[label="Formal n"]
-28[label="LibraryMethod stoi"]
-29[label="MethodType {int -> string}"]
-30[label="PrimitiveType int"]
-31[label="Formal i"]
-32[label="LibraryMethod itos"]
-33[label="MethodType {string -> int[]}"]
-34[label="PrimitiveType string"]
-35[label="Formal s"]
-36[label="LibraryMethod stoa"]
-37[label="MethodType {int[] -> string}"]
-38[label="PrimitiveType int[]"]
-39[label="Formal a"]
-40[label="LibraryMethod atos"]
-41[label="MethodType {int -> int}"]
-42[label="PrimitiveType int"]
-43[label="Formal n"]
-44[label="LibraryMethod random"]
-45[label="MethodType {  -> int}"]
-46[label="LibraryMethod time"]
-47[label="MethodType {int -> int}"]
-48[label="PrimitiveType int"]
-49[label="Formal i"]
-50[label="LibraryMethod exit"]
-51[label="Class Library"]
-52[label="MethodType {int -> int}"]
-53[label="PrimitiveType int"]
-54[label="Formal x"]
-55[label="VirtualMethod f"]
-56[label="Class A"]
-57[label="PrimitiveType string"]
-58[label="Field  k"]
-59[label="Class B has super classB"]
-60[label="PrimitiveType string"]
-61[label="Field  p"]
-62[label="Class C has super classB"]
-63[label="Program"]
+1[label="PrimitiveType string"]
+2[label="Field  str"]
+3[label="PrimitiveType int"]
+4[label="Field  i"]
+5[label="MethodType {boolean -> int}"]
+6[label="PrimitiveType boolean"]
+7[label="Formal b"]
+8[label="VariableLocation b"]
+23[label="PrimitiveType int"]
+24[label="Literal 5"]
+25[label="LocalVariable k"]
+26[label="StatementsBlock"]
+27[label="Literal 1"]
+28[label="ReturnStatement"]
+29[label="StatementsBlock"]
+9[label="UserType A"]
+10[label="NewClass instantiation A"]
+11[label="LocalVariable x"]
+12[label="VariableLocation x"]
+13[label="VariableLocation i in external scope"]
+13[label="VariableLocation i"]
+14[label="Literal 9"]
+15[label="Assignment"]
+16[label="VariableLocation x"]
+17[label="VariableLocation str in external scope"]
+17[label="VariableLocation str"]
+18[label="Literal "hello""]
+19[label="Assignment"]
+20[label="Literal 0"]
+21[label="ReturnStatement"]
+22[label="StatementsBlock"]
+30[label="IfStatement"]
+31[label="StaticMethod sfunc"]
+32[label="MethodType {A, int, int -> void}"]
+33[label="UserType A"]
+34[label="Formal a"]
+35[label="PrimitiveType int"]
+36[label="Formal max"]
+37[label="PrimitiveType int"]
+38[label="Formal val"]
+39[label="PrimitiveType int[]"]
+40[label="PrimitiveType int"]
+41[label="VariableLocation max"]
+42[label="NewArray allocation"]
+43[label="LocalVariable arr"]
+44[label="PrimitiveType int"]
+45[label="Literal 0"]
+46[label="LocalVariable i"]
+47[label="VariableLocation i"]
+48[label="VariableLocation max"]
+49[label="LogicalBinaryOp less than"]
+50[label="VariableLocation arr"]
+51[label="VariableLocation i"]
+52[label="ArrayLocation"]
+53[label="VariableLocation val"]
+54[label="Assignment"]
+55[label="VariableLocation i"]
+56[label="VariableLocation i"]
+57[label="Literal 1"]
+58[label="MathBinaryOp addition"]
+59[label="Assignment"]
+60[label="VariableLocation a"]
+61[label="Literal null"]
+62[label="LogicalBinaryOp equality"]
+63[label="BreakStatement"]
+64[label="IfStatement"]
+65[label="StatementsBlock"]
+66[label="whileStatement"]
+67[label="VirtualMethod vfunc"]
+68[label="Class A"]
+69[label="PrimitiveType int"]
+70[label="Field  j"]
+71[label="MethodType {A, int, int -> void}"]
+72[label="UserType A"]
+73[label="Formal a"]
+74[label="PrimitiveType int"]
+75[label="Formal max"]
+76[label="PrimitiveType int"]
+77[label="Formal val"]
+78[label="VirtualMethod vfunc"]
+79[label="Class B has super classA"]
+80[label="MethodType {string[] -> void}"]
+81[label="PrimitiveType string[]"]
+82[label="Formal args"]
+83[label="UserType A[][]"]
+84[label="LocalVariable a"]
+85[label="StaticMethod main"]
+86[label="Class C"]
+87[label="Program"]
 
 }
