@@ -2,6 +2,7 @@ package IC;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,7 +22,7 @@ public class MySymbolTable {
 	public MySymbolTable(int id, String description){
 		this.id = id;
 		this.description = description;
-		entries = new HashMap<String, MySymbolRecord>();
+		entries = new LinkedHashMap<String, MySymbolRecord>();
 		children = new ArrayList<MySymbolTable>();
 	}
 	
@@ -91,21 +92,27 @@ public class MySymbolTable {
 		//Map<Integer, String> childrenMap = new HashMap<Integer, String>();
 		int i = 0;
 		for(String key : entries.keySet()){
+			boolean printType = true;
+			boolean printTypeFirst = true;
 			switch(this.entries.get(key).getKind()){
 			case Class:
 				i = 0;
+				printType = false;
 				break;
 			case Field:
 				i = 1;
 				break;
 			case Static_Method:
 				i = 2;
+				printTypeFirst = false;
 				break;
 			case Library_Method:
 				i = 2;
+				printTypeFirst = false;
 				break;
 			case Virtual_Method:
 				i = 3;
+				printTypeFirst = false;
 				break;
 			case Parameter:
 					i = 4;
@@ -117,7 +124,17 @@ public class MySymbolTable {
 			chunks[i].append("\t");
 			chunks[i].append(entries.get(key).getKindToString());
 			chunks[i].append(": ");
-			chunks[i].append(key);
+			if(printType && printTypeFirst){
+				chunks[i].append(entries.get(key).getType().getFullName());
+				chunks[i].append(" ");
+				chunks[i].append(key);
+			}else if(!printTypeFirst && printType){
+				chunks[i].append(key);
+				chunks[i].append(" ");
+				chunks[i].append(entries.get(key).getType().getFullName());
+			}else{
+				chunks[i].append(key);
+			}
 			chunks[i].append("\n");
 			//childrenMap.put(entries.get(key).getNode().enclosingScope().getId(),key);
 		}

@@ -48,7 +48,12 @@ public class MySymbolRecord {
 	}
 	
 	public String getKindToString(){
-		String strKind = kind.toString();
+		String strKind = kind.toString().toLowerCase();
+		if(strKind.length() >= 1){
+			String first = strKind.charAt(0) + "";
+			first = first.toUpperCase();
+			strKind = first + strKind.substring(1);
+		}
 		return strKind.replace('_', ' ');
 	}
 	
