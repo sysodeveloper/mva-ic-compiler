@@ -157,32 +157,45 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 
 	@Override
 	public StringBuffer visit(Assignment assignment) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append(assignment.getVariable().accept(this));
+		output.append(assignment.getAssignment().accept(this));
+		return output;
 	}
 
 	@Override
 	public StringBuffer visit(CallStatement callStatement) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append(callStatement.getCall().accept(this));
+		return output;
 	}
 
 	@Override
 	public StringBuffer visit(Return returnStatement) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		if(returnStatement.hasValue()){
+			output.append(returnStatement.getValue().accept(this));
+		}
+		return output;
 	}
 
 	@Override
 	public StringBuffer visit(If ifStatement) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append(ifStatement.getCondition().accept(this));
+		output.append(ifStatement.getOperation().accept(this));
+		if(ifStatement.hasElse()){
+			output.append(ifStatement.getElseOperation().accept(this));
+		}
+		return output;	
 	}
 
 	@Override
 	public StringBuffer visit(While whileStatement) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append(whileStatement.getCondition().accept(this));
+		output.append(whileStatement.getOperation().accept(this));
+		return output;	
 	}
 
 	@Override
@@ -213,21 +226,28 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 
 	@Override
 	public StringBuffer visit(LocalVariable localVariable) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		output.append(localVariable.getType().accept(this));
+		if(localVariable.hasInitValue()){
+			output.append(localVariable.getInitValue().accept(this));	
+		}
+		return output;	
 	}
 
 	@Override
 	public StringBuffer visit(VariableLocation location) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
+		StringBuffer output = new StringBuffer();
+		if(location.isExternal()){
+			output.append(location.getLocation().accept(this));	
+		}
+		return output;	
 	}
-
 	@Override
 	public StringBuffer visit(ArrayLocation location) {
-		// TODO Auto-generated method stub
-		return new StringBuffer();
-	}
+		StringBuffer output = new StringBuffer();
+		output.append(location.getArray().accept(this));
+		output.append(location.getIndex().accept(this));
+		return output;		}
 
 	@Override
 	public StringBuffer visit(StaticCall call) {
