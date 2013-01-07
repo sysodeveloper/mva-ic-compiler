@@ -131,6 +131,7 @@ public class MySymbolTable {
 				output.append(", ");
 			}
 			output.deleteCharAt(output.length()-1);
+			output.deleteCharAt(output.length()-1);
 			output.append("\n");
 		}
 		return output.toString();
