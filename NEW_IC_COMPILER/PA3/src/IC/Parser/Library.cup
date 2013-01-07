@@ -62,8 +62,8 @@ terminal UNOP;
 // The grammar
 libic ::= CLASS CLASS_ID:id LCBR libmethod:lstMethods RCBR
 {:
-	if(id.toString().compareTo("Library") != 0){ parser.syntax_error((Symbol) id); };	
-	RESULT = new ICClass(parser.getLine(), id.toString(),(List<Field>)new ArrayList<Field>(),(List<Method>) lstMethods);
+	if(id.toString().compareTo("Library") != 0){ throw new SyntaxError(new Token(sym.CLASS_ID,idleft,id.toString()),idleft,"class name should be Library"); };		
+	RESULT = new ICClass(idleft, id.toString(),(List<Field>)new ArrayList<Field>(),(List<Method>) lstMethods);
 :};
 libmethod ::= STATIC type:t ID:i LP formals:lstFormals RP SEMI libmethod:lstMethods
 {:  ArrayList<LibraryMethod> methods = (ArrayList<LibraryMethod>)lstMethods;
@@ -72,17 +72,17 @@ libmethod ::= STATIC type:t ID:i LP formals:lstFormals RP SEMI libmethod:lstMeth
 	RESULT = methods; :} | 
 STATIC VOID ID:i LP formals:lstFormals RP SEMI libmethod:lstMethods 
 {:  ArrayList<LibraryMethod> methods = (ArrayList<LibraryMethod>)lstMethods;
-	methods.add(0, new LibraryMethod(new PrimitiveType(parser.getLine(),DataTypes.VOID), i.toString(), (ArrayList<Formal>)lstFormals));
+	methods.add(0, new LibraryMethod(new PrimitiveType(ileft,DataTypes.VOID), i.toString(), (ArrayList<Formal>)lstFormals));
 	RESULT = methods; :}
 |  {: RESULT = new ArrayList<LibraryMethod>(); :};
-type::= INT 
-{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.INT); :} | 
-BOOLEAN
-{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.BOOLEAN); :} | 
-STRING 
-{: RESULT = new PrimitiveType(parser.getLine(), DataTypes.STRING); :} | 
+type::= INT:t 
+{: RESULT = new PrimitiveType(tleft, DataTypes.INT); :} | 
+BOOLEAN:t
+{: RESULT = new PrimitiveType(tleft, DataTypes.BOOLEAN); :} | 
+STRING:t
+{: RESULT = new PrimitiveType(tleft, DataTypes.STRING); :} | 
 CLASS_ID:c
-{: RESULT = new UserType(parser.getLine(),c.toString()); :} | 
+{: RESULT = new UserType(cleft,c.toString()); :} | 
 type:t LB RB
 {:((Type)t).incrementDimension(); RESULT = t; :};
 formals::= type:t ID:i typelist:lst 
