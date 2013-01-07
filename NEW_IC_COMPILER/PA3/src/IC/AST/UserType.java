@@ -3,6 +3,8 @@ package IC.AST;
 import java.util.HashSet;
 import java.util.Set;
 
+import IC.DataTypes;
+
 /**
  * User-defined data type AST node.
  * 
@@ -91,5 +93,21 @@ public class UserType extends Type {
 	@Override
 	public Object clone() {
 		return new UserType(line, name);
+	}
+
+	@Override
+	public int compareTo(Type o) {
+		// TODO Auto-generated method stub
+		if(o.equals(new PrimitiveType(o.getLine(), null)))
+			return 1;
+		if(this.equals(o))
+			return 0;
+		if(this.getDimension() > 0 || o.getDimension() > 0)
+			return -1;
+		if(o.enclosingScope().Lookup(this.getName())==null)
+			return -1;
+		
+		return 1;
+		
 	}
 }

@@ -43,9 +43,9 @@
 			}	
 		}		
 	}
-}*/
+}
 
-class A{
+class A  {
 	void test(int r, string name){
 		while(r>0){
 		x=x+1;			
@@ -110,6 +110,14 @@ class C extends B{
 		
 		t = 5;		
 	}
-	
+
 	int t(){}
+}
+*/
+class T{
+	int f(){
+		string t;
+		return -t;
+		
+	}
 }

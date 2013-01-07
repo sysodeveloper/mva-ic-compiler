@@ -44,4 +44,14 @@ public class PrimitiveType extends Type {
 	public Object clone() {
 		return new PrimitiveType(line, type);
 	}
+
+	@Override
+	public int compareTo(Type o) {
+		// TODO Auto-generated method stub
+		if(o.equals(new PrimitiveType(o.getLine(), null)))
+			return 1;
+		if(this.equals(o))
+			return 0;
+		return -1;
+	}
 }
