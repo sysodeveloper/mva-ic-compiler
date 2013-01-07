@@ -5,7 +5,7 @@ package IC.AST;
  * 
  * @author Tovi Almozlino
  */
-public abstract class Type extends ASTNode implements INameable {
+public abstract class Type extends ASTNode implements INameable,Comparable<Type> {
 
 	/**
 	 * Number of array 'dimensions' in data type. For example, int[][] ->
@@ -94,4 +94,6 @@ public abstract class Type extends ASTNode implements INameable {
 	 * Clone the object.
 	 */
 	public abstract Object clone();
+	
+	
 }

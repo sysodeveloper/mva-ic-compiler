@@ -99,4 +99,12 @@ public class MethodType extends Type {
 		return "{" + formals.toString()  + " -> " + 
 			getReturnType().getFullName() + "}";
 	}
+
+	@Override
+	public int compareTo(Type o) {
+		// TODO Auto-generated method stub
+		if( this.equals(o))
+			return 0;
+		return -1;
+	}
 }

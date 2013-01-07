@@ -1,0 +1,22 @@
+digraph G{
+    1
+     2
+    3 -> {2}
+      4 -> {}
+     5 -> {4}
+    6 -> {5}
+  7 -> {1 3 6}
+8 -> {7}
+9 -> {8}
+
+1[label="MethodType {  -> int}"]
+2[label="PrimitiveType string"]
+3[label="LocalVariable t"]
+4[label="VariableLocation t"]
+5[label="LogicalUnaryOp unary subtraction"]
+6[label="ReturnStatement"]
+7[label="VirtualMethod f"]
+8[label="Class T"]
+9[label="Program"]
+
+}
