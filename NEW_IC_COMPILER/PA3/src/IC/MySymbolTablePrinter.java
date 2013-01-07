@@ -214,8 +214,8 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 	public StringBuffer visit(StatementsBlock statementsBlock) {
 		StringBuffer output = new StringBuffer();
 		output.append("\n");
-		output.append("Statement Block Symbol Table: (located in ");
-		output.append(statementsBlock.enclosingScope().getParent().getDescription()+")");
+		output.append("Statement Block Symbol Table: ( located in ");
+		output.append(statementsBlock.enclosingScope().getParent().getDescription()+" )");
 		output.append("\n");
 		output.append(statementsBlock.enclosingScope());
 		for(Statement s : statementsBlock.getStatements()){

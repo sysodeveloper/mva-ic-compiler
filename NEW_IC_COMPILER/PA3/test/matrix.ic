@@ -23,8 +23,9 @@ class A {
     while (i < max){
         arr[i] = val;
         i = i + 1;
+        Library.printi(i);
         if (a == null)
-        	break;
+          break;
     }
   }
 }
