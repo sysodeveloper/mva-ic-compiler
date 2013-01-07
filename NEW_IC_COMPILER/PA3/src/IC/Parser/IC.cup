@@ -115,7 +115,7 @@ ClassIC ::= CLASS CLASS_ID:className ClassContent:content
 							classContent = (Object[])content;
 							ArrayList<Field> fields = (ArrayList<Field>)classContent[0];
 							ArrayList<Method> methods = (ArrayList<Method>)classContent[1];
-							RESULT = new ICClass(parser.getLine(), className.toString(), fields, methods);
+							RESULT = new ICClass(classNameleft, className.toString(), fields, methods);
 					:}
 ;
 
@@ -125,7 +125,7 @@ ClassICEx ::= CLASS CLASS_ID:derivedClass EXTENDS CLASS_ID:baseClass ClassConten
 							classContent = (Object[])content;
 							ArrayList<Field> fields = (ArrayList<Field>)classContent[0];
 							ArrayList<Method> methods = (ArrayList<Method>)classContent[1];
-							RESULT = new ICClass(parser.getLine(), derivedClass.toString(),baseClass.toString(), fields, methods);
+							RESULT = new ICClass(derivedClassleft, derivedClass.toString(),baseClass.toString(), fields, methods);
 					:}
 ;
 
@@ -179,7 +179,7 @@ Field ::= Type:t ID:i FieldList:flst SEMI
 
 FieldList ::= COMMA ID:i FieldList:flst
 			 {: ArrayList<Field> lstFields = (ArrayList<Field>)flst;
-			 	lstFields.add(0, new Field(new PrimitiveType(parser.getLine(), DataTypes.INT) ,i.toString()) );
+			 	lstFields.add(0, new Field(new PrimitiveType(ileft, DataTypes.INT) ,i.toString()) );
 			 	RESULT = lstFields; :}|
 			 {: RESULT = new ArrayList<Field>();  :} ;
 			 
@@ -187,17 +187,17 @@ FieldList ::= COMMA ID:i FieldList:flst
  
 
 
-Type::= INT 	 	 {: RESULT = new PrimitiveType(parser.getLine(), DataTypes.INT); :} | 
-		BOOLEAN		 {: RESULT = new PrimitiveType(parser.getLine(), DataTypes.BOOLEAN); :} | 
-		STRING  	 {: RESULT = new PrimitiveType(parser.getLine(), DataTypes.STRING); :} | 
-		CLASS_ID:c   {: RESULT = new UserType(parser.getLine(),c.toString()); :} | 
+Type::= INT:t 	 	 {: RESULT = new PrimitiveType(tleft, DataTypes.INT); :} | 
+		BOOLEAN:t		 {: RESULT = new PrimitiveType(tleft, DataTypes.BOOLEAN); :} | 
+		STRING:t  	 {: RESULT = new PrimitiveType(tleft, DataTypes.STRING); :} | 
+		CLASS_ID:c   {: RESULT = new UserType(cleft,c.toString()); :} | 
 		Type:t LB RB {: ((Type)t).incrementDimension(); RESULT = t; :};
 
 
 MethodPrefix ::= VOID ID:id LP 
 					{: 
 							Object methodPrefix[] = new Object[2];
-							methodPrefix[0]=new PrimitiveType(parser.getLine(),DataTypes.VOID); methodPrefix[1]=id;
+							methodPrefix[0]=new PrimitiveType(idleft,DataTypes.VOID); methodPrefix[1]=id;
 							RESULT = methodPrefix;
 					:} |
 				 Type:t ID:id LP 
@@ -244,101 +244,44 @@ Statement ::=   Location:l ASSIGN Expr:e SEMI {: RESULT = new  Assignment((Locat
 				
 				Call:call SEMI {: RESULT = new  CallStatement((Call)call);:}| 
 				
-				RETURN ExprOrEmpty:e SEMI {: RESULT = (e==null)? new Return(parser.getLine()): new Return(parser.getLine(),(Expression)e); 	:}|
+				RETURN ExprOrEmpty:e SEMI {: RESULT = (e==null)? new Return(eleft): new Return(eleft,(Expression)e); 	:}|
 				
 				IF LP Expr:condition RP Statement:ifStm ELSE Statement:elseStm 
 					{:
-						/*
-						List<Statement> ifStmList  = new ArrayList<Statement>();
-						List<Statement> elseStmList  = new ArrayList<Statement>();
-						
-						if(!(ifStm instanceof List<?>)){ 
-							if(ifStm instanceof LocalVariable){
-								  String msg = "definition of local variable " +((LocalVariable)ifStm).getName() + " is not allowed ";
-         						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
-         					}
-							else
-								ifStmList.add((Statement)ifStm);
-						}
-						else 
-							ifStmList = (ArrayList<Statement>)ifStm;
-						
-						if(!(elseStm  instanceof List<?>)){
-						 	if(elseStm instanceof LocalVariable){
-								  String msg = "definition of local variable " +((LocalVariable)elseStm).getName() + " is not allowed ";
-         						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
-         					}
-						 	else
-						 		elseStmList.add((Statement)elseStm);
-						}
-						else{
-						   elseStmList = (ArrayList<Statement>)elseStm;	
-						}   				 	
-						RESULT = new If((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)ifStmList), new StatementsBlock(parser.getLine(), (List<Statement>)elseStmList));
-						*/
 						if(ifStm instanceof LocalVariable){
 							  String msg = "definition of local variable " +((LocalVariable)ifStm).getName() + " is not allowed ";
-     						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
+     						  throw new SyntaxError(new Token(sym.SEMI,ifStmleft,";"), ifStmleft,msg);
      					}
      					if(elseStm instanceof LocalVariable){
 							  String msg = "definition of local variable " +((LocalVariable)elseStm).getName() + " is not allowed ";
-     						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
+     						  throw new SyntaxError(new Token(sym.SEMI,elseStmleft,";"), elseStmleft,msg);
      					}
 						RESULT = new If((Expression)condition, (Statement)ifStm, (Statement)elseStm);
 					:}|
 				
 				IF LP Expr:condition RP Statement:ifStm
 					 {:
-					 /*
-					 	List<Statement> stmList  = new ArrayList<Statement>();
-					  	if(!(ifStm instanceof List<?>)){ 
-							if(ifStm instanceof LocalVariable){
-								  String msg = "definition of local variable " +((LocalVariable)ifStm).getName() + " is not allowed ";
-         						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
-         					}
-							else
-								stmList.add((Statement)ifStm);
-						}
-						else 
-							stmList = (ArrayList<Statement>)ifStm;
-					 	RESULT = new If((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stmList));
-					 	*/
 					 	if(ifStm instanceof LocalVariable){
 							  String msg = "definition of local variable " +((LocalVariable)ifStm).getName() + " is not allowed ";
-     						  throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
+     						  throw new SyntaxError(new Token(sym.SEMI,ifStmleft,";"), ifStmleft,msg);
      					}
 					 	RESULT = new If((Expression)condition, (Statement)ifStm);
 					 :} |
 				
 				WHILE LP Expr:condition RP Statement:stm 
 					 {: 
-						/*
-						List<Statement> stmList  = new ArrayList<Statement>();
-						if(!(stm instanceof List<?>)){ 
-						
-							if(stm instanceof LocalVariable){
-								String msg = "definition of local variable " +((LocalVariable)stm).getName() + " is not allowed ";
-         						throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
-         					}
-         					else
-								stmList.add((Statement)stm); 
-						}	
-						else 
-							stmList = (ArrayList<Statement>)stm;
-						RESULT = new While((Expression)condition, new StatementsBlock(parser.getLine(), (List<Statement>)stmList));
-						*/
 						if(stm instanceof LocalVariable){
 							String msg = "definition of local variable " +((LocalVariable)stm).getName() + " is not allowed ";
-     						throw new SyntaxError(new Token(sym.SEMI,parser.getLine(),";"), parser.getLine(),msg);
+     						throw new SyntaxError(new Token(sym.SEMI,stmleft,";"), stmleft,msg);
      					} 
 						RESULT = new While((Expression)condition, (Statement)stm);
 					 :}|	    
 			    
-			    BREAK SEMI {:RESULT = new Break(parser.getLine());:}|
+			    BREAK:b SEMI {:RESULT = new Break(bleft);:}|
 			    
-			    CONTINUE SEMI {:RESULT = new Continue(parser.getLine());:}|
+			    CONTINUE:c SEMI {:RESULT = new Continue(cleft);:}|
 			    
-			    LCBR StatementStar:stmList RCBR {: RESULT = new StatementsBlock(parser.getLine(),(List<Statement>) stmList); :} |
+			    LCBR StatementStar:stmList RCBR {: RESULT = new StatementsBlock(stmListleft,(List<Statement>) stmList); :} |
 			    
 			    Type:t ID:id InitVariable:e SEMI {: if(e!=null) RESULT = new LocalVariable((Type)t, id.toString() , (Expression)e); else RESULT = new LocalVariable((Type)t, id.toString() );  :}
 			    ;
@@ -348,7 +291,6 @@ StatementStar ::=  Statement:stm StatementStar:stmList
 							   	ArrayList<Statement> lst = new ArrayList<Statement>();
 							   	if(stmList != null) lst.addAll((ArrayList<Statement>)stmList);
 							   if(stm != null) lst.add(0, (Statement)stm);
-							   	System.out.println(lst + " " + parser.getLine());
 							   	RESULT = lst;
 							   :}|
 							   {: RESULT = new ArrayList<Statement>(); :} ;
@@ -357,24 +299,24 @@ InitVariable ::= ASSIGN Expr:e {: RESULT = e; :}|{:RESULT = null;:}  ;
 
 ExprOrEmpty ::= Expr:e{: RESULT = e; :}|{:RESULT = null;:} ;
 
-Location ::= ID:id {: RESULT = new VariableLocation(parser.getLine(), id.toString()); :}|
- 			 Expr:e DOT ID:id {: RESULT = new VariableLocation(parser.getLine(),(Expression)e, id.toString()); :}|
+Location ::= ID:id {: RESULT = new VariableLocation(idleft, id.toString()); :}|
+ 			 Expr:e DOT ID:id {: RESULT = new VariableLocation(eleft,(Expression)e, id.toString()); :}|
   			 Expr:array LB Expr:index RB {: RESULT = new ArrayLocation((Expression) array, (Expression) index); :} ;
 
 Call ::= StaticCall:sc{:RESULT = sc;:} | VirtualCall:vc{:RESULT = vc;:};
 
 StaticCall ::= CLASS_ID:class_id DOT ID:id LP Arguments:argsList RP
 				{: 
-				RESULT = new StaticCall(parser.getLine(), class_id.toString(), id.toString(),(List<Expression>) argsList); :};
+				RESULT = new StaticCall(idleft, class_id.toString(), id.toString(),(List<Expression>) argsList); :};
 
 VirtualCall ::= VirtualCallPrefix:callPrefix Arguments:argsList RP 
 					 {: 
 					 	Object prefix[] = new Object[2];
 					 	prefix = (Object[])callPrefix;
-					 	RESULT = new VirtualCall(parser.getLine(),(Expression)prefix[0],prefix[1].toString(),(List<Expression>)argsList);
+					 	RESULT = new VirtualCall(callPrefixleft,(Expression)prefix[0],prefix[1].toString(),(List<Expression>)argsList);
 					 
 					 :} | 
- 				ID:id LP Arguments:argsList RP {: RESULT = new VirtualCall(parser.getLine(),id.toString(),(List<Expression>)argsList); :};
+ 				ID:id LP Arguments:argsList RP {: RESULT = new VirtualCall(idleft,id.toString(),(List<Expression>)argsList); :};
 
 VirtualCallPrefix ::= Expr:e DOT ID:id LP {:
 											 Object callPrefix[] = new Object[2];
@@ -410,25 +352,25 @@ Unop ::= MINUS {: RESULT = UnaryOps.UMINUS;  :} |
 		 LNEG  {: RESULT = UnaryOps.LNEG;  :};
 
 Literal ::= INTEGER:l
-{: RESULT = new Literal(parser.getLine(),LiteralTypes.INTEGER,l); :} | 
+{: RESULT = new Literal(lleft,LiteralTypes.INTEGER,l); :} | 
 QUOTE:l 
-{: RESULT = new Literal(parser.getLine(),LiteralTypes.STRING,l); :} | 
+{: RESULT = new Literal(lleft,LiteralTypes.STRING,l); :} | 
 TRUE:l
-{: RESULT = new Literal(parser.getLine(),LiteralTypes.TRUE,l); :} | 
+{: RESULT = new Literal(lleft,LiteralTypes.TRUE,l); :} | 
 FALSE:l 
-{: RESULT = new Literal(parser.getLine(),LiteralTypes.FALSE,l); :} | 
+{: RESULT = new Literal(lleft,LiteralTypes.FALSE,l); :} | 
 NULL:l
-{: RESULT = new Literal(parser.getLine(),LiteralTypes.NULL,l); :};
+{: RESULT = new Literal(lleft,LiteralTypes.NULL,l); :};
 
 Expr ::= Location:l{: RESULT = l ;:}|
 		
 		Call:call {: RESULT = call; :}|
 		
-		THIS {: RESULT = new This(parser.getLine()); :} |
+		THIS:t {: RESULT = new This(tleft); :} |
 		
 		LP Expr:e RP {: RESULT = new ExpressionBlock((Expression)e); :}| 
 		
-		NEW CLASS_ID:cid LP RP {: RESULT = new NewClass(parser.getLine(), cid.toString()); :}|
+		NEW CLASS_ID:cid LP RP {: RESULT = new NewClass(cidleft, cid.toString()); :}|
 		
 		NEW Type:t LB Expr:e RB {: RESULT = new  NewArray((Type)t,(Expression)e);  :}|
 		

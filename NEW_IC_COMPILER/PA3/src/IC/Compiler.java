@@ -298,11 +298,11 @@ public class Compiler {
 	 * Dump the symbol and type table.
 	 */
 	private static void dumpTable(String fileName) {
-		SymbolTablePrinter tablePrinter = new SymbolTablePrinter(fileName, 
+		/*SymbolTablePrinter tablePrinter = new SymbolTablePrinter(fileName, 
 				(Program)(SymbolTable.getRoot().getParentNode()));
 		TypeTablePrinter typePrinter = new TypeTablePrinter(
 				SymbolTable.getUsedType(), fileName);
 		System.out.println(tablePrinter);
-		System.out.println(typePrinter);
+		System.out.println(typePrinter);*/
 	}
 }
