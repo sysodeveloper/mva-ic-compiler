@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,13 +20,13 @@ public class MyTypeTable {
 	private Map<MyType,MyArrayType> uniqueArrayTypes;
     private Map<String,MyClassType> uniqueClassTypes;
     private Map<String,MyMethodType> uniqueMethodTypes;
-    private HashSet<MyPrimitiveType> uniquePrimitiveType;
+    private LinkedList<MyPrimitiveType> uniquePrimitiveType;
 	
 	public MyTypeTable(){
 		uniqueArrayTypes = new HashMap<MyType, MyArrayType>();
 		uniqueClassTypes = new HashMap<String, MyClassType>();
 		uniqueMethodTypes = new HashMap<String, MyMethodType>();
-		uniquePrimitiveType = new HashSet<MyPrimitiveType>(); 		
+		uniquePrimitiveType = new LinkedList<MyPrimitiveType>(); 		
 	}
 	
 	// Returns unique array type object
@@ -68,8 +69,9 @@ public class MyTypeTable {
 	
 	// Returns unique primitive type object
 	public MyPrimitiveType primitiveType(MyPrimitiveType pType){
-		if(uniquePrimitiveType.contains(pType)){
-			System.out.println("already here");
+		if(uniquePrimitiveType.contains(pType)){			
+			//System.out.println("already here");
+			return uniquePrimitiveType.get(uniquePrimitiveType.indexOf(pType));
 		}
 		uniquePrimitiveType.add(pType);		
 		return pType;
