@@ -8,7 +8,11 @@ public class MyArrayType extends MyType {
 	@Override
 	boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
-		return false;
+		if(! elementType.subtypeOf(((MyArrayType)type).getElementType()))
+				return false;
+		if(dimantion != ((MyArrayType)type).getDimantion())
+			return false;
+		return true;
 	}
 
 	public MyType getElementType() {

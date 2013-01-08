@@ -9,8 +9,19 @@ public class MyClassType extends MyType {
 	@Override
 	boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
+		if(this == type)
+			return true;
+		if(superClass == null)
+			return false;
+		MyClassType c = superClass;
+		while(c!=null){
+			if(c == type)
+				return true;
+			c = c.getSuperClass();	
+		}
 		return false;
 	}
+	
 	public ICClass getClassAST() {
 		return classAST;
 	}
