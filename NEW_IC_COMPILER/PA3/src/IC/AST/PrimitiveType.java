@@ -1,6 +1,12 @@
 package IC.AST;
 
 import IC.DataTypes;
+import IC.MyArrayType;
+import IC.MyBoolType;
+import IC.MyIntType;
+import IC.MyStringType;
+import IC.MyType;
+import IC.MyVoidType;
 
 /**
  * Primitive data type AST node.
@@ -53,5 +59,37 @@ public class PrimitiveType extends Type {
 		if(this.equals(o))
 			return 0;
 		return -1;
+	}
+
+	@Override
+	public MyType getMyType() {
+		// TODO Auto-generated method stub
+		MyArrayType arrayType = null;
+		MyType baseType = null;
+		if(type == null)
+			return null;
+		if(type == DataTypes.VOID)
+			return new MyVoidType();
+		
+		if(type == DataTypes.INT)
+			baseType = new MyIntType();
+		if(type == DataTypes.BOOLEAN)
+			baseType = new MyBoolType();
+		if(type == DataTypes.STRING)
+			baseType = new MyStringType();
+		
+		if(this.getDimension()==0){
+			return baseType;
+		}
+		else{
+			arrayType = new MyArrayType();
+			arrayType.setDimantion(this.getDimension());
+			arrayType.setElementType(baseType);
+			arrayType.setName(this.getName());
+			arrayType.setFullName();
+		}		
+		
+		return arrayType;
+	
 	}
 }

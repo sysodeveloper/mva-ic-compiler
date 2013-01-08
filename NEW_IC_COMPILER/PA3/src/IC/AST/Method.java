@@ -3,6 +3,8 @@ package IC.AST;
 import java.util.ArrayList;
 import java.util.List;
 
+import IC.MyMethodType;
+import IC.MyType;
 import IC.SymbolTable;
 
 /**
@@ -71,7 +73,10 @@ public abstract class Method extends ASTNode implements SymbolTableContainer, IN
 		
 		return methodType;
 	}
-
+	
+	public Type getReturnType(){
+		return this.type;
+	}
 	public String getName() {
 		return name;
 	}
@@ -82,5 +87,19 @@ public abstract class Method extends ASTNode implements SymbolTableContainer, IN
 
 	public List<Statement> getStatements() {
 		return statements;
+	}
+	
+	public MyType getMyType(){
+		MyMethodType method = new MyMethodType();
+		method.setName(this.getName());
+		ArrayList<MyType> formalTypes = new ArrayList<MyType>();
+		MyType returnType = this.getReturnType().getMyType();
+		method.setReturnType(returnType);
+		for(Formal f : this.getFormals()){
+			formalTypes.add(f.getType().getMyType());
+		}
+		method.setParamTypes(formalTypes);
+		method.setFullName();
+		return method;
 	}
 }

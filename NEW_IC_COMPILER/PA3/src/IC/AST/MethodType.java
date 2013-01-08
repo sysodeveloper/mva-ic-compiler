@@ -5,6 +5,9 @@ package IC.AST;
 
 import java.util.List;
 
+import IC.MyMethodType;
+import IC.MyType;
+
 /**
  * AST method type.
  *
@@ -107,4 +110,12 @@ public class MethodType extends Type {
 			return 0;
 		return -1;
 	}
+
+	@Override
+	public MyType getMyType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 }

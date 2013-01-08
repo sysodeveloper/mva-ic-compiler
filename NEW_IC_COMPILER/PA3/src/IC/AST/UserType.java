@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import IC.DataTypes;
+import IC.MyArrayType;
+import IC.MyClassType;
+import IC.MyType;
 
 /**
  * User-defined data type AST node.
@@ -109,5 +112,11 @@ public class UserType extends Type {
 		
 		return 1;
 		
+	}
+
+	@Override
+	public MyType getMyType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

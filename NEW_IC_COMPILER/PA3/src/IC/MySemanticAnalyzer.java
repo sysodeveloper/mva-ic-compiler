@@ -161,7 +161,9 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(Return returnStatement, MySymbolTable d) {
 		// TODO Auto-generated method stub
-		return returnStatement.getValue().accept(this, d) ;
+		if(returnStatement.hasValue())
+			return returnStatement.getValue().accept(this, d);
+		return true;
 	}
 
 	@Override
@@ -184,7 +186,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(Break breakStatement, MySymbolTable d) {
-		if(! checkLoop(d)){
+		if(true){
 			semanticErrors.add(new SemanticError("break statement not inside while scope ", breakStatement.getLine()));
 			return false;
 		}
@@ -295,22 +297,32 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 				}
 				
 			}
-			else{ // calling to virtual method of other class, need to change the scope ???
+			else{ // calling to virtual method of other class
 				//System.out.println("classname = " + call.getLocation().toString());
-				if(call.getLocation() instanceof ExpressionBlock){ // something like (new MyClass).m
+				if(call.getLocation() instanceof ExpressionBlock){ 
 					Expression newExp= ((ExpressionBlock)call.getLocation()).getExpression();
-					if(newExp instanceof NewClass){
+					if(newExp instanceof NewClass){// something like (new MyClass).m
 						result = checkFunction(call.getName(), classScopes.get(((NewClass)newExp).getName()), Kind.Virtual_Method);
 						if(!result){
 							semanticErrors.add(new SemanticError("call to undefined virtual function "+call.getName()+ " of class "+ ((NewClass)newExp).getName(), call.getLine()));			
 							return false;
 						}
 					}
+					
+					
 						
 				}
-				else if(call.getLocation() instanceof VariableLocation ){
-					return true;
-				}
+				else if(call.getLocation() instanceof VariableLocation){
+					/* doesn't work yet  */
+					/*
+					MySymbolRecord r = call.getLocation().enclosingScope().Lookup(((VariableLocation)call.getLocation()).getName());
+					MySymbolTable t = classScopes.get(r.getType().getName());
+					if(! t.getEntries().containsKey(((VariableLocation)call.getLocation()).getName())){
+						semanticErrors.add(new SemanticError("call to undefined virtual function "+call.getName()+ " of class "+ r.getType().getName(), call.getLine()));			
+						return false;
+					}*/
+				}return true;
+				
 			}
 		}
 		
@@ -450,6 +462,8 @@ private boolean checkFunction(String varName, MySymbolTable scope ,Kind function
 		}
 		return false;
 	}
+	
+	
 	
 	public void printErrorStack(){
 		for(SemanticError e: semanticErrors)

@@ -2,6 +2,9 @@ package IC.AST;
 
 import java.util.List;
 
+import IC.MyArrayType;
+import IC.MyClassType;
+import IC.MyType;
 import IC.SymbolTable;
 
 /**
@@ -145,7 +148,26 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 	public void setStaticTable(SymbolTable m_staticTable) {
 		this.m_staticTable = m_staticTable;
 	}
-
+	
+	public MyType getMyType(){
+		MyClassType returnType = new MyClassType();
+		returnType.setName(this.getName());
+		returnType.setClassAST(this);
+		if(this.hasSuperClass()){
+			MyClassType superClass = new MyClassType();
+			superClass.setName(getSuperClassName());
+			returnType.setSuperClass(superClass);
+		}
+		if(this.getUserType().getDimension() ==0)
+			return returnType;
+		MyArrayType array = new MyArrayType();
+		array.setDimantion(this.getUserType().getDimension());
+		array.setElementType(returnType);
+		array.setName(this.getName());
+		array.setFullName();
+		return array;
+	}
+	
 	/**
 	 * The hash code for the type.
 	 */

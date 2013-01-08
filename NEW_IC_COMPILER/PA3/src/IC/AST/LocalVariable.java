@@ -1,5 +1,8 @@
 package IC.AST;
 
+import IC.MyArrayType;
+import IC.MyType;
+
 /**
  * Local variable declaration statement AST node.
  * 
@@ -67,5 +70,6 @@ public class LocalVariable extends Statement  implements INameable {
 	public Expression getInitValue() {
 		return initValue;
 	}
-
+	
+	
 }
