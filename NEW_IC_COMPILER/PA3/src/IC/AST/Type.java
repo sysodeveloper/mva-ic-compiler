@@ -1,5 +1,7 @@
 package IC.AST;
 
+import IC.MyType;
+
 /**
  * Abstract base class for data type AST nodes.
  * 
@@ -94,6 +96,7 @@ public abstract class Type extends ASTNode implements INameable,Comparable<Type>
 	 * Clone the object.
 	 */
 	public abstract Object clone();
+	public abstract MyType getMyType();
 	
 	
 }

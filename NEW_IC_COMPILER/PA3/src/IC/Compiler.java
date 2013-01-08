@@ -202,7 +202,7 @@ public class Compiler {
 			fr = new FileReader(f);
 			Lexer lex = new Lexer(fr);
 			LibraryParser libParser = new LibraryParser(lex);
-			libParser.printTokens = false;
+			//libParser.printTokens = false;
 			Symbol parsedSymbol = libParser.parse();
 			System.out.println("Successfully parsed library file " +libPath);
 			return parsedSymbol.value;
@@ -280,16 +280,17 @@ public class Compiler {
 			System.out.println("Symbol tables builded? " + success);
 			MySymbolTablePrinter printer = new MySymbolTablePrinter();
 			System.out.println(printer.visit(root));
-			/*if(success){
+			if(success){
 				MySemanticAnalyzer analyzer = new MySemanticAnalyzer();
 				boolean analyze = analyzer.visit(root,null);
 				
 				if(!analyze) analyzer.printErrorStack();
-				MyTypeBuilder typeBuilder = new MyTypeBuilder();
-				typeBuilder.visit(root, null);
-				typeBuilder.printErrorStack();
+				MyTypeTable types = buider.getTypeTable();
+				types.printTypeTable();
+				//typeBuilder.visit(root, null);
+				//typeBuilder.printErrorStack();
 				return analyze;
-			}*/
+			}
 			return success;
 			
 	}

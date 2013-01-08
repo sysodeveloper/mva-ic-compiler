@@ -49,7 +49,15 @@ import IC.AST.While;
 public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boolean>{
 	static int uniqueTable = 0;
 	static int uniqueRecord = 0;	
+	MyTypeTable typeTable;
 	
+	public MyTypeTable getTypeTable(){
+		return typeTable;
+	}
+	
+	public BuildMySymbolTable(){
+		typeTable = new MyTypeTable();
+	}
 	
 	
 	@Override
@@ -64,9 +72,12 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		for(ICClass c : program.getClasses()){
 			MySymbolRecord record =  new MySymbolRecord(uniqueRecord++,c,Kind.Class,new UserType(c.getLine(), c.getName()));
 			if(!table.InsertRecord(c.getName(),record)){
-				c.setRecord(record);
+				
 				return Boolean.FALSE;
 			}
+			MyType mt = typeTable.insertType(c.getMyType());
+			record.setMyType(mt);
+			c.setRecord(record);
 		}
 
 		
@@ -134,10 +145,12 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		table.setParent(d);
 		for(Field f : icClass.getFields()){
 			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,f,Kind.Field,f.getType());
-			if(!table.InsertRecord(f.getName(),record )){
-				f.setRecord(record);
+			if(!table.InsertRecord(f.getName(),record )){				
 				return Boolean.FALSE;
 			}
+			MyType mt = typeTable.insertType(f.getType().getMyType());
+			record.setMyType(mt);
+			f.setRecord(record);
 		}		
 		for(Field f : icClass.getFields()){
 			returnValue &= f.accept(this,table);
@@ -170,6 +183,8 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		boolean returnValue = true;	
 		MySymbolRecord trecord = new MySymbolRecord(uniqueRecord++,method,kind,method.getType());
 		returnValue = d.InsertRecord(method.getName(),trecord) ;
+		MyType methodType = typeTable.insertType(method.getMyType());
+		trecord.setMyType(methodType);
 		method.setRecord(trecord);	
 		
 		MySymbolTable table = new MySymbolTable(uniqueTable++,method.getName());
@@ -178,8 +193,12 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		for(Formal f : method.getFormals()){
 			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,f,Kind.Parameter,f.getType());
 			if(!table.InsertRecord(f.getName(), record)){
-				f.setRecord(record);
+				
+				return false;
 			}
+			MyType mt = typeTable.insertType(f.getType().getMyType());
+			record.setMyType(mt);				
+			f.setRecord(record);
 		}
 		for(Statement s : method.getStatements()){
 			returnValue &= s.accept(this, table);
@@ -213,6 +232,8 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,formal,Kind.Parameter,formal.getType());
 			record.setAsDeclared();
 			d.InsertRecord(formal.getName(),record );
+			MyType mt = typeTable.insertType(formal.getType().getMyType());
+			record.setMyType(mt);					
 			formal.setRecord(record);
 		}
 		return new Boolean(returnValue);
@@ -274,6 +295,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(While whileStatement, MySymbolTable d) {
 		boolean returnValue = whileStatement.getCondition().accept(this, d);
+		
 		returnValue &= whileStatement.getOperation().accept(this, d);	
 		//MySymbolTable table = new MySymbolTable(uniqueTable++,"while in " + d.getDescription());
 		//table.setParent(d);
@@ -301,6 +323,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		//d is the symbol table of the parent symbol class
 		MySymbolTable table = new MySymbolTable(uniqueTable++,"statement block in " + d.getDescription());
 		table.setParent(d);
+		
 		for(Statement s : statementsBlock.getStatements()){
 			returnValue &= s.accept(this, table);
 		}
@@ -319,9 +342,15 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		}
 		record.setAsDeclared();
 		returnValue &= localVariable.getType().accept(this,d);
-		if(localVariable.hasInitValue())
+		if(localVariable.hasInitValue()){
+			localVariable.getInitValue().accept(this, d);
 			record.setAsInitialized();
-		localVariable.setRecord(record);
+		}
+		if(returnValue){
+			MyType mt= typeTable.insertType(localVariable.getType().getMyType());				
+			record.setMyType(mt);
+			localVariable.setRecord(record);			
+		}
 		return new Boolean(returnValue);
 	}
 
@@ -367,7 +396,8 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(VirtualCall call, MySymbolTable d) {
 		call.setEnclosingScope(d);
 		boolean returnValue = true;
-		returnValue &= call.getLocation().accept(this,d);
+		if(call.isExternal())
+			returnValue &= call.getLocation().accept(this,d);
 		for(IC.AST.Expression e : call.getArguments()){
 			returnValue &= e.accept(this, d);
 		}
@@ -392,6 +422,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		boolean returnValue = true;
 		returnValue &= newArray.getSize().accept(this, d);
 		returnValue &= newArray.getType().accept(this, d);
+				
 		return new Boolean(returnValue);
 	}
 
@@ -439,7 +470,9 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(Literal literal, MySymbolTable d) {
 		literal.setEnclosingScope(d);
-		return literal.getICType().accept(this,d);
+		boolean returnValue = literal.getICType().accept(this,d);
+		
+		return  returnValue;
 	}
 
 	@Override
@@ -452,12 +485,14 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(MethodType methodType, MySymbolTable d) {
+		
 		methodType.setEnclosingScope(d);
 		boolean returnValue = true;
 		for(Type t : methodType.getFormalTypes()){
 			returnValue &= t.accept(this, d);
 		}
 		returnValue &= methodType.getReturnType().accept(this, d);
+		
 		return new Boolean(returnValue);
 	}
 	

@@ -22,6 +22,7 @@ public class MySymbolRecord {
 	private Kind kind;
 	private List<Object> properties;
 	private Type type;
+	private MyType myType;
 	private boolean declared = true;
 	private boolean initialized = false;
 	
@@ -84,4 +85,14 @@ public class MySymbolRecord {
 	public boolean isInitialized(){
 		return this.initialized;
 	}
+
+	public MyType getMyType() {
+		return myType;
+	}
+
+	public void setMyType(MyType myType) {
+		this.myType = myType;
+	}
+	
+	
 }

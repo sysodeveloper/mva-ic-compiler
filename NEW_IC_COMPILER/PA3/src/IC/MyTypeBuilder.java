@@ -1,4 +1,4 @@
-package IC;
+/*package IC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -320,4 +320,4 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, Type> {
 				System.out.println(e.toString());
 			}
 	}
-}
+}*/

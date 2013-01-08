@@ -331,15 +331,15 @@ public class SymbolTable implements Visitor<Boolean> {
 		}
 		
 		if(icClass.hasSuperClass()){			
-			try {
-				checkShadowing(icClass.getInnerTable());		
+			/*try {
+				//checkShadowing(icClass.getInnerTable());		
 					
 				
 			} catch (SemanticError e) {
 				// TODO Auto-generated catch block
 				System.out.println(e.toString());
 				return false;
-			}
+			}*/
 		}
 		return isOk;
 	}
@@ -724,44 +724,4 @@ public class SymbolTable implements Visitor<Boolean> {
 		return true;
 	}
 	
-	/**
-	 * Shadowing semantic check in build time
-	 * @throws SemanticError 
-	 */
-	private boolean checkShadowing(SymbolTable classTable) throws SemanticError{
-		
-		SymbolTable extendedClassTable = classTable.getParent();
-		Map<String,SymbolRecord> c_symbols = classTable.getEntries(); 
-		Map<String,SymbolRecord> ex_symbols = extendedClassTable.getEntries();
-		Set<Entry<String,SymbolRecord>> c_entries = c_symbols.entrySet();
-		Set<Entry<String,SymbolRecord>> ex_entries = c_symbols.entrySet();
-		
-		while(extendedClassTable != null){
-			//check fields and methods shadowing and correct overriding
-			
-			for(Entry<String,SymbolRecord> symbol : c_entries){
-				if(ex_symbols.containsKey(symbol.getKey())){ // field or method with the same name as in extended class
-					if(symbol.getValue().getKind()==Kind.FIELD){
-						throw new SemanticError("Field or method with the field name "+symbol.getKey()+" already defined in extended classes", 
-								symbol.getValue().getNode().getLine());
-						// shadowing with a filed name is not allowed 
-					}
-					if(symbol.getValue().getKind() == Kind.VIRTUAL_METHOD || symbol.getValue().getKind() == Kind.STATIC_METHOD){
-						SymbolRecord ex_symbol_rec = ex_symbols.get(symbol.getKey());
-						SymbolRecord symbol_rec = symbol.getValue();
-						if(ex_symbol_rec.getKind()!=symbol_rec.getKind()) // method name shadows a field or method with different type(static/virtual)
-							throw new SemanticError("Method or field with the method name "+symbol.getKey()+" already defined in extended classes", 
-									symbol.getValue().getNode().getLine());						
-						//check method signatures
-						if(! symbol_rec.getType().equals(ex_symbol_rec.getType()))
-							throw new SemanticError("Method with the method name "+symbol.getKey()+" already defined in extended classes. Overloading is not allowed.", 
-									symbol.getValue().getNode().getLine());	
-					}
-				}
-			}
-			
-			extendedClassTable = extendedClassTable.getParent();
-		}
-		return true;
-	}
 }
