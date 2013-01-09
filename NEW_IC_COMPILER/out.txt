@@ -9,8 +9,10 @@ digraph G{
      8 -> {}
     9 -> {8}
   10 -> {1 4 7 9}
-11 -> {10}
-12 -> {11}
+    11
+  12 -> {11}
+13 -> {10 12}
+14 -> {13}
 
 1[label="MethodType {  -> int}"]
 2[label="PrimitiveType string[][]"]
@@ -22,7 +24,9 @@ digraph G{
 8[label="VariableLocation ty"]
 9[label="ReturnStatement"]
 10[label="VirtualMethod f"]
-11[label="Class T"]
-12[label="Program"]
+11[label="MethodType {  -> void}"]
+12[label="VirtualMethod y"]
+13[label="Class T"]
+14[label="Program"]
 
 }

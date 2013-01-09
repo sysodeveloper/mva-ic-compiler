@@ -186,9 +186,15 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		MyType methodType = typeTable.insertType(method.getMyType());
 		trecord.setMyType(methodType);
 		method.setRecord(trecord);	
+		MyType retType = typeTable.insertType(method.getReturnType().getMyType());
+		
 		
 		MySymbolTable table = new MySymbolTable(uniqueTable++,method.getName());
 		table.setParent(d);
+		MySymbolRecord returnRecord = new MySymbolRecord(uniqueRecord++, method, kind, method.getType());
+		MyType returnMyType = typeTable.insertType(retType);
+		returnRecord.setMyType(returnMyType);
+		table.InsertRecord("$ret", returnRecord);
 		returnValue &= method.getType().accept(this,table);
 		for(Formal f : method.getFormals()){
 			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,f,Kind.Parameter,f.getType());

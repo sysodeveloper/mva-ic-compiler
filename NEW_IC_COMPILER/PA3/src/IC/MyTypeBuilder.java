@@ -1,4 +1,4 @@
-/*package IC;
+package IC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,281 +43,225 @@ import IC.AST.While;
 
 
 
-public class MyTypeBuilder implements PropagatingVisitor<Object, Type> {
+public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	private MyTypeTable types;
-	private int uniqueId=0;
 	private List<SemanticError> semanticErrors = new ArrayList<SemanticError>();
-	public MyTypeBuilder(){
-		types = new MyTypeTable();
+	
+	private boolean TypeOK(MyType t1, MyType t2){
+		//left t1, right t2
+		if(t1 == t2){
+			return true;
+		}else if(t2.subtypeOf(t1)){
+			return true;
+		}
+		return false;
 	}
 	
-	@Override
-	public Type visit(Program program, Object d) {
-		// TODO Auto-generated method stub
-		for(ICClass c:program.getClasses())
-			c.accept(this, d);
-		return null;
-	}
-
-	@Override
-	public Type visit(ICClass icClass, Object d) {
-		// TODO Auto-generated method stub
-		for(Field f:icClass.getFields())
-			f.accept(this, d);
-		for(Method m:icClass.getMethods())
-				m.accept(this, d);
-		Type t = icClass.getUserType().accept(this, d);	
-		types.insertType(t);
-		icClass.setTypeFromTable(t);
-		return t;
-	}
-
-	@Override
-	public Type visit(Field field, Object d) {
-		// TODO Auto-generated method stub
-		Type t = field.getType().accept(this, d);
-		types.insertType(t);
-		field.setTypeFromTable(t);
-		return t;
-	}
-
-	public Type visit(Method method, Object d) {
-		for(Formal f:method.getFormals())
-			f.accept(this, d);
-		for(Statement s:method.getStatements())
-			s.accept(this, d);		
-		Type t = method.getType().accept(this, d);
-		types.insertType(t);
-		method.setTypeFromTable(t);
-		return t;
+	public MyTypeBuilder(MyTypeTable table){
+		this.types = table;
 	}
 	@Override
-	public Type visit(VirtualMethod method, Object d) {
-		// TODO Auto-generated method stub
-		return visit((Method)method,d);
-	}
-
-	@Override
-	public Type visit(StaticMethod method, Object d) {
-		// TODO Auto-generated method stub
-		return visit((Method)method,d);
-	}
-
-	@Override
-	public Type visit(LibraryMethod method, Object d) {
-		// TODO Auto-generated method stub
-		return visit((Method)method,d);
-	}
-
-	@Override
-	public Type visit(Formal formal, Object d) {
-		// TODO Auto-generated method stub
-		Type t =formal.getType().accept(this, d);
-		types.insertType(t);
-		formal.setTypeFromTable(t);
-		return t;
-	}
-
-	@Override
-	public Type visit(PrimitiveType type, Object d) {
-		// TODO Auto-generated method stub
-		types.insertType(type);
-		type.setTypeFromTable(type);
-		return type;
-	}
-
-	@Override
-	public Type visit(UserType type, Object d) {
-		// TODO Auto-generated method stub
-		types.insertType(type);
-		type.setTypeFromTable(type);
-		return type;
-	}
-
-	@Override
-	public Type visit(Assignment assignment, Object d) {
-		// TODO Auto-generated method stub
-		Type leftValue = assignment.getVariable().accept(this, d);
-		Type rightValue = assignment.getAssignment().accept(this, d);
-		if(leftValue.compareTo(rightValue)>=0){
-			types.insertType(leftValue);
-			leftValue.setTypeFromTable(leftValue);
-			rightValue.setTypeFromTable(leftValue);
-			return leftValue;
+	public MyType visit(Program program, Object d) {
+		for(ICClass c : program.getClasses()){
+			c.accept(this,d);
 		}
-			
 		return null;
 	}
-
 	@Override
-	public Type visit(CallStatement callStatement, Object d) {
+	public MyType visit(ICClass icClass, Object d) {
+		icClass.getUserType().accept(this,d);
+		for(Field f : icClass.getFields()){
+			f.accept(this,d);
+		}
+		for(Method m: icClass.getMethods()){
+			m.accept(this,d);
+		}
+		return null;
+	}
+	@Override
+	public MyType visit(Field field, Object d) {
+		return field.getType().accept(this,d);
+	}
+
+	public MyType visit(Method method, Object d){
+		method.getType().accept(this,d);
+		for(Formal f : method.getFormals()){
+			f.accept(this,d);
+		}
+		for(Statement s : method.getStatements()){
+			s.accept(this,d);
+		}
+		return method.getMyType();
+	}
+	@Override
+	public MyType visit(VirtualMethod method, Object d) {
+		return visit((Method)method,d);
+	}
+	@Override
+	public MyType visit(StaticMethod method, Object d) {
+		return visit((Method)method,d);
+	}
+	@Override
+	public MyType visit(LibraryMethod method, Object d) {
+		return visit((Method)method,d);
+	}
+	@Override
+	public MyType visit(Formal formal, Object d) {
+		return formal.getType().accept(this,d);
+	}
+	@Override
+	public MyType visit(PrimitiveType type, Object d) {
+		return types.insertType(type.getMyType());
+	}
+	@Override
+	public MyType visit(UserType type, Object d) {
+		return types.insertType(type.getMyType());
+	}
+	@Override
+	public MyType visit(Assignment assignment, Object d) {
+		MyType varType = assignment.getVariable().accept(this,d);
+		MyType exprType = assignment.getAssignment().accept(this,d);
+		if(TypeOK(varType,exprType)){
+			return varType;
+		}
+		semanticErrors.add(new SemanticError("Cannot assign different types",assignment.getLine()));
+		return null;
+	}
+	@Override
+	public MyType visit(CallStatement callStatement, Object d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 	@Override
-	public Type visit(Return returnStatement, Object d) {
-		// TODO Auto-generated method stub
+	public MyType visit(Return returnStatement, Object d) {
+		MySymbolRecord retRecord = returnStatement.enclosingScope().Lookup("$ret");
+		if(retRecord == null){
+			System.out.println("MEGA ERROR!");
+		}
+		MyType methodType = retRecord.getMyType();
 		
-		return null;
-	}
-
-	@Override
-	public Type visit(If ifStatement, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(While whileStatement, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(Break breakStatement, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(Continue continueStatement, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(StatementsBlock statementsBlock, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(LocalVariable localVariable, Object d) {
-		// TODO Auto-generated method stub
-		Type localType = localVariable.getType().accept(this, d); 
-		if(!localVariable.hasInitValue()){
-			
-			types.insertType(localType);
-			localVariable.setTypeFromTable(localType);
-			return localType;
-		}
-			
-		Type initValueType = localVariable.getInitValue().accept(this, d);
-		if(localType.compareTo(initValueType) >= 0){			
-			types.insertType(localType);
-			localVariable.setTypeFromTable(localType);
-			return localType;
-		}
-		semanticErrors.add(new SemanticError("variable of type "+localType.getFullName()+" cannot be initialized with value of type "+initValueType.getFullName(), localType.getLine()));
-		return null;	
-	}
-
-	@Override
-	public Type visit(VariableLocation location, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(ArrayLocation location, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(StaticCall call, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(VirtualCall call, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(This thisExpression, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(NewClass newClass, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(NewArray newArray, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(Length length, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(MathBinaryOp binaryOp, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(LogicalBinaryOp binaryOp, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(MathUnaryOp unaryOp, Object d) {
-		// TODO Auto-generated method stub
-		Type operand = unaryOp.getOperand().accept(this, d);
-		if(unaryOp.getOperator() == UnaryOps.UMINUS && operand.compareTo(new PrimitiveType(unaryOp.getLine(), DataTypes.INT))>=0)
-			return operand;
-		if(unaryOp.getOperator() == UnaryOps.LNEG && operand.compareTo(new PrimitiveType(unaryOp.getLine(), DataTypes.BOOLEAN))>=0)
-			return operand;
-		semanticErrors.add(new SemanticError("unsupported unary operation "+unaryOp.getOperator().getDescription()+" on type "+operand.getName(), operand.getLine()));
-		return null;
-	}
-
-	@Override
-	public Type visit(LogicalUnaryOp unaryOp, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(Literal literal, Object d) {
-		// TODO Auto-generated method stub
-		types.insertType(literal.getICType());
-		literal.setTypeFromTable(literal.getICType());
-		return literal.getICType();
-	}
-
-	@Override
-	public Type visit(ExpressionBlock expressionBlock, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Type visit(MethodType methodType, Object d) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public void printErrorStack(){
-		for(SemanticError e: semanticErrors)
-			try {
-				throw e;
-			} catch (SemanticError e1) {
-				// TODO Auto-generated catch block
-				System.out.println(e.toString());
+		if(returnStatement.hasValue()){
+			MyType ret = returnStatement.getValue().accept(this,d);
+			if(TypeOK(methodType, ret)){
+				return methodType;
 			}
+			semanticErrors.add(new SemanticError("Cannot return different types",returnStatement.getLine()));	
+		}
+		//void
+		MyType typeTable = types.insertType(new MyVoidType());
+		if(TypeOK(methodType,typeTable)){
+			return typeTable;
+		}
+		return null;
 	}
-}*/
+	@Override
+	public MyType visit(If ifStatement, Object d) {
+		return null;
+	}
+	@Override
+	public MyType visit(While whileStatement, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(Break breakStatement, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(Continue continueStatement, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(StatementsBlock statementsBlock, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(LocalVariable localVariable, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(VariableLocation location, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(ArrayLocation location, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(StaticCall call, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(VirtualCall call, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(This thisExpression, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(NewClass newClass, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(NewArray newArray, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(Length length, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(MathBinaryOp binaryOp, Object d) {
+		// TODO Auto-generated method stub
+		MyType leftType = binaryOp.getFirstOperand().accept(this, d);
+		MyType rightType = binaryOp.getSecondOperand().accept(this, d);
+		if(TypeOK(leftType, rightType))
+			return leftType;
+		
+		semanticErrors.add(new SemanticError("Cannot operate on different types",binaryOp.getLine()));
+		return null;
+	}
+	@Override
+	public MyType visit(LogicalBinaryOp binaryOp, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(MathUnaryOp unaryOp, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(LogicalUnaryOp unaryOp, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(Literal literal, Object d) {
+		// TODO Auto-generated method stub		
+		return types.insertType(literal.getMyType());
+	}
+	@Override
+	public MyType visit(ExpressionBlock expressionBlock, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public MyType visit(MethodType methodType, Object d) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}
