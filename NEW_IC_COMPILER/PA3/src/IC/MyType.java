@@ -3,7 +3,10 @@ package IC;
 import IC.AST.Type;
 
 public abstract class MyType {
+	private int unique_id;
+	public static int run_id = 6;
 	private String name;	
+	private int dimention=0;
 	abstract boolean subtypeOf(MyType type) ;
 	
 	public String getName() {
@@ -24,7 +27,11 @@ public abstract class MyType {
 		else {
 			MyType t = (MyType)o;
 			if(	getName().equals(t.getName())) {
-				return true;
+				if(getDimention() == t.getDimention()){
+					return true;	
+				}else{
+					return false;
+				}
 			}
 			return false;
 		}
@@ -41,6 +48,22 @@ public abstract class MyType {
 		}
 	    
 	    return result;
+	}
+
+	public int getUnique_id() {
+		return unique_id;
+	}
+
+	public void setUnique_id(int unique_id) {
+		this.unique_id = unique_id;
+	}
+
+	public int getDimention() {
+		return dimention;
+	}
+
+	public void setDimention(int dimention) {
+		this.dimention = dimention;
 	}
 	
 }

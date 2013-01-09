@@ -6,6 +6,11 @@ public class MyClassType extends MyType {
 	
 	private ICClass classAST;
 	private MyClassType superClass=null;
+	
+	public MyClassType(){
+		this.setUnique_id(this.run_id++);
+	}
+	
 	@Override
 	boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
@@ -30,7 +35,7 @@ public class MyClassType extends MyType {
 	}
 	
 	public String toString(){
-		String r = "Class: "+this.getName();
+		String r = this.getUnique_id()+": Class: "+this.getName();
 		if(hasSuperClass())
 			r+=", Superclass Name: "+getSuperClass().getName();
 		return r;

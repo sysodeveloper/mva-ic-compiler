@@ -162,6 +162,7 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 			return returnType;
 		MyArrayType array = new MyArrayType();
 		array.setDimantion(this.getUserType().getDimension());
+		returnType.setDimention(this.getUserType().getDimension());
 		array.setElementType(returnType);
 		array.setName(this.getName());
 		array.setFullName();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ import IC.AST.MethodType;
 import IC.AST.Type;
 
 public class MyTypeTable {
-	private int uniqueId = 0;
+	private int uniqueId = 6;
 	// Maps element types to array types
 	private Map<MyType,MyArrayType> uniqueArrayTypes;
     private Map<String,MyClassType> uniqueClassTypes;
@@ -23,21 +24,20 @@ public class MyTypeTable {
     private LinkedList<MyPrimitiveType> uniquePrimitiveType;
 	
 	public MyTypeTable(){
-		uniqueArrayTypes = new HashMap<MyType, MyArrayType>();
-		uniqueClassTypes = new HashMap<String, MyClassType>();
-		uniqueMethodTypes = new HashMap<String, MyMethodType>();
+		uniqueArrayTypes = new LinkedHashMap<MyType, MyArrayType>();
+		uniqueClassTypes = new LinkedHashMap<String, MyClassType>();
+		uniqueMethodTypes = new LinkedHashMap<String, MyMethodType>();
 		uniquePrimitiveType = new LinkedList<MyPrimitiveType>(); 		
 	}
 	
 	// Returns unique array type object
 	public  MyArrayType arrayType(MyArrayType elemType) {
-		if (uniqueArrayTypes.containsKey(elemType)) {
+		if (uniqueArrayTypes.containsKey(elemType.getElementType())) {
 			// array type object already created – return it
 			return uniqueArrayTypes.get(elemType);
 			}
 		else {
 			// object doesn’t exist – put it inside and return it
-			
 			uniqueArrayTypes.put(elemType.getElementType(),elemType);
 			return elemType;
 			}		

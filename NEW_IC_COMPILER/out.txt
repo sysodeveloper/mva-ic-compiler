@@ -1,22 +1,28 @@
 digraph G{
     1
-     2
-    3 -> {2}
-      4 -> {}
-     5 -> {4}
-    6 -> {5}
-  7 -> {1 3 6}
-8 -> {7}
-9 -> {8}
+      2
+      3
+    4 -> {2 3}
+      5
+      6
+    7 -> {5 6}
+     8 -> {}
+    9 -> {8}
+  10 -> {1 4 7 9}
+11 -> {10}
+12 -> {11}
 
 1[label="MethodType {  -> int}"]
-2[label="PrimitiveType string"]
-3[label="LocalVariable t"]
-4[label="VariableLocation t"]
-5[label="LogicalUnaryOp unary subtraction"]
-6[label="ReturnStatement"]
-7[label="VirtualMethod f"]
-8[label="Class T"]
-9[label="Program"]
+2[label="PrimitiveType string[][]"]
+3[label="Literal 0"]
+4[label="LocalVariable ty"]
+5[label="PrimitiveType string[][][]"]
+6[label="Literal 0"]
+7[label="LocalVariable tdy"]
+8[label="VariableLocation ty"]
+9[label="ReturnStatement"]
+10[label="VirtualMethod f"]
+11[label="Class T"]
+12[label="Program"]
 
 }
