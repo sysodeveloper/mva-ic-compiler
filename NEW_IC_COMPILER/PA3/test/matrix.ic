@@ -27,3 +27,10 @@ class B extends A{
 		}
 	}
 }
+
+class C extends A{
+	int x;
+	void q(){
+		x = 4294967297;
+	}
+}
