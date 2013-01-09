@@ -225,7 +225,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		MySymbolRecord func = null;
 		MyClassType tempClass = new MyClassType();
 		tempClass.setName(call.getClassName());
-		MyType stClass = types.insertType(new MyClassType()); // get the class type object of the static call class
+		MyType stClass = types.insertType(tempClass); // get the class type object of the static call class
 		func = ((MyClassType)stClass).getClassAST().enclosingScope().Lookup(call.getName()); // static function exists, checked before in analyzer
 		
 		List<Formal> funcFormals = ((Method)func.getNode()).getFormals();
@@ -239,7 +239,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		for(int i=0;i<funcFormals.size();i++){
 			MyType formalType = funcFormals.get(i).accept(this, d);
 			if(formalType!= callArgs.get(i).accept(this, d)){
-				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type"+formalType.getName()+" as argument number "+i,call.getLine()));
+				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type "+formalType.getName()+" as argument number "+(i+1),call.getLine()));
 				return voidType;
 			}
 		}
@@ -278,7 +278,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		for(int i=0;i<funcFormals.size();i++){
 			MyType formalType = funcFormals.get(i).accept(this, d);
 			if(formalType!= callArgs.get(i).accept(this, d)){
-				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type"+formalType.getName()+" as argument number "+i,call.getLine()));
+				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type "+formalType.getName()+" as argument number "+(i+1),call.getLine()));
 				return voidType;
 			}
 		}
@@ -303,10 +303,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			return voidType;
 		}
 		
-		MyType baseType = newArray.getType().accept(this, d);
-		
+		MyType baseType = newArray.getType().accept(this, d);		
 		MyArrayType tempArray = new MyArrayType();
 		tempArray.setElementType(baseType);
+		tempArray.setDimantion(baseType.getDimention());
 		
 		return types.insertType(tempArray);
 	}
@@ -337,7 +337,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			return voidType;
 		}
 		if(leftType != intType){ // math operation on types which are not integers
-			semanticErrors.add(new SemanticError("Cannot perform math operation on "+leftType.toString() ,binaryOp.getLine()));
+			semanticErrors.add(new SemanticError("Cannot perform math operation on "+leftType.getName() ,binaryOp.getLine()));
 			return voidType;
 		}		
 		return leftType;
@@ -396,8 +396,16 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Literal literal, Object d) {
-		// TODO Auto-generated method stub		
-		return types.insertType(literal.getMyType());
+		MyType type =  types.insertType(literal.getMyType());
+		if(type!=intType)
+			return type;
+		try{
+			int value = Integer.parseInt(((String)literal.getValue()));
+		}catch(NumberFormatException e){
+			semanticErrors.add(new SemanticError("the number is out of range",literal.getLine()));
+			return voidType;
+		}		
+		return type;
 	}
 	@Override
 	public MyType visit(ExpressionBlock expressionBlock, Object d) {

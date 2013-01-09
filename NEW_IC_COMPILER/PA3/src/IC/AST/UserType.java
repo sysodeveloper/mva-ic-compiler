@@ -5,8 +5,12 @@ import java.util.Set;
 
 import IC.DataTypes;
 import IC.MyArrayType;
+import IC.MyBoolType;
 import IC.MyClassType;
+import IC.MyIntType;
+import IC.MyStringType;
 import IC.MyType;
+import IC.MyVoidType;
 
 /**
  * User-defined data type AST node.
@@ -117,6 +121,21 @@ public class UserType extends Type {
 	@Override
 	public MyType getMyType() {
 		// TODO Auto-generated method stub
-		return null;
+		MyArrayType arrayType = null;
+		MyClassType baseType = new MyClassType();
+		baseType.setName(this.getName());	
+		
+		if(this.getDimension()==0){
+			return baseType;
+		}
+		else{
+			arrayType = new MyArrayType();
+			arrayType.setDimantion(this.getDimension());
+			baseType.setDimention(this.getDimension());
+			arrayType.setElementType(baseType);
+			arrayType.setName(this.getName());
+			arrayType.setFullName();
+		}
+		return arrayType;
 	}
 }
