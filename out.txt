@@ -66,7 +66,21 @@ digraph G{
     72 -> {53 71}
   73 -> {52 72}
 74 -> {73}
-75 -> {51 74}
+    75
+     76
+    77 -> {76}
+      78
+          79
+          80        81 -> {79 80}
+            82 -> {}
+            83
+          84 -> {82 83}
+          85        86 -> {84 85}
+      87 -> {81 86}
+    88 -> {78 87}
+    89  90 -> {75 77 88 89}
+91 -> {90}
+92 -> {51 74 91}
 
 1[label="MethodType {string -> void}"]
 2[label="PrimitiveType string"]
@@ -142,6 +156,23 @@ digraph G{
 72[label="whileStatement"]
 73[label="VirtualMethod p"]
 74[label="Class A"]
-75[label="Program"]
+75[label="MethodType {int[] -> int}"]
+76[label="PrimitiveType int[]"]
+77[label="Formal yyy"]
+78[label="Literal true"]
+79[label="Literal true"]
+80[label="ContinueStatement"]
+81[label="whileStatement"]
+82[label="VariableLocation yyy"]
+83[label="Literal 1"]
+84[label="LogicalBinaryOp equality"]
+85[label="BreakStatement"]
+86[label="IfStatement"]
+87[label="StatementsBlock"]
+88[label="whileStatement"]
+89[label="BreakStatement"]
+90[label="VirtualMethod u"]
+91[label="Class B has super classA"]
+92[label="Program"]
 
 }
