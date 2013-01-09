@@ -17,3 +17,13 @@ class A{
 		}
 	}
 }
+
+class B extends A{
+	int u(int[] yyy){
+		while(true){
+			while(true) continue;
+			if(yyy == 1)
+					break;
+		}
+	}
+}
