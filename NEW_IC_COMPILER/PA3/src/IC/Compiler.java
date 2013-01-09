@@ -13,6 +13,7 @@ import IC.AST.GraphEdgesPrinter;
 import IC.AST.GrpahNodesPrinter;
 import IC.AST.ICClass;
 import IC.AST.Labeling;
+import IC.AST.PrettyPrinter;
 import IC.AST.Program;
 import IC.AST.TreePrinter;
 import IC.Parser.*;
@@ -35,7 +36,7 @@ public class Compiler {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Error: No input IC file.");
-			System.exit(1);
+			return;
 		}
 		if(args.length == 1){
 			// Only parse the ic file.
@@ -156,6 +157,9 @@ public class Compiler {
 	 * Prints the ast tree, needs to run after LabelAst(root,someNumber)
 	 */
 	private static void PrintASTCommand(Object root){
+		PrettyPrinter printer = new PrettyPrinter(ICFileParsed);
+		System.out.println(printer.visit((Program)root));
+		/*
 		try{
 			TreePrinter treePrinter = new TreePrinter();
 			String[] out = ((String)treePrinter.visit((Program)root)).split("\n");
@@ -168,7 +172,7 @@ public class Compiler {
 			System.out.println("Null Pointer in PrintASTCommand");
 		}catch(Exception e2){
 			System.out.println("Error while printing: " + e2.getMessage());
-		}
+		}*/
 	}
 	
 	/**
@@ -208,16 +212,12 @@ public class Compiler {
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
 			System.out.println(libPath + " " + e3.getMessage());
-			System.exit(1);
 		}catch (LexicalError e1){
 			System.out.println(libPath + " " +e1.getMessage());
-			System.exit(1);
 		}catch (FileNotFoundException e) {
 			System.out.println("Error: The file " + libPath + " doesn't exist.");
-			System.exit(1);
 		} catch (Exception e2) {
 			System.out.println(libPath + " " + e2.getMessage());
-			System.exit(1);
 		}
 		return null;
 	}
@@ -242,16 +242,12 @@ public class Compiler {
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
 			System.out.println(filePath + " " + e3.getMessage());
-			System.exit(1);
 		}catch (LexicalError e1){
-			System.out.println(filePath + " " + e1.getMessage());
-			System.exit(1);	
+			System.out.println(filePath + " " + e1.getMessage());	
 		}catch (FileNotFoundException e) {
 			System.out.println("Error: The file " + filePath + " doesn't exist.");
-			System.exit(1);
 		} catch (Exception e2) {
 			System.out.println(filePath + " " + "Error while parsing: " + e2.getMessage());
-			System.exit(1);
 		}
 		return null;
 	}
