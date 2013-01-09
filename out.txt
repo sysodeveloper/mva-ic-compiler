@@ -78,9 +78,17 @@ digraph G{
           85        86 -> {84 85}
       87 -> {81 86}
     88 -> {78 87}
-    89  90 -> {75 77 88 89}
-91 -> {90}
-92 -> {51 74 91}
+  89 -> {75 77 88}
+90 -> {89}
+   91
+92 -> {91}
+    93
+      94 -> {}
+      95
+    96 -> {94 95}
+  97 -> {93 96}
+98 -> {92 97}
+99 -> {51 74 90 98}
 
 1[label="MethodType {string -> void}"]
 2[label="PrimitiveType string"]
@@ -170,9 +178,16 @@ digraph G{
 86[label="IfStatement"]
 87[label="StatementsBlock"]
 88[label="whileStatement"]
-89[label="BreakStatement"]
-90[label="VirtualMethod u"]
-91[label="Class B has super classA"]
-92[label="Program"]
+89[label="VirtualMethod u"]
+90[label="Class B has super classA"]
+91[label="PrimitiveType int"]
+92[label="Field  x"]
+93[label="MethodType {  -> void}"]
+94[label="VariableLocation x"]
+95[label="Literal 4294967297"]
+96[label="Assignment"]
+97[label="VirtualMethod q"]
+98[label="Class C has super classA"]
+99[label="Program"]
 
 }
