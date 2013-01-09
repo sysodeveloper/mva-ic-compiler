@@ -2,6 +2,11 @@ package IC.AST;
 
 import IC.DataTypes;
 import IC.LiteralTypes;
+import IC.MyBoolType;
+import IC.MyIntType;
+import IC.MyNullType;
+import IC.MyStringType;
+import IC.MyType;
 
 /**
  * Literal value AST node.
@@ -74,6 +79,22 @@ public class Literal extends Expression {
 
 	public Object getValue() {
 		return value;
+	}
+	
+	public MyType getMyType(){
+		switch(type){
+		case FALSE:
+			return new MyBoolType();
+		case TRUE:
+			return new MyBoolType();
+		case INTEGER:
+			return new MyIntType();
+		case NULL:
+			return new MyNullType();
+		case STRING:
+			return new MyStringType();
+		}
+		return null;
 	}
 
 }

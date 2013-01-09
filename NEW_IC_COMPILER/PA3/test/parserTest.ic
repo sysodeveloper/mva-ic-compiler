@@ -122,4 +122,7 @@ class T{
 		return ty;
 		
 	}
+	
+	void y(){
+	}
 }
