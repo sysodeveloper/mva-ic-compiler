@@ -114,10 +114,12 @@ class C extends B{
 	int t(){}
 }
 */
+
 class T{
 	int f(){
-		string t;
-		return -t;
+		string[][] ty=0;
+		string[][][] tdy=0;
+		return ty;
 		
 	}
 }

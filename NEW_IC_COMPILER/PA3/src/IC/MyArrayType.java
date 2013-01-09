@@ -3,14 +3,18 @@ package IC;
 public class MyArrayType extends MyType {
 	
 	private MyType elementType;
-	private int dimantion;
+	private int arrayDimention;
+	
+	public MyArrayType(){
+		this.setUnique_id(this.run_id++);
+	}
 	
 	@Override
 	boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
 		if(! elementType.subtypeOf(((MyArrayType)type).getElementType()))
 				return false;
-		if(dimantion != ((MyArrayType)type).getDimantion())
+		if(arrayDimention != ((MyArrayType)type).getDimantion())
 			return false;
 		return true;
 	}
@@ -24,11 +28,11 @@ public class MyArrayType extends MyType {
 	}
 
 	public int getDimantion() {
-		return dimantion;
+		return arrayDimention;
 	}
 
 	public void setDimantion(int dimantion) {
-		this.dimantion = dimantion;
+		this.arrayDimention = dimantion;
 	}
 	
 	public void setFullName(){
@@ -41,6 +45,6 @@ public class MyArrayType extends MyType {
 	}
 	
 	public String toString(){
-		return "Array type: "+this.getName();
+		return this.getUnique_id()+": Array type: "+this.getName();
 	}
 }

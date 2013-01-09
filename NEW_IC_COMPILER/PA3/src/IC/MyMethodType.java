@@ -12,6 +12,9 @@ public class MyMethodType extends MyType {
 	private ArrayList<MyType> paramTypes;
 	private MyType returnType;
 	
+	public MyMethodType(){
+		this.setUnique_id(this.run_id++);
+	}
 	
 	@Override
 	boolean subtypeOf(MyType type) {
@@ -51,6 +54,6 @@ public class MyMethodType extends MyType {
 	}
 	
 	public String toString(){
-		return "Method type: "+this.getName();
+		return this.getUnique_id()+": Method type: "+this.getName();
 	}
 }
