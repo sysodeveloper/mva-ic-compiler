@@ -36,57 +36,46 @@ public class Compiler {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Error: No input IC file.");
-			return;
 		}
-		if(args.length == 1){
-			// Only parse the ic file.
-			Object root = ParseICFile(args[0]);
-			if(BuildSymbolTables((Program)root, args[0])) {
-				System.out.println("Build symbol table complete.");
+		//check which arguments are entered
+		Object root = ParseICFile(args[0]);
+		Object libraryClass = null;
+		//check if the library needs to be parsed
+		boolean foundlibrary = false;
+		for(int i=1;i<args.length;i++){
+			if(args[i].startsWith("-L")){
+				libraryClass = ParseLibraryFile(args[i].substring(2));
+				AddLibraryToRoot(root,libraryClass);
+				foundlibrary = true;
+				break;
 			}
-			else {
-				System.err.println("Build symbol table failed.");
-				return;
+		}
+		//find library file in the current directory
+		if(!foundlibrary){
+			String fileIC = args[0];
+			String sep = System.getProperty("path.separator");
+			fileIC = fileIC.substring(0,fileIC.lastIndexOf(sep));
+			String defLib = fileIC + sep + "libic.sig";
+			libraryClass = ParseLibraryFile(defLib);
+			AddLibraryToRoot(root,libraryClass);
+		}
+		//check if needs to be printed
+		for(int i=1;i<args.length;i++){
+			if(args[i].compareTo("-print-ast") == 0){
+				LabelAST(root, 0);
+				PrintASTCommand(root);
+				GraphvizAST((Program)root);
+				break;
 			}
-		}else{
-			// Check which arguments are entered.
-			Object root = ParseICFile(args[0]);
-			Object libraryClass = null;
-			// Check if the library needs to be parsed.
-			for(int i = 1;i < args.length; ++i){
-				if(args[i].startsWith("-L")){
-					libraryClass = ParseLibraryFile(args[i].substring(2));
-					AddLibraryToRoot(root,libraryClass);
-					break;
-				}
+		}
+		//check if needs to dump symbol table and type table.
+		for(int i = 1; i < args.length; ++i){
+			if(args[i].compareTo("-dump-symtab") == 0){
+				dumpTable(args[0]);
+				break;
 			}
-			// Check if needs to be printed.
-			for(int i = 1; i < args.length; ++i){
-				if(args[i].compareTo("-print-ast") == 0){
-					LabelAST(root, 0);
-					PrintASTCommand(root);
-					GraphvizAST((Program)root);
-					break;
-				}
-			}
-			
-			if(BuildSymbolTables((Program)root, args[0])) {
-				System.out.println("Build symbol table complete.");
-			}
-			else {
-				System.err.println("Build symbol table failed.");
-				return;
-			}
-			
-			// Check if needs to dump symbol table and type table.
-			for(int i = 1; i < args.length; ++i){
-				if(args[i].compareTo("-dump-symtab") == 0){
-					dumpTable(args[0]);
-					break;
-				}
-			}
-		}		
-	}
+		}
+	}		
 
 	public static String getICFileParsed(){
 		return Compiler.ICFileParsed;
@@ -283,9 +272,8 @@ public class Compiler {
 				if(!analyze) analyzer.printErrorStack();
 				MyTypeTable types = buider.getTypeTable();
 				types.printTypeTable();
-				MyTypeBuilder typeBuilder = new MyTypeBuilder(types);
-				typeBuilder.visit(root, null);
-				typeBuilder.printErrorStack();
+				//typeBuilder.visit(root, null);
+				//typeBuilder.printErrorStack();
 				return analyze;
 			}
 			return success;
