@@ -49,7 +49,12 @@ public class MySymbolRecord {
 	}
 	
 	public String getKindToString(){
-		String strKind = kind.toString().toLowerCase();
+		String strKind;
+		if(this.kind == kind.Library_Method){
+			strKind = Kind.Static_Method.toString().toLowerCase();
+		}else{
+			strKind = kind.toString().toLowerCase();	
+		}
 		if(strKind.length() >= 1){
 			String first = strKind.charAt(0) + "";
 			first = first.toUpperCase();
