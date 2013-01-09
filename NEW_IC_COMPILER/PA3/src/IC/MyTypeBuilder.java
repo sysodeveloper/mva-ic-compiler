@@ -302,7 +302,13 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("Type of array size expression can be only int type",newArray.getLine()));
 			return voidType;
 		}
-		return newArray.getType().accept(this, d);
+		
+		MyType baseType = newArray.getType().accept(this, d);
+		
+		MyArrayType tempArray = new MyArrayType();
+		tempArray.setElementType(baseType);
+		
+		return types.insertType(tempArray);
 	}
 	@Override
 	public MyType visit(Length length, Object d) {
@@ -357,6 +363,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 				semanticErrors.add(new SemanticError("Can perform "+binaryOp.getOperator().getDescription()+" operation only on boolean types",binaryOp.getLine()));
 				return voidType;
 			}
+			return boolType;
 			
 		}
 		
