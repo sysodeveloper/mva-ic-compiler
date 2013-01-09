@@ -49,6 +49,9 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	private MySymbolTable globalScope;
 	private Map<String,MySymbolTable> classScopes = new LinkedHashMap<String, MySymbolTable>();
 	private List<SemanticError> semanticErrors = new ArrayList<SemanticError>();
+	
+	//continue and break flags
+	private int loopCounter = 0;
 	@Override
 	public Boolean visit(Program program, MySymbolTable d) {
 		globalScope = program.enclosingScope();
@@ -178,15 +181,16 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(While whileStatement, MySymbolTable d) {
-		// TODO Auto-generated method stub
 		boolean result = whileStatement.getCondition().accept(this, d);
+		loopCounter++;
 		result &= whileStatement.getOperation().accept(this, whileStatement.enclosingScope());
+		loopCounter--;
 		return result;
 	}
 
 	@Override
 	public Boolean visit(Break breakStatement, MySymbolTable d) {
-		if(true){
+		if(loopCounter == 0){
 			semanticErrors.add(new SemanticError("break statement not inside while scope ", breakStatement.getLine()));
 			return false;
 		}
@@ -195,7 +199,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(Continue continueStatement, MySymbolTable d) {
-		if(! checkLoop(d)){
+		if(loopCounter == 0){
 			semanticErrors.add(new SemanticError("continue statement not inside while scope ", continueStatement.getLine()));
 			return false;
 		}

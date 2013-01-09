@@ -50,94 +50,23 @@ digraph G{
    49 -> {48}
   50 -> {47 49}
 51 -> {4 8 12 16 18 20 22 28 32 36 40 44 46 50}
-   52
-53 -> {52}
-   54
-55 -> {54}
-    56
-     57
-    58 -> {57}
-      59 -> {}
-            74
-            75
-          76 -> {74 75}
-        77 -> {76}
-         78
-        79 -> {78}
-      80 -> {77 79}
-          60
-          61        62 -> {60 61}
-           63 -> {}
-          64 in external scope -> {63}
-          65
-        66 -> {64 65}
-           67 -> {}
-          68 in external scope -> {67}
-          69
-        70 -> {68 69}
-         71
-        72 -> {71}
-      73 -> {62 66 70 72}
-    81 -> {59 80 73}
-  82 -> {56 58 81}
-    83
-     84
-    85 -> {84}
-     86
-    87 -> {86}
-     88
-    89 -> {88}
-      90
-        91
-        92 -> {}
-      93 -> {91 92}
-    94 -> {90 93}
-      95
-      96
-    97 -> {95 96}
-        98 -> {}
-        99 -> {}
-      100 -> {98 99}
-            101 -> {}
-            102 -> {}
-          103 -> {101 102}
-          104 -> {}
-        105 -> {103 104}
-          106 -> {}
-            107 -> {}
-            108
-          109 -> {107 108}
-        110 -> {106 109}
-           111 -> {}
-         112 -> {111}
-        113 -> {112}
-            114 -> {}
-            115
-          116 -> {114 115}
-          117        118 -> {116 117}
-      119 -> {105 110 113 118}
-    120 -> {100 119}
-  121 -> {83 85 87 89 94 97 120}
-122 -> {53 55 82 121}
-   123
-124 -> {123}
-    125
-     126
-    127 -> {126}
-     128
-    129 -> {128}
-     130
-    131 -> {130}
-  132 -> {125 127 129 131}
-133 -> {124 132}
-    134
-     135
-    136 -> {135}
-     137
-    138 -> {137}
-  139 -> {134 136 138}
-140 -> {139}
-141 -> {51 122 133 140}
+    52
+      53
+          54
+              55
+                56
+                57              58 -> {56 57}
+            59 -> {55 58}
+            60              61
+                62                63                64              65 -> {62 63 64}
+            66 -> {61 65}
+          67 -> {59 60 66}
+        68 -> {54 67}
+        69        70      71 -> {68 69 70}
+    72 -> {53 71}
+  73 -> {52 72}
+74 -> {73}
+75 -> {51 74}
 
 1[label="MethodType {string -> void}"]
 2[label="PrimitiveType string"]
@@ -190,97 +119,29 @@ digraph G{
 49[label="Formal i"]
 50[label="LibraryMethod exit"]
 51[label="Class Library"]
-52[label="PrimitiveType string"]
-53[label="Field  str"]
-54[label="PrimitiveType int"]
-55[label="Field  i"]
-56[label="MethodType {boolean -> int}"]
-57[label="PrimitiveType boolean"]
-58[label="Formal b"]
-59[label="VariableLocation b"]
-74[label="PrimitiveType int"]
-75[label="Literal 5"]
-76[label="LocalVariable k"]
-77[label="StatementsBlock"]
-78[label="Literal 1"]
-79[label="ReturnStatement"]
-80[label="StatementsBlock"]
-60[label="UserType A"]
-61[label="NewClass instantiation A"]
-62[label="LocalVariable x"]
-63[label="VariableLocation x"]
-64[label="VariableLocation i in external scope"]
-64[label="VariableLocation i"]
-65[label="Literal 9"]
-66[label="Assignment"]
-67[label="VariableLocation x"]
-68[label="VariableLocation str in external scope"]
-68[label="VariableLocation str"]
-69[label="Literal "hello""]
-70[label="Assignment"]
-71[label="Literal 0"]
-72[label="ReturnStatement"]
-73[label="StatementsBlock"]
-81[label="IfStatement"]
-82[label="StaticMethod sfunc"]
-83[label="MethodType {A, int, int -> void}"]
-84[label="UserType A"]
-85[label="Formal a"]
-86[label="PrimitiveType int"]
-87[label="Formal max"]
-88[label="PrimitiveType int"]
-89[label="Formal val"]
-90[label="PrimitiveType int[]"]
-91[label="PrimitiveType int"]
-92[label="VariableLocation max"]
-93[label="NewArray allocation"]
-94[label="LocalVariable arr"]
-95[label="PrimitiveType int"]
-96[label="Literal 0"]
-97[label="LocalVariable i"]
-98[label="VariableLocation i"]
-99[label="VariableLocation max"]
-100[label="LogicalBinaryOp less than"]
-101[label="VariableLocation arr"]
-102[label="VariableLocation i"]
-103[label="ArrayLocation"]
-104[label="VariableLocation val"]
-105[label="Assignment"]
-106[label="VariableLocation i"]
-107[label="VariableLocation i"]
-108[label="Literal 1"]
-109[label="MathBinaryOp addition"]
-110[label="Assignment"]
-111[label="VariableLocation i"]
-112[label="StaticCall to method printi"]
-113[label="CallStatement"]
-114[label="VariableLocation a"]
-115[label="Literal null"]
-116[label="LogicalBinaryOp equality"]
-117[label="BreakStatement"]
-118[label="IfStatement"]
-119[label="StatementsBlock"]
-120[label="whileStatement"]
-121[label="VirtualMethod vfunc"]
-122[label="Class A"]
-123[label="PrimitiveType int"]
-124[label="Field  j"]
-125[label="MethodType {A, int, int -> void}"]
-126[label="UserType A"]
-127[label="Formal a"]
-128[label="PrimitiveType int"]
-129[label="Formal max"]
-130[label="PrimitiveType int"]
-131[label="Formal val"]
-132[label="VirtualMethod vfunc"]
-133[label="Class B has super classA"]
-134[label="MethodType {string[] -> void}"]
-135[label="PrimitiveType string[]"]
-136[label="Formal args"]
-137[label="UserType A[][]"]
-138[label="LocalVariable a"]
-139[label="StaticMethod main"]
-140[label="Class C"]
-141[label="Program"]
+52[label="MethodType {  -> void}"]
+53[label="Literal true"]
+54[label="Literal true"]
+55[label="Literal true"]
+56[label="Literal true"]
+57[label="ContinueStatement"]
+58[label="whileStatement"]
+59[label="whileStatement"]
+60[label="BreakStatement"]
+61[label="Literal true"]
+62[label="BreakStatement"]
+63[label="ContinueStatement"]
+64[label="BreakStatement"]
+65[label="StatementsBlock"]
+66[label="IfStatement"]
+67[label="StatementsBlock"]
+68[label="whileStatement"]
+69[label="ContinueStatement"]
+70[label="BreakStatement"]
+71[label="StatementsBlock"]
+72[label="whileStatement"]
+73[label="VirtualMethod p"]
+74[label="Class A"]
+75[label="Program"]
 
 }
