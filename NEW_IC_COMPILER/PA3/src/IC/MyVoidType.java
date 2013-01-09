@@ -7,5 +7,10 @@ public class MyVoidType extends MyPrimitiveType {
 		this.setName("void");
 		this.setUnique_id(5);
 	}
-
+	
+	@Override
+	boolean subtypeOf(MyType type) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

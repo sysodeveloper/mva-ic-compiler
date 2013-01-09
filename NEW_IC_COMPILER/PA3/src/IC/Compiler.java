@@ -283,8 +283,9 @@ public class Compiler {
 				if(!analyze) analyzer.printErrorStack();
 				MyTypeTable types = buider.getTypeTable();
 				types.printTypeTable();
-				//typeBuilder.visit(root, null);
-				//typeBuilder.printErrorStack();
+				MyTypeBuilder typeBuilder = new MyTypeBuilder(types);
+				typeBuilder.visit(root, null);
+				typeBuilder.printErrorStack();
 				return analyze;
 			}
 			return success;

@@ -8,6 +8,7 @@ import IC.AST.Assignment;
 import IC.AST.Break;
 import IC.AST.CallStatement;
 import IC.AST.Continue;
+import IC.AST.Expression;
 import IC.AST.ExpressionBlock;
 import IC.AST.Field;
 import IC.AST.Formal;
@@ -46,7 +47,11 @@ import IC.AST.While;
 public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	private MyTypeTable types;
 	private List<SemanticError> semanticErrors = new ArrayList<SemanticError>();
-	
+	private MyType intType;
+	private MyType boolType;
+	private MyType stringType;
+	private MyType nullType;
+	private MyType voidType;
 	private boolean TypeOK(MyType t1, MyType t2){
 		//left t1, right t2
 		if(t1 == t2){
@@ -59,13 +64,18 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	
 	public MyTypeBuilder(MyTypeTable table){
 		this.types = table;
+		intType = table.insertType(new MyIntType());
+		boolType = table.insertType(new MyBoolType());
+		stringType = table.insertType(new MyStringType());
+		nullType = table.insertType(new MyNullType());
+		voidType = table.insertType(new MyVoidType());
 	}
 	@Override
 	public MyType visit(Program program, Object d) {
 		for(ICClass c : program.getClasses()){
 			c.accept(this,d);
 		}
-		return null;
+		return voidType;
 	}
 	@Override
 	public MyType visit(ICClass icClass, Object d) {
@@ -76,11 +86,11 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		for(Method m: icClass.getMethods()){
 			m.accept(this,d);
 		}
-		return null;
+		return icClass.getRecord().getMyType();
 	}
 	@Override
 	public MyType visit(Field field, Object d) {
-		return field.getType().accept(this,d);
+		return field.getRecord().getMyType();
 	}
 
 	public MyType visit(Method method, Object d){
@@ -91,7 +101,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		for(Statement s : method.getStatements()){
 			s.accept(this,d);
 		}
-		return method.getMyType();
+		return method.getRecord().getMyType();
 	}
 	@Override
 	public MyType visit(VirtualMethod method, Object d) {
@@ -122,15 +132,19 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		MyType varType = assignment.getVariable().accept(this,d);
 		MyType exprType = assignment.getAssignment().accept(this,d);
 		if(TypeOK(varType,exprType)){
+			if(varType == intType){ // here var and assignment are integers
+				
+			}
 			return varType;
 		}
 		semanticErrors.add(new SemanticError("Cannot assign different types",assignment.getLine()));
-		return null;
+		return voidType;
 	}
 	@Override
 	public MyType visit(CallStatement callStatement, Object d) {
 		// TODO Auto-generated method stub
-		return null;
+		return callStatement.getCall().accept(this, d);
+	
 	}
 	@Override
 	public MyType visit(Return returnStatement, Object d) {
@@ -145,109 +159,233 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			if(TypeOK(methodType, ret)){
 				return methodType;
 			}
-			semanticErrors.add(new SemanticError("Cannot return different types",returnStatement.getLine()));	
+			semanticErrors.add(new SemanticError("Cannot return different types",returnStatement.getLine()));
+			return voidType;
 		}
-		//void
-		MyType typeTable = types.insertType(new MyVoidType());
-		if(TypeOK(methodType,typeTable)){
-			return typeTable;
+		//void		
+		if(methodType==voidType){
+			return voidType;
 		}
-		return null;
+		semanticErrors.add(new SemanticError("Cannot return different types",returnStatement.getLine()));
+		return voidType;
 	}
 	@Override
 	public MyType visit(If ifStatement, Object d) {
-		return null;
+		return voidType;
 	}
 	@Override
 	public MyType visit(While whileStatement, Object d) {
 		// TODO Auto-generated method stub
-		return null;
+		return voidType;
 	}
 	@Override
 	public MyType visit(Break breakStatement, Object d) {
 		// TODO Auto-generated method stub
-		return null;
+		return voidType;
 	}
 	@Override
 	public MyType visit(Continue continueStatement, Object d) {
 		// TODO Auto-generated method stub
-		return null;
+		return voidType;
 	}
 	@Override
 	public MyType visit(StatementsBlock statementsBlock, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		for(Statement s : statementsBlock.getStatements())
+			s.accept(this, d);
+		return voidType; // maybe we need to return void here ???
 	}
 	@Override
 	public MyType visit(LocalVariable localVariable, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		MyType varType =  localVariable.getRecord().getMyType();
+		if(!localVariable.hasInitValue())
+			return varType;
+		MyType initType =  localVariable.getInitValue().accept(this, d);
+		if(!TypeOK(varType, initType)){
+			semanticErrors.add(new SemanticError("Type of initializing expresion "+initType.getName()+" didnt match variable type "+varType.getName(),localVariable.getLine()));
+			return voidType;
+		}
+		return varType;
 	}
 	@Override
 	public MyType visit(VariableLocation location, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		if(location.isExternal())
+			return location.getLocation().accept(this, d);
+		return location.enclosingScope().Lookup(location.getName()).getMyType();
 	}
 	@Override
 	public MyType visit(ArrayLocation location, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		if(location.getIndex().accept(this, d) != intType){
+			semanticErrors.add(new SemanticError("Type of array index expression can be only int type",location.getLine()));
+			return voidType;
+		}
+		return location.getArray().accept(this, d);
 	}
 	@Override
 	public MyType visit(StaticCall call, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		MySymbolRecord func = null;
+		MyClassType tempClass = new MyClassType();
+		tempClass.setName(call.getClassName());
+		MyType stClass = types.insertType(new MyClassType()); // get the class type object of the static call class
+		func = ((MyClassType)stClass).getClassAST().enclosingScope().Lookup(call.getName()); // static function exists, checked before in analyzer
+		
+		List<Formal> funcFormals = ((Method)func.getNode()).getFormals();
+		List<Expression> callArgs = call.getArguments();
+		
+		if(callArgs.size() != funcFormals.size()){
+			semanticErrors.add(new SemanticError("function "+call.getName()+" expects "+funcFormals.size()+" arguments",call.getLine()));
+			return voidType;
+		}
+		// check every argument
+		for(int i=0;i<funcFormals.size();i++){
+			MyType formalType = funcFormals.get(i).accept(this, d);
+			if(formalType!= callArgs.get(i).accept(this, d)){
+				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type"+formalType.getName()+" as argument number "+i,call.getLine()));
+				return voidType;
+			}
+		}
+		
+		return func.getNode().enclosingScope().Lookup("$ret").getMyType();
 	}
 	@Override
 	public MyType visit(VirtualCall call, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		MySymbolRecord func = null;
+		if(call.isExternal()){ // need to check if this function exists in external context
+			MyType exType = call.getLocation().accept(this, d);
+			if(!(exType instanceof MyClassType)){
+				semanticErrors.add(new SemanticError("Type of location expression can be only user defined type",call.getLine()));
+				return voidType;
+			}
+			// search for that function in the specified class
+			exType = types.insertType(exType);
+			func = ((MyClassType)exType).getClassAST().enclosingScope().Lookup(call.getName());
+			if(func == null){
+				semanticErrors.add(new SemanticError("function with the name "+call.getName()+"does not exsists in class "+exType.getName(),call.getLine()));
+				return voidType;
+			}			
+		}
+		else{ // function exists in current context, checked before by analyzer
+			func = call.enclosingScope().Lookup(call.getName());
+		}
+		// check that types of formals match the types that the function expects 
+		List<Formal> funcFormals = ((Method)func.getNode()).getFormals();
+		List<Expression> callArgs = call.getArguments();
+		
+		if(callArgs.size() != funcFormals.size()){
+			semanticErrors.add(new SemanticError("function "+call.getName()+" expects "+funcFormals.size()+" arguments",call.getLine()));
+			return voidType;
+		}
+		// check every argument
+		for(int i=0;i<funcFormals.size();i++){
+			MyType formalType = funcFormals.get(i).accept(this, d);
+			if(formalType!= callArgs.get(i).accept(this, d)){
+				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type"+formalType.getName()+" as argument number "+i,call.getLine()));
+				return voidType;
+			}
+		}
+		
+		return func.getNode().enclosingScope().Lookup("$ret").getMyType();
 	}
 	@Override
 	public MyType visit(This thisExpression, Object d) {
 		// TODO Auto-generated method stub
-		return null;
+		return voidType;
 	}
 	@Override
 	public MyType visit(NewClass newClass, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		MyClassType c = new MyClassType();
+		c.setName(newClass.getName());
+		return types.insertType(c);
 	}
 	@Override
 	public MyType visit(NewArray newArray, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		if(newArray.getSize().accept(this, d) != intType){
+			semanticErrors.add(new SemanticError("Type of array size expression can be only int type",newArray.getLine()));
+			return voidType;
+		}
+		return newArray.getType().accept(this, d);
 	}
 	@Override
 	public MyType visit(Length length, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		MyType expType = length.getArray().accept(this, d);
+		if(!(expType instanceof MyArrayType)){
+			semanticErrors.add(new SemanticError("length can be applyed only to array types",length.getLine()));
+			return voidType;
+		}
+		return intType;
 	}
 	@Override
 	public MyType visit(MathBinaryOp binaryOp, Object d) {
-		// TODO Auto-generated method stub
+		
 		MyType leftType = binaryOp.getFirstOperand().accept(this, d);
 		MyType rightType = binaryOp.getSecondOperand().accept(this, d);
-		if(TypeOK(leftType, rightType))
-			return leftType;
 		
-		semanticErrors.add(new SemanticError("Cannot operate on different types",binaryOp.getLine()));
-		return null;
+		if(leftType != rightType){		
+			semanticErrors.add(new SemanticError("Cannot perform math operation on different types",binaryOp.getLine()));
+			return voidType;
+		}
+		//special case for strings 
+		if(leftType == stringType){
+			if(binaryOp.getOperator()==BinaryOps.PLUS)
+				return leftType;
+			semanticErrors.add(new SemanticError("Cannot perform "+binaryOp.getOperator().getDescription()+ " operation on string types",binaryOp.getLine()));
+			return voidType;
+		}
+		if(leftType != intType){ // math operation on types which are not integers
+			semanticErrors.add(new SemanticError("Cannot perform math operation on "+leftType.toString() ,binaryOp.getLine()));
+			return voidType;
+		}		
+		return leftType;
 	}
 	@Override
 	public MyType visit(LogicalBinaryOp binaryOp, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		MyType leftType = binaryOp.getFirstOperand().accept(this, d);
+		MyType rightType = binaryOp.getSecondOperand().accept(this, d);
+		boolean LRtypesOK = TypeOK(leftType, rightType);
+		boolean RLtypesOK = TypeOK(rightType, leftType);
+		
+		// binaryOps == , !=  
+		if(binaryOp.getOperator() == BinaryOps.EQUAL || binaryOp.getOperator() == BinaryOps.NEQUAL){
+			if(!LRtypesOK && !RLtypesOK){ // T0 not <= T1 AND T1 not <=T0
+				semanticErrors.add(new SemanticError("Cannot perform logical operation on different types",binaryOp.getLine()));
+				return voidType;
+			}
+			
+		}
+		// binaryOps && , || - only on booleans 
+		if(binaryOp.getOperator() == BinaryOps.LAND || binaryOp.getOperator() == BinaryOps.LOR){
+			if(leftType != boolType || rightType != boolType){
+				semanticErrors.add(new SemanticError("Can perform "+binaryOp.getOperator().getDescription()+" operation only on boolean types",binaryOp.getLine()));
+				return voidType;
+			}
+			
+		}
+		
+		//other cases: <=,<,>=,> ,  only on integers
+		if(!LRtypesOK || !RLtypesOK || leftType!=intType){
+			semanticErrors.add(new SemanticError("Can perform "+binaryOp.getOperator().getDescription()+" operation only on int types",binaryOp.getLine()));
+			return voidType;
+		}
+		
+		return boolType;
 	}
 	@Override
 	public MyType visit(MathUnaryOp unaryOp, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		MyType operandType = unaryOp.getOperand().accept(this, d);
+		
+		if(operandType != intType){
+			semanticErrors.add(new SemanticError("Can perform "+unaryOp.getOperator().getDescription()+" operation only on int types",unaryOp.getLine()));
+			return voidType;
+		}
+		return intType;
 	}
 	@Override
 	public MyType visit(LogicalUnaryOp unaryOp, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		MyType operandType = unaryOp.getOperand().accept(this, d);
+		if(operandType != boolType){
+			semanticErrors.add(new SemanticError("Can perform "+unaryOp.getOperator().getDescription()+" operation only on boolean types",unaryOp.getLine()));
+			return voidType;
+		}
+		return boolType;
 	}
 	@Override
 	public MyType visit(Literal literal, Object d) {
@@ -256,12 +394,22 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(ExpressionBlock expressionBlock, Object d) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return  expressionBlock.getExpression().accept(this, d);
 	}
 	@Override
 	public MyType visit(MethodType methodType, Object d) {
 		// TODO Auto-generated method stub
-		return null;
+		return voidType;
+	}
+	
+	public void printErrorStack(){
+		for(SemanticError e: semanticErrors)
+			try {
+				throw e;
+			} catch (SemanticError e1) {
+				// TODO Auto-generated catch block
+				System.out.println(e.toString());
+			}
 	}
 }
