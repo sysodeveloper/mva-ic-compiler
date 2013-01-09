@@ -94,6 +94,9 @@ public class MySymbolTable {
 		for(String key : entries.keySet()){
 			boolean printType = true;
 			boolean printTypeFirst = true;
+			if(key.compareTo("$ret") == 0){
+				continue;
+			}
 			switch(this.entries.get(key).getKind()){
 			case Class:
 				i = 0;
