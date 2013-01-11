@@ -60,7 +60,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 			putAllClasseScopes(c.enclosingScope());
 		
 		for(ICClass c:program.getClasses())			
-			result &= c.accept(this,program.enclosingScope());		
+			result &= c.accept(this,program.enclosingScope());
 		return result;
 	}
 
