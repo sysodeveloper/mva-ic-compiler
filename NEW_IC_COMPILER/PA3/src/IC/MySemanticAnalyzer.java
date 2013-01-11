@@ -227,19 +227,36 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(VariableLocation location, MySymbolTable d) {
-		boolean result = true;
-		/*if(!location.isExternal()){
-			result = checkVariable(location.getName(), d);
-			if(!result){
-				semanticErrors.add(new SemanticError("undefined variable with the name "+location.getName() , location.getLine()));
+		boolean filed = checkVariable(location.getName(), d,Kind.Field);
+		boolean param = checkVariable(location.getName(), d,Kind.Parameter);
+		boolean local = checkVariable(location.getName(), d,Kind.Local_Variable);
+		
+		if(location.isExternal()){ // 
+			boolean result = location.getLocation().accept(this, d);
+			if(!result)
+				return false;
+			
+			if(location.getLocation() instanceof This){				
+				if(!filed){
+					semanticErrors.add(new SemanticError("undefined field with the name "+location.getName() , location.getLine()));
+					return false;
+				}
+			}
+			//field of another class - check in type rules
+			return true;
+		}	
+		
+		
+		
+		// direct reference
+		else{		
+			if(!(filed || param  || local )){
+				semanticErrors.add(new SemanticError("undefined variable/field with the name "+location.getName() , location.getLine()));
 				return false;
 			}
-		}*/
-		if(location.isExternal()){ // need to think what to do here !!!
-			result &= location.getLocation().accept(this, d);
-			result &= checkVariable(location.getName(), location.getLocation().enclosingScope()); // need to check for location in another scope
-		}	
-		return result;
+		}
+		
+		return true;
 	}
 
 	@Override
@@ -423,17 +440,18 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		return false;
 	}
 	
-	private boolean checkVariable(String varName, MySymbolTable scope){
+	private boolean checkVariable(String varName, MySymbolTable scope,Kind varKind){
 		
-		while(scope.getParent()!=null){
+		while(scope!=globalScope){
 			Map<String,MySymbolRecord> records = scope.getEntries();
 			if(records.containsKey(varName) && 
-					(records.get(varName).getKind()== Kind.Local_Variable ||records.get(varName).getKind()== Kind.Parameter || records.get(varName).getKind()== Kind.Field ))
+					(records.get(varName).getKind()==varKind))
 				return true;
 			scope = scope.getParent();
 		}
 		return false;
-	}
+	}	
+	
 	
 private boolean checkFunction(String varName, MySymbolTable scope ,Kind functionKind){
 		
