@@ -50,6 +50,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	static int uniqueTable = 0;
 	static int uniqueRecord = 0;	
 	MyTypeTable typeTable;
+	private List<SemanticError> semanticErrors = new ArrayList<SemanticError>();
 	
 	public MyTypeTable getTypeTable(){
 		return typeTable;
@@ -72,7 +73,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		for(ICClass c : program.getClasses()){
 			MySymbolRecord record =  new MySymbolRecord(uniqueRecord++,c,Kind.Class,new UserType(c.getLine(), c.getName()));
 			if(!table.InsertRecord(c.getName(),record)){
-				
+				semanticErrors.add(new SemanticError("Class with the name "+c.getName()+" has already been defined", c.getLine()));
 				return Boolean.FALSE;
 			}
 			MyType mt = typeTable.insertType(c.getMyType());
@@ -108,7 +109,8 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 							changed = true;
 						}
 					}else{
-						System.out.println("Undefined Class " + c.getSuperClassName());
+						//System.out.println("Undefined Class " + c.getSuperClassName());
+						semanticErrors.add(new SemanticError("Undefined extended class with name "+c.getName(), c.getLine()));						
 						return Boolean.FALSE;
 					}
 				}
@@ -120,11 +122,15 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 					str.append(allClasses.get(0).getName());
 					str.append(" at line ");
 					str.append(allClasses.get(0).getLine());
+					semanticErrors.add(new SemanticError("Inheretence cycle detected with class "+allClasses.get(0).getName(), allClasses.get(0).getLine()));						
+					return Boolean.FALSE;
 				}else{
+					semanticErrors.add(new SemanticError("Inheretence cycle detected"+allClasses.get(0).getName(), allClasses.get(0).getLine()));					
 					str.append("Inheretence cycle detected");
+					return Boolean.FALSE;
 				}
-				System.out.println(str);
-				return Boolean.FALSE;
+				//System.out.println(str);
+				//return Boolean.FALSE;
 			}else{
 				//update list
 				allClasses.removeAll(removeClasses);
@@ -145,7 +151,8 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		table.setParent(d);
 		for(Field f : icClass.getFields()){
 			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,f,Kind.Field,f.getType());
-			if(!table.InsertRecord(f.getName(),record )){				
+			if(!table.InsertRecord(f.getName(),record )){	
+				semanticErrors.add(new SemanticError("Field with the name "+f.getName()+" has already been defined", f.getLine()));
 				return Boolean.FALSE;
 			}
 			MyType mt = typeTable.insertType(f.getType().getMyType());
@@ -160,15 +167,8 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		}				
 		returnValue &= icClass.getUserType().accept(this, table);
 		icClass.setEnclosingScope(table);
-		d.addChild(table);
-		try {
-			String m = icClass.getName();
-			checkShadowing(table);
-		} catch (SemanticError e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.toString());
-			return false;
-		}
+		d.addChild(table);		
+		returnValue &= checkShadowing(table);		
 		return new Boolean(returnValue);
 	}
 
@@ -182,7 +182,11 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(Method method,MySymbolTable d, Kind kind){
 		boolean returnValue = true;	
 		MySymbolRecord trecord = new MySymbolRecord(uniqueRecord++,method,kind,method.getType());
-		returnValue = d.InsertRecord(method.getName(),trecord) ;
+		returnValue = d.InsertRecord(method.getName(),trecord);
+		if(!returnValue){
+			semanticErrors.add(new SemanticError("Method with the name "+method.getName()+" has already been defined", method.getLine()));
+			return false;
+		}
 		MyType methodType = typeTable.insertType(method.getMyType());
 		trecord.setMyType(methodType);
 		method.setRecord(trecord);	
@@ -237,7 +241,11 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		if(returnValue){
 			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,formal,Kind.Parameter,formal.getType());
 			record.setAsDeclared();
-			d.InsertRecord(formal.getName(),record );
+			if(!d.InsertRecord(formal.getName(),record )){
+				semanticErrors.add(new SemanticError("Formal with the name "+formal.getName()+" has already been defined", formal.getLine()));
+				return false;
+			}
+			
 			MyType mt = typeTable.insertType(formal.getType().getMyType());
 			record.setMyType(mt);					
 			formal.setRecord(record);
@@ -344,7 +352,10 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		MySymbolRecord record = new MySymbolRecord(uniqueRecord++,localVariable,Kind.Local_Variable,localVariable.getType());
 		boolean returnValue = d.InsertRecord(localVariable.getName(), record);
 		if(!returnValue){			
-			System.out.println("ERROR INSERTING " + localVariable.getName() + " to table " + d.getId());
+			//System.out.println("ERROR INSERTING " + localVariable.getName() + " to table " + d.getId());
+			semanticErrors.add(new SemanticError("Local variable with the name "+localVariable.getName()+" has already been defined", localVariable.getLine()));
+			return false;
+			
 		}
 		record.setAsDeclared();
 		returnValue &= localVariable.getType().accept(this,d);
@@ -379,15 +390,9 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 			if(!returnValue)
 				return false;
 			return true;
-		}
+		}		
 		
-		try {
-			checkVariableDeclaration(location, d);
-		} catch (SemanticError e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.toString());
-			return false;
-		}
+		returnValue &=	checkVariableDeclaration(location, d);		
 		return new Boolean(returnValue);
 	}
 
@@ -517,7 +522,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	 * Shadowing semantic check in build time
 	 * @throws SemanticError 
 	 */
-	private void checkShadowing(MySymbolTable classTable) throws SemanticError{
+	private boolean checkShadowing(MySymbolTable classTable) {
 		
 		MySymbolTable extendedClassTable = classTable.getParent();
 		Map<String,MySymbolRecord> c_symbols = classTable.getEntries(); 
@@ -532,44 +537,53 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 			for(Entry<String,MySymbolRecord> symbol : c_entries){
 				if(ex_symbols.containsKey(symbol.getKey())){ // field or method with the same name as in extended class
 					if(symbol.getValue().getKind()==Kind.Field){
-						throw new SemanticError("Field or method with the field name "+symbol.getKey()+" already defined in extended classes", 
-								symbol.getValue().getNode().getLine());
+						semanticErrors.add(new SemanticError("Field or method with the field name "+symbol.getKey()+" already defined in extended classes", 
+								symbol.getValue().getNode().getLine()));
+						return false;
 						// shadowing with a filed name is not allowed 
 					}
 					if(symbol.getValue().getKind() == Kind.Virtual_Method || symbol.getValue().getKind() == Kind.Static_Method ){
 						MySymbolRecord ex_symbol_rec = ex_symbols.get(symbol.getKey());
 						MySymbolRecord symbol_rec = symbol.getValue();
-						if(ex_symbol_rec.getKind()!=symbol_rec.getKind()) // method name shadows a field or method with different type(static/virtual)
-							throw new SemanticError("Method or field with the method name "+symbol.getKey()+" already defined in extended classes", 
-									symbol.getValue().getNode().getLine());						
+						if(ex_symbol_rec.getKind()!=symbol_rec.getKind()){ // method name shadows a field or method with different type(static/virtual)
+							semanticErrors.add( new SemanticError("Method or field with the method name "+symbol.getKey()+" already defined in extended classes", 
+									symbol.getValue().getNode().getLine()));		
+						return false;
+						}
 						//check method signatures
-						if(! symbol_rec.getType().equals(ex_symbol_rec.getType()))
-							throw new SemanticError("Method with the method name "+symbol.getKey()+" already defined in extended classes. Overloading is not allowed.", 
-									symbol.getValue().getNode().getLine());	
+						if(! symbol_rec.getType().equals(ex_symbol_rec.getType())){
+							semanticErrors.add( new SemanticError("Method with the method name "+symbol.getKey()+" already defined in extended classes. Overloading is not allowed.", 
+									symbol.getValue().getNode().getLine()));	
+							return false;
+						}
+						
 					}
 				}
 			}
 			
 			extendedClassTable = extendedClassTable.getParent();
 		}
-		
+		return true;
 	}
 	
-	private void checkVariableDeclaration(VariableLocation var, MySymbolTable scope) throws SemanticError{
+	private boolean checkVariableDeclaration(VariableLocation var, MySymbolTable scope){
 		String varName = var.getName();
 		while(scope.getParent()!=null){
 			if(scope.getEntries().containsKey(varName) && 
 					(scope.getEntries().get(varName).getKind() == Kind.Local_Variable || scope.getEntries().get(varName).getKind() == Kind.Field || scope.getEntries().get(varName).getKind() == Kind.Parameter))
 			{
-				if(scope.getEntries().get(varName).getKind() == Kind.Local_Variable && !scope.getEntries().get(varName).isInitialized()) // check for initialization
-					throw new SemanticError("variable "+varName+" has not been initialized",var.getLine());
+				if(scope.getEntries().get(varName).getKind() == Kind.Local_Variable && !scope.getEntries().get(varName).isInitialized()){ // check for initialization
+					semanticErrors.add( new SemanticError("variable "+varName+" has not been initialized",var.getLine()));
+					return false;
+				}
 				else
-					return;
+					return true;
 			}
 			scope = scope.getParent();
 		}
 		
-		throw new SemanticError("use of undefined variable "+varName,var.getLine());
+		semanticErrors.add(new SemanticError("use of undefined variable "+varName,var.getLine()));
+		return false;
 	}
 	
 	private void setInitialization(String varName,  MySymbolTable scope ){
@@ -580,5 +594,15 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 			}
 			scope = scope.getParent();
 		}
+	}
+	
+	public void printErrorStack(){
+		for(SemanticError e: semanticErrors)
+			try {
+				throw e;
+			} catch (SemanticError e1) {
+				// TODO Auto-generated catch block
+				System.out.println(e.toString());
+			}
 	}
 }
