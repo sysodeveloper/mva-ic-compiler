@@ -130,7 +130,6 @@ public class UserType extends Type {
 		}
 		else{
 			arrayType = new MyArrayType();
-			arrayType.setDimantion(this.getDimension());
 			baseType.setDimention(this.getDimension());
 			arrayType.setElementType(baseType);
 			arrayType.setName(this.getName());

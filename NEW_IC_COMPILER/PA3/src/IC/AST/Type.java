@@ -98,5 +98,4 @@ public abstract class Type extends ASTNode implements INameable,Comparable<Type>
 	public abstract Object clone();
 	public abstract MyType getMyType();
 	
-	
 }

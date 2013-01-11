@@ -1,122 +1,32 @@
 digraph G{
-   1
-    2
-   3 -> {2}
-  4 -> {1 3}
-   5
-    6
-   7 -> {6}
-  8 -> {5 7}
-   9
-    10
-   11 -> {10}
-  12 -> {9 11}
-   13
-    14
-   15 -> {14}
-  16 -> {13 15}
-   17
-  18 -> {17}
-   19
-  20 -> {19}
-   21
-  22 -> {21}
-   23
-    24
-   25 -> {24}
-    26
-   27 -> {26}
-  28 -> {23 25 27}
-   29
-    30
-   31 -> {30}
-  32 -> {29 31}
-   33
-    34
-   35 -> {34}
-  36 -> {33 35}
-   37
-    38
-   39 -> {38}
-  40 -> {37 39}
-   41
-    42
-   43 -> {42}
-  44 -> {41 43}
-   45
-  46 -> {45}
-   47
-    48
-   49 -> {48}
-  50 -> {47 49}
-51 -> {4 8 12 16 18 20 22 28 32 36 40 44 46 50}
-    52
-  53 -> {52}
-    54
-     55 -> {}
-    56 -> {55}
-  57 -> {54 56}
-58 -> {53 57}
-59 -> {51 58}
+    1
+  2 -> {1}
+    3
+     4 -> {}
+    5 -> {4}
+  6 -> {3 5}
+    7
+     8
+    9 -> {8}
+     10
+    11 -> {10}
+  12 -> {7 9 11}
+13 -> {2 6 12}
+14 -> {13}
 
-1[label="MethodType {string -> void}"]
-2[label="PrimitiveType string"]
-3[label="Formal s"]
-4[label="LibraryMethod println"]
-5[label="MethodType {string -> void}"]
-6[label="PrimitiveType string"]
-7[label="Formal s"]
-8[label="LibraryMethod print"]
-9[label="MethodType {int -> void}"]
-10[label="PrimitiveType int"]
-11[label="Formal i"]
-12[label="LibraryMethod printi"]
-13[label="MethodType {boolean -> void}"]
-14[label="PrimitiveType boolean"]
-15[label="Formal b"]
-16[label="LibraryMethod printb"]
-17[label="MethodType {  -> int}"]
-18[label="LibraryMethod readi"]
-19[label="MethodType {  -> string}"]
-20[label="LibraryMethod readln"]
-21[label="MethodType {  -> boolean}"]
-22[label="LibraryMethod eof"]
-23[label="MethodType {string, int -> int}"]
-24[label="PrimitiveType string"]
-25[label="Formal s"]
-26[label="PrimitiveType int"]
-27[label="Formal n"]
-28[label="LibraryMethod stoi"]
-29[label="MethodType {int -> string}"]
-30[label="PrimitiveType int"]
-31[label="Formal i"]
-32[label="LibraryMethod itos"]
-33[label="MethodType {string -> int[]}"]
-34[label="PrimitiveType string"]
-35[label="Formal s"]
-36[label="LibraryMethod stoa"]
-37[label="MethodType {int[] -> string}"]
-38[label="PrimitiveType int[]"]
-39[label="Formal a"]
-40[label="LibraryMethod atos"]
-41[label="MethodType {int -> int}"]
-42[label="PrimitiveType int"]
-43[label="Formal n"]
-44[label="LibraryMethod random"]
-45[label="MethodType {  -> int}"]
-46[label="LibraryMethod time"]
-47[label="MethodType {int -> int}"]
-48[label="PrimitiveType int"]
-49[label="Formal i"]
-50[label="LibraryMethod exit"]
-51[label="Class Library"]
-52[label="MethodType {  -> int}"]
-53[label="StaticMethod f"]
-54[label="MethodType {  -> int}"]
-55[label="VirtualCall to method f"]
-56[label="CallStatement"]
-57[label="VirtualMethod myFunc"]
-58[label="Class MyClass"]
-59[label="Program"]
+1[label="MethodType {  -> int}"]
+2[label="VirtualMethod f"]
+3[label="MethodType {  -> int}"]
+4[label="VirtualCall to method f"]
+5[label="CallStatement"]
+6[label="VirtualMethod myFunc"]
+7[label="MethodType {string[] -> void}"]
+8[label="PrimitiveType string[]"]
+9[label="Formal args"]
+10[label="PrimitiveType string[][][]"]
+11[label="LocalVariable myArray"]
+12[label="StaticMethod main"]
+13[label="Class MyClass"]
+14[label="Program"]
 
 }

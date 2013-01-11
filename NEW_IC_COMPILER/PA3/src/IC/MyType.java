@@ -26,7 +26,11 @@ public abstract class MyType {
 		}
 		else {
 			MyType t = (MyType)o;
+			String myName = getName();
+			String secondName = t.getName();
 			if(	getName().equals(t.getName())) {
+				int d1 = getDimention();
+				int d2 = t.getDimention();
 				if(getDimention() == t.getDimention()){
 					return true;	
 				}else{
@@ -64,6 +68,20 @@ public abstract class MyType {
 
 	public void setDimention(int dimention) {
 		this.dimention = dimention;
+		//set name again
+		StringBuffer elementBaseName = new StringBuffer();
+		if(name != null && name.length() > 0){
+			int pos = this.name.indexOf('[');
+			if(pos > 0){
+				elementBaseName.append(this.name.substring(0,pos));
+			}else{
+				elementBaseName.append(this.name);
+			}
+			for (int i = 0; i < getDimention(); i++) {
+				elementBaseName.append("[]");
+			}
+			this.setName(elementBaseName.toString());
+		}
 	}
 	
 }

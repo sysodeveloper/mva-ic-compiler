@@ -32,13 +32,13 @@ public class MyTypeTable {
 	
 	// Returns unique array type object
 	public  MyArrayType arrayType(MyArrayType elemType) {
-		if (uniqueArrayTypes.containsKey(elemType.getElementType())) {
+		if (uniqueArrayTypes.containsKey(elemType)) {
 			// array type object already created – return it
 			return uniqueArrayTypes.get(elemType);
 			}
 		else {
 			// object doesn’t exist – put it inside and return it
-			uniqueArrayTypes.put(elemType.getElementType(),elemType);
+			uniqueArrayTypes.put(elemType,elemType);
 			return elemType;
 			}		
 	}

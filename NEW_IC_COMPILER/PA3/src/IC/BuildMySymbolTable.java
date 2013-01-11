@@ -355,7 +355,18 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		if(returnValue){
 			MyType mt= typeTable.insertType(localVariable.getType().getMyType());				
 			record.setMyType(mt);
-			localVariable.setRecord(record);			
+			localVariable.setRecord(record);
+			//if array insert all its dimensions
+			if(localVariable.getType().getDimension() > 0){
+				for(int i=1;i<localVariable.getType().getDimension();i++){
+					MyArrayType newArrType = new MyArrayType();
+					newArrType.setElementType(localVariable.getType().getMyType());
+					newArrType.setDimention(i);
+					newArrType.setFullName();
+					System.out.println("ARRAY TYPE = " + newArrType.getName() + " " + newArrType.getDimention());
+					typeTable.insertType(newArrType);
+				}
+			}
 		}
 		return new Boolean(returnValue);
 	}
@@ -428,7 +439,6 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		boolean returnValue = true;
 		returnValue &= newArray.getSize().accept(this, d);
 		returnValue &= newArray.getType().accept(this, d);
-			
 		return new Boolean(returnValue);
 	}
 
