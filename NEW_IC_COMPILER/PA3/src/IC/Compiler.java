@@ -51,14 +51,14 @@ public class Compiler {
 			}
 		}
 		//find library file in the current directory
-		if(!foundlibrary){
+		/*if(!foundlibrary){
 			String fileIC = args[0];
 			String sep = File.separator;
 			fileIC = fileIC.substring(0,fileIC.lastIndexOf(sep));
 			String defLib = fileIC + sep + "libic.sig";
 			libraryClass = ParseLibraryFile(defLib);
 			AddLibraryToRoot(root,libraryClass);
-		}
+		}*/
 		//check if needs to be printed
 		for(int i=1;i<args.length;i++){
 			if(args[i].compareTo("-print-ast") == 0){

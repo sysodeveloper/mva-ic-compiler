@@ -284,7 +284,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 			result = checkFunction(call.getName(), d, Kind.Virtual_Method);
 			result |= checkFunction(call.getName(), d, Kind.Static_Method);
 			if(!result){
-				semanticErrors.add(new SemanticError("call to undefined virtual function "+call.getName(), call.getLine()));			
+				semanticErrors.add(new SemanticError("call to undefined  function "+call.getName(), call.getLine()));			
 				return false;
 			}
 			
