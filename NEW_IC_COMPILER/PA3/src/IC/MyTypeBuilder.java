@@ -287,7 +287,19 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("Type of array index expression can be only int type",location.getLine()));
 			return voidType;
 		}
-		return location.getArray().accept(this, d);
+		MyType mtype = location.getArray().accept(this, d);
+        if(!(mtype instanceof MyArrayType)){
+            semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
+            return voidType;
+        }
+		if(mtype.getDimention() > 1){
+			//array type
+			mtype.setDimention(mtype.getDimention()-1);
+		}else if(mtype.getDimention() == 1){
+			//now array must be converted to base type
+			return ((MyArrayType)mtype).getElementType();
+		}
+		return mtype;
 	}
 	@Override
 	public MyType visit(StaticCall call, Object d) {
@@ -367,22 +379,15 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(NewArray newArray, Object d) {
-		System.out.println("NEW ARRAY TEST: ");
-		System.out.println("type = " + newArray.getType().getName());
-		
 		if(newArray.getSize().accept(this, d) != intType){
 			semanticErrors.add(new SemanticError("Type of array size expression can be only int type",newArray.getLine()));
 			return voidType;
 		}
-		MyType baseType = newArray.getType().accept(this, d);		
-
-		baseType.setDimention(1);
-		MyArrayType array = new MyArrayType();
-		array.setElementType(baseType);
-		//array.setDimantion(1);
-		array.setDimention(1);
-		return array;
-
+		MyType baseType = newArray.getType().accept(this, d);
+		MyArrayType arr = new MyArrayType();
+		arr.setElementType(baseType);
+		arr.setDimention(1);
+		return arr;
 
 	}
 	@Override
