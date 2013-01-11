@@ -270,16 +270,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			}
 			return externalField.getMyType();
 		
-		}
-		
-		MyType mtype = location.enclosingScope().Lookup(location.getName()).getMyType();
-		if(location.getLocation() instanceof ArrayLocation){// array location
-			if(!(mtype instanceof MyArrayType)){
-				semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
-				return voidType;
-			}
-			return ((MyArrayType)mtype).getElementType();
-		}	
+		}		
 				
 		return location.enclosingScope().Lookup(location.getName()).getMyType();
 	}
@@ -289,11 +280,15 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("Type of array index expression can be only int type",location.getLine()));
 			return voidType;
 		}
+
 		MyType mtype = location.getArray().accept(this, d);
-        if(!(mtype instanceof MyArrayType)){
-            semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
-            return voidType;
-        }
+		
+			if(!(mtype instanceof MyArrayType)){
+				semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
+				return voidType;
+			}
+			//return ((MyArrayType)mtype).getElementType();		
+		
         if(this.fromVariableLocation){
 			if(mtype.getDimention() > 1){
 				//array type
@@ -306,6 +301,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
         	mtype.setDimention(mtype.getDimention()+1);
         }
 		return mtype;
+
 	}
 	@Override
 	public MyType visit(StaticCall call, Object d) {
