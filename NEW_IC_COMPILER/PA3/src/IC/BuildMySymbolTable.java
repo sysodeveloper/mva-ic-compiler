@@ -268,11 +268,13 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(Assignment assignment, MySymbolTable d) {
 		assignment.setEnclosingScope(d);
+		d.InsertRecord("$assignment", new MySymbolRecord(0,null,null,null));
 		boolean var = assignment.getVariable().accept(this,d);
+		d.getEntries().remove("$assignment");
 		boolean assign =  assignment.getAssignment().accept(this,d);
-		if(assign){
-			//Does not work!
-			//setInitialization(((VariableLocation)assignment.getVariable()).getName(), d);
+		if(assign && (assignment.getVariable() instanceof VariableLocation)){
+			
+			setInitialization(((VariableLocation)assignment.getVariable()).getName(), d);
 		}
 		return var&&assign;
 	}
@@ -395,8 +397,10 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 				return false;
 			return true;
 		}		
-		
-		returnValue &=	checkVariableDeclaration(location, d);		
+		if(d.Lookup("$assignment")==null)
+			returnValue &=	checkVariableDeclaration(location, d,true);		
+		else
+			returnValue &=	checkVariableDeclaration(location, d,false);
 		return new Boolean(returnValue);
 	}
 
@@ -570,18 +574,23 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		return true;
 	}
 	
-	private boolean checkVariableDeclaration(VariableLocation var, MySymbolTable scope){
+	private boolean checkVariableDeclaration(VariableLocation var, MySymbolTable scope,boolean checkInit){
 		String varName = var.getName();
 		while(scope.getParent()!=null){
 			if(scope.getEntries().containsKey(varName) && 
 					(scope.getEntries().get(varName).getKind() == Kind.Local_Variable || scope.getEntries().get(varName).getKind() == Kind.Field || scope.getEntries().get(varName).getKind() == Kind.Parameter))
 			{
-				if(scope.getEntries().get(varName).getKind() == Kind.Local_Variable && !scope.getEntries().get(varName).isInitialized()){ // check for initialization
-					semanticErrors.add( new SemanticError("variable "+varName+" has not been initialized",var.getLine()));
-					return false;
+				//check initialization if needed
+				if(checkInit){
+					if(scope.getEntries().get(varName).getKind() == Kind.Local_Variable && !scope.getEntries().get(varName).isInitialized()){ // check for initialization
+						semanticErrors.add( new SemanticError("variable "+varName+" has not been initialized",var.getLine()));
+						
+						return false;
+					}
+					else
+						return true;
 				}
-				else
-					return true;
+				return true;
 			}
 			scope = scope.getParent();
 		}
@@ -592,7 +601,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	
 	private void setInitialization(String varName,  MySymbolTable scope ){
 		while(scope.getParent()!=null){
-			if(scope.getEntries().containsKey(varName)){
+			if(scope.getEntries().containsKey(varName) && (scope.getEntries().get(varName).getKind()==Kind.Local_Variable)){
 				scope.getEntries().get(varName).setAsInitialized();
 				break;
 			}
