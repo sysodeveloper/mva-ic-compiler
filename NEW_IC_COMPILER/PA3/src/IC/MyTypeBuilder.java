@@ -92,7 +92,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		for(ICClass c : program.getClasses()){
 			c.accept(this,d);
 		}
-		if(mainMethods != 1){
+		if(mainMethods < 1){
 			semanticErrors.add(new SemanticError("Entry method is undefined " + mainMethods,program.getLine()));
 			return voidType;
 		}

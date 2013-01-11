@@ -1,7 +1,14 @@
 class MyClass{
 	static int f(){
 	}
+	static void main3(string[] args){
+	
+	}
 	int myFunc(){
 		f();
+	
+	}
+	static void main(string[] args){
+	
 	}
 } 
