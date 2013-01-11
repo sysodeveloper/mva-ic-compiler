@@ -1,36 +1,7 @@
-class A{
-	void p(){
-		while(true){
-			while(true){
-				while(true)
-					while(true)
-																						continue;
-																	break;
-						if(true){
-							break;
-																								continue;
-																	break;
-						}
-			}
-																	continue;
-																	break;
-		}
+class MyClass{
+	static int f(){
 	}
-}
-
-class B extends A{
-	int u(int[] yyy){
-		while(true){
-			while(true) continue;
-			if(yyy == 1)
-					break;
-		}
+	int myFunc(){
+		f();
 	}
-}
-
-class C extends A{
-	int x;
-	void q(){
-		x = 4294967297;
-	}
-}
+} 

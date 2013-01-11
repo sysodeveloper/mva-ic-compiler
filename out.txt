@@ -51,44 +51,13 @@ digraph G{
   50 -> {47 49}
 51 -> {4 8 12 16 18 20 22 28 32 36 40 44 46 50}
     52
-      53
-          54
-              55
-                56
-                57              58 -> {56 57}
-            59 -> {55 58}
-            60              61
-                62                63                64              65 -> {62 63 64}
-            66 -> {61 65}
-          67 -> {59 60 66}
-        68 -> {54 67}
-        69        70      71 -> {68 69 70}
-    72 -> {53 71}
-  73 -> {52 72}
-74 -> {73}
-    75
-     76
-    77 -> {76}
-      78
-          79
-          80        81 -> {79 80}
-            82 -> {}
-            83
-          84 -> {82 83}
-          85        86 -> {84 85}
-      87 -> {81 86}
-    88 -> {78 87}
-  89 -> {75 77 88}
-90 -> {89}
-   91
-92 -> {91}
-    93
-      94 -> {}
-      95
-    96 -> {94 95}
-  97 -> {93 96}
-98 -> {92 97}
-99 -> {51 74 90 98}
+  53 -> {52}
+    54
+     55 -> {}
+    56 -> {55}
+  57 -> {54 56}
+58 -> {53 57}
+59 -> {51 58}
 
 1[label="MethodType {string -> void}"]
 2[label="PrimitiveType string"]
@@ -141,53 +110,13 @@ digraph G{
 49[label="Formal i"]
 50[label="LibraryMethod exit"]
 51[label="Class Library"]
-52[label="MethodType {  -> void}"]
-53[label="Literal true"]
-54[label="Literal true"]
-55[label="Literal true"]
-56[label="Literal true"]
-57[label="ContinueStatement"]
-58[label="whileStatement"]
-59[label="whileStatement"]
-60[label="BreakStatement"]
-61[label="Literal true"]
-62[label="BreakStatement"]
-63[label="ContinueStatement"]
-64[label="BreakStatement"]
-65[label="StatementsBlock"]
-66[label="IfStatement"]
-67[label="StatementsBlock"]
-68[label="whileStatement"]
-69[label="ContinueStatement"]
-70[label="BreakStatement"]
-71[label="StatementsBlock"]
-72[label="whileStatement"]
-73[label="VirtualMethod p"]
-74[label="Class A"]
-75[label="MethodType {int[] -> int}"]
-76[label="PrimitiveType int[]"]
-77[label="Formal yyy"]
-78[label="Literal true"]
-79[label="Literal true"]
-80[label="ContinueStatement"]
-81[label="whileStatement"]
-82[label="VariableLocation yyy"]
-83[label="Literal 1"]
-84[label="LogicalBinaryOp equality"]
-85[label="BreakStatement"]
-86[label="IfStatement"]
-87[label="StatementsBlock"]
-88[label="whileStatement"]
-89[label="VirtualMethod u"]
-90[label="Class B has super classA"]
-91[label="PrimitiveType int"]
-92[label="Field  x"]
-93[label="MethodType {  -> void}"]
-94[label="VariableLocation x"]
-95[label="Literal 4294967297"]
-96[label="Assignment"]
-97[label="VirtualMethod q"]
-98[label="Class C has super classA"]
-99[label="Program"]
+52[label="MethodType {  -> int}"]
+53[label="StaticMethod f"]
+54[label="MethodType {  -> int}"]
+55[label="VirtualCall to method f"]
+56[label="CallStatement"]
+57[label="VirtualMethod myFunc"]
+58[label="Class MyClass"]
+59[label="Program"]
 
 }

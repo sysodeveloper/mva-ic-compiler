@@ -171,12 +171,28 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(If ifStatement, Object d) {
-		return voidType;
+		//Check that the condition is boolean type
+		MyType conditionType = ifStatement.getCondition().accept(this,d);
+		if(!TypeOK(conditionType,boolType)){
+			semanticErrors.add(new SemanticError("If condition should be boolean type and not " + conditionType.getName(), ifStatement.getLine()));
+		}
+		//Continue traversing the tree
+		ifStatement.getElseOperation().accept(this,d);
+		if(ifStatement.hasElse()){
+			ifStatement.getElseOperation().accept(this,d);
+		}
+		return conditionType;
 	}
 	@Override
 	public MyType visit(While whileStatement, Object d) {
-		// TODO Auto-generated method stub
-		return voidType;
+		//Check that the condition is boolean type
+		MyType conditionType = whileStatement.getCondition().accept(this,d);
+		if(!TypeOK(conditionType,boolType)){
+			semanticErrors.add(new SemanticError("While condition should be boolean type and not " + conditionType.getName(), whileStatement.getLine()));
+		}
+		//Continue traversing the tree
+		whileStatement.getOperation().accept(this,d);
+		return conditionType;
 	}
 	@Override
 	public MyType visit(Break breakStatement, Object d) {
@@ -287,7 +303,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(This thisExpression, Object d) {
-		// TODO Auto-generated method stub
+		//maybe we need this type to be the current class type? It is not one of the rules...
 		return voidType;
 	}
 	@Override
