@@ -183,13 +183,12 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(Assignment assignment, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
 		MyType varType = types.insertType(assignment.getVariable().accept(this,d));
 		MyType exprType = types.insertType(assignment.getAssignment().accept(this,d));
 		if(TypeOK(varType,exprType)){
 			return varType;
 		}
-		semanticErrors.add(new SemanticError("Cannot assign different types",assignment.getLine()));
+		semanticErrors.add(new SemanticError("Cannot assign different types " + varType.getName() + " = " + exprType.getName(),assignment.getLine()));
 		return voidType;
 	}
 	@Override
@@ -292,17 +291,18 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		if(!localVariable.hasInitValue())
 			return varType;
 		MyType initType =  localVariable.getInitValue().accept(this, d);
-		if(!TypeOK(varType, initType)){
-			semanticErrors.add(new SemanticError("Type of initializing expresion "+initType.getName()+" didnt match variable type "+varType.getName(),localVariable.getLine()));
-			return voidType;
-		}
+		//if(!TypeOK(varType, initType)){
+		//	semanticErrors.add(new SemanticError("Type of initializing expresion "+initType.getName()+" didnt match variable type "+varType.getName(),localVariable.getLine()));
+		//	return voidType;
+	//	}
 		return varType;
 	}
 	@Override
 	public MyType visit(VariableLocation location, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
+		this.fromVariableLocation = true;
+		System.out.println("FROM VARIABLE LOCATION ");
 		if(location.isExternal()){// need to check if exists in external context
 			MyType t = location.getLocation().accept(this, d);
 			MyType locType = types.insertType(t);
@@ -319,8 +319,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			}
 			return externalField.getMyType();
 		
-		}		
-		this.fromVariableLocation = true;				
+		}				
 		return location.enclosingScope().Lookup(location.getName()).getMyType();
 	}
 	@Override
@@ -328,27 +327,30 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		//DO NOT !!
 		//fromNewArray = false;
 		//fromVariableLocation = false;
-		
 		if(location.getIndex().accept(this, d) != intType){
 			semanticErrors.add(new SemanticError("Type of array index expression can be only int type",location.getLine()));
 			return voidType;
 		}
 
-		MyType mtype = location.getArray().accept(this, d);
-		
+		MyType mtype = location.getArray().accept(this, d); 
 			if(!(mtype instanceof MyArrayType)){
 				semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
 				return voidType;
 			}
 			//return ((MyArrayType)mtype).getElementType();		
-		
+			System.out.println("ARRAY LOCATION FROM VARIABLE LOCATION = " + fromVariableLocation);
+			System.out.println("ARRAY LOCATION FROM NEW ARRAY = " + fromNewArray);
+			System.out.println("ARRAY DIM = " + mtype.getDimention());
         if(this.fromVariableLocation){
 			if(mtype.getDimention() > 1){
-				//array type
-				mtype.setDimention(mtype.getDimention()-1);
+				//array type - get new from the table
+				MyArrayType newType = new MyArrayType();
+				newType.setElementType(((MyArrayType)mtype).getElementType());
+				newType.setDimention(newType.getDimention()-1);
+				return types.insertType(newType);
 			}else if(mtype.getDimention() == 1){
 				//now array must be converted to base type
-				return ((MyArrayType)mtype).getElementType();
+				return types.insertType(((MyArrayType)mtype).getElementType());
 			}
         }else if(this.fromNewArray){
         	mtype.setDimention(mtype.getDimention()+1);
@@ -448,7 +450,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(NewArray newArray, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
+		this.fromNewArray = true;
 		if(newArray.getSize().accept(this, d) != intType){
 			semanticErrors.add(new SemanticError("Type of array size expression can be only int type",newArray.getLine()));
 			return voidType;
@@ -457,7 +459,6 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		MyArrayType arr = new MyArrayType();
 		arr.setElementType(baseType);
 		arr.setDimention(1);
-		this.fromNewArray = true;
 		return arr;
 
 	}
