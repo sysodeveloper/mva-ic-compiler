@@ -57,7 +57,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	private MyType mainMethodType;
 	//exactly one main
 	private int mainMethods = 0;
-	
+	//for array new and reference
+	private boolean fromNewArray = false;
+	private boolean fromVariableLocation = false;
 	private boolean TypeOK(MyType t1, MyType t2){
 		//left t1, right t2
 		if(t1 == t2){
@@ -292,13 +294,17 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
             semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
             return voidType;
         }
-		if(mtype.getDimention() > 1){
-			//array type
-			mtype.setDimention(mtype.getDimention()-1);
-		}else if(mtype.getDimention() == 1){
-			//now array must be converted to base type
-			return ((MyArrayType)mtype).getElementType();
-		}
+        if(this.fromVariableLocation){
+			if(mtype.getDimention() > 1){
+				//array type
+				mtype.setDimention(mtype.getDimention()-1);
+			}else if(mtype.getDimention() == 1){
+				//now array must be converted to base type
+				return ((MyArrayType)mtype).getElementType();
+			}
+        }else if(this.fromNewArray){
+        	mtype.setDimention(mtype.getDimention()+1);
+        }
 		return mtype;
 	}
 	@Override
@@ -387,6 +393,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		MyArrayType arr = new MyArrayType();
 		arr.setElementType(baseType);
 		arr.setDimention(1);
+		this.fromNewArray = true;
 		return arr;
 
 	}
