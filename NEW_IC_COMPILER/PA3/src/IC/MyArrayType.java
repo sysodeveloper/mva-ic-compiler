@@ -39,7 +39,7 @@ public class MyArrayType extends MyType {
 		this.setName((elementType.getName()+dimentionString));
 	}	
 	public String toString(){
-		return this.getUnique_id()+": Array type: "+this.getName() + " DIM " + this.getDimention();
+		return this.getUnique_id()+": Array type: "+this.getName();
 	}
 	 
 }

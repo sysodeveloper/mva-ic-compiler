@@ -363,7 +363,6 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 					newArrType.setElementType(localVariable.getType().getMyType());
 					newArrType.setDimention(i);
 					newArrType.setFullName();
-					System.out.println("ARRAY TYPE = " + newArrType.getName() + " " + newArrType.getDimention());
 					typeTable.insertType(newArrType);
 				}
 			}

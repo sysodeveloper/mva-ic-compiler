@@ -8,11 +8,27 @@ digraph G{
     7
      8
     9 -> {8}
-     10
-    11 -> {10}
-  12 -> {7 9 11}
-13 -> {2 6 12}
-14 -> {13}
+      10
+      11
+    12 -> {10 11}
+      13
+      14
+    15 -> {13 14}
+      16
+      17
+    18 -> {16 17}
+            19 -> {}
+            20
+          21 -> {19 20}
+          22
+        23 -> {21 22}
+        24
+      25 -> {23 24}
+      26
+    27 -> {25 26}
+  28 -> {7 9 12 15 18 27}
+29 -> {2 6 28}
+30 -> {29}
 
 1[label="MethodType {  -> int}"]
 2[label="VirtualMethod f"]
@@ -23,10 +39,26 @@ digraph G{
 7[label="MethodType {string[] -> void}"]
 8[label="PrimitiveType string[]"]
 9[label="Formal args"]
-10[label="PrimitiveType string[][][]"]
-11[label="LocalVariable myArray"]
-12[label="StaticMethod main"]
-13[label="Class MyClass"]
-14[label="Program"]
+10[label="PrimitiveType int[][][]"]
+11[label="Literal null"]
+12[label="LocalVariable myArray"]
+13[label="PrimitiveType int[][]"]
+14[label="Literal null"]
+15[label="LocalVariable otherArray"]
+16[label="PrimitiveType int"]
+17[label="Literal 8"]
+18[label="LocalVariable x"]
+19[label="VariableLocation myArray"]
+20[label="Literal 1"]
+21[label="ArrayLocation"]
+22[label="Literal 2"]
+23[label="ArrayLocation"]
+24[label="Literal 3"]
+25[label="ArrayLocation"]
+26[label="Literal 2"]
+27[label="Assignment"]
+28[label="StaticMethod main"]
+29[label="Class MyClass"]
+30[label="Program"]
 
 }
