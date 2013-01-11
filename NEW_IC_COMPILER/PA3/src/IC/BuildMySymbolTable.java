@@ -378,7 +378,9 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 			returnValue = location.getLocation().accept(this,d);
 			if(!returnValue)
 				return false;
+			return true;
 		}
+		
 		try {
 			checkVariableDeclaration(location, d);
 		} catch (SemanticError e) {
