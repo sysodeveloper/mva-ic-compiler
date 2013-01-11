@@ -92,6 +92,8 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Program program, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
 		for(ICClass c : program.getClasses()){
 			c.accept(this,d);
 		}
@@ -103,6 +105,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(ICClass icClass, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		icClass.getUserType().accept(this,d);
 		for(Field f : icClass.getFields()){
 			f.accept(this,d);
@@ -114,10 +119,16 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Field field, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		return field.getRecord().getMyType();
 	}
 
 	public MyType visit(Method method, Object d){
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		if(mainMethods > 1){
 			semanticErrors.add(new SemanticError("Cannot have more than one main method",method.getLine()));
 			return voidType;
@@ -149,19 +160,30 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Formal formal, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		return formal.getType().accept(this,d);
 	}
 	@Override
 	public MyType visit(PrimitiveType type, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		return types.insertType(type.getMyType());
 	}
 	@Override
 	public MyType visit(UserType type, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		return types.insertType(type.getMyType());
 	}
 	@Override
 	public MyType visit(Assignment assignment, Object d) {
-	
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MyType varType = types.insertType(assignment.getVariable().accept(this,d));
 		MyType exprType = types.insertType(assignment.getAssignment().accept(this,d));
 		if(TypeOK(varType,exprType)){
@@ -173,11 +195,17 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	@Override
 	public MyType visit(CallStatement callStatement, Object d) {
 		// TODO Auto-generated method stub
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		return callStatement.getCall().accept(this, d);
 	
 	}
 	@Override
 	public MyType visit(Return returnStatement, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MySymbolRecord retRecord = returnStatement.enclosingScope().Lookup("$ret");
 		if(retRecord == null){
 			System.out.println("MEGA ERROR!");
@@ -201,6 +229,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(If ifStatement, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		//Check that the condition is boolean type
 		MyType conditionType = ifStatement.getCondition().accept(this,d);
 		if(!TypeOK(conditionType,boolType)){
@@ -215,6 +246,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(While whileStatement, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		//Check that the condition is boolean type
 		MyType conditionType = whileStatement.getCondition().accept(this,d);
 		if(!TypeOK(conditionType,boolType)){
@@ -226,22 +260,34 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Break breakStatement, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		// TODO Auto-generated method stub
 		return voidType;
 	}
 	@Override
 	public MyType visit(Continue continueStatement, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		// TODO Auto-generated method stub
 		return voidType;
 	}
 	@Override
 	public MyType visit(StatementsBlock statementsBlock, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		for(Statement s : statementsBlock.getStatements())
 			s.accept(this, d);
 		return voidType; // maybe we need to return void here ???
 	}
 	@Override
 	public MyType visit(LocalVariable localVariable, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MyType varType =  localVariable.getRecord().getMyType();
 		if(!localVariable.hasInitValue())
 			return varType;
@@ -254,9 +300,12 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(VariableLocation location, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
 		
 		if(location.isExternal()){// need to check if exists in external context
-			MyType locType = types.insertType(location.getLocation().accept(this, d));				
+			MyType t = location.getLocation().accept(this, d);
+			MyType locType = types.insertType(t);
 			
 			//current class field
 			if(location.getLocation() instanceof This){
@@ -271,11 +320,15 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			return externalField.getMyType();
 		
 		}		
-				
+		this.fromVariableLocation = true;				
 		return location.enclosingScope().Lookup(location.getName()).getMyType();
 	}
 	@Override
 	public MyType visit(ArrayLocation location, Object d) {
+		//DO NOT !!
+		//fromNewArray = false;
+		//fromVariableLocation = false;
+		
 		if(location.getIndex().accept(this, d) != intType){
 			semanticErrors.add(new SemanticError("Type of array index expression can be only int type",location.getLine()));
 			return voidType;
@@ -305,6 +358,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(StaticCall call, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MySymbolRecord func = null;
 		MyClassType tempClass = new MyClassType();
 		tempClass.setName(call.getClassName());
@@ -331,6 +387,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(VirtualCall call, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MySymbolRecord func = null;
 		if(call.isExternal()){ // need to check if this function exists in external context
 			MyType exType = call.getLocation().accept(this, d);
@@ -370,17 +429,26 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(This thisExpression, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		//maybe we need this type to be the current class type? It is not one of the rules...
 		return voidType;
 	}
 	@Override
 	public MyType visit(NewClass newClass, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MyClassType c = new MyClassType();
 		c.setName(newClass.getName());
 		return types.insertType(c);
 	}
 	@Override
 	public MyType visit(NewArray newArray, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		if(newArray.getSize().accept(this, d) != intType){
 			semanticErrors.add(new SemanticError("Type of array size expression can be only int type",newArray.getLine()));
 			return voidType;
@@ -395,6 +463,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Length length, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MyType expType = length.getArray().accept(this, d);
 		if(!(expType instanceof MyArrayType)){
 			semanticErrors.add(new SemanticError("length can be applyed only to array types",length.getLine()));
@@ -404,6 +475,8 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(MathBinaryOp binaryOp, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
 		
 		MyType leftType = binaryOp.getFirstOperand().accept(this, d);
 		MyType rightType = binaryOp.getSecondOperand().accept(this, d);
@@ -427,6 +500,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(LogicalBinaryOp binaryOp, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MyType leftType = binaryOp.getFirstOperand().accept(this, d);
 		MyType rightType = binaryOp.getSecondOperand().accept(this, d);
 		boolean LRtypesOK = TypeOK(leftType, rightType);
@@ -460,6 +536,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(MathUnaryOp unaryOp, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MyType operandType = unaryOp.getOperand().accept(this, d);
 		
 		if(operandType != intType){
@@ -479,6 +558,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Literal literal, Object d) {
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		MyType type =  types.insertType(literal.getMyType());
 		if(type!=intType)
 			return type;
@@ -498,10 +580,14 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	@Override
 	public MyType visit(MethodType methodType, Object d) {
 		// TODO Auto-generated method stub
+		fromNewArray = false;
+		fromVariableLocation = false;
+		
 		return voidType;
 	}
 	
 	private MyType getVarType(String varName, MySymbolTable scope,Kind varKind){
+		
 		while(scope!=null){
 			Map<String,MySymbolRecord> records = scope.getEntries();
 			if(records.containsKey(varName) && 
