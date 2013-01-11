@@ -14,4 +14,6 @@ public abstract class MyPrimitiveType extends MyType {
 		return this.getUnique_id()+": Primitive type: "+this.getName();
 	}
 	
+	public abstract MyPrimitiveType clone();
+	
 }

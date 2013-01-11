@@ -4,73 +4,141 @@ digraph G{
     3
      4 -> {}
     5 -> {4}
-  6 -> {3 5}
-    7
-     8
-    9 -> {8}
-      10
-            11
-            12
-          13 -> {11 12}
+      6
+          7
+          8
+        9 -> {7 8}
+        10
+      11 -> {9 10}
+    12 -> {6 11}
+      13
           14
-        15 -> {13 14}
-        16
-      17 -> {15 16}
-    18 -> {10 17}
-      19
-      20
-    21 -> {19 20}
-      22
-      23
-    24 -> {22 23}
-            25 -> {}
-            26
-          27 -> {25 26}
-          28
-        29 -> {27 28}
-        30
-      31 -> {29 30}
-      32
-    33 -> {31 32}
-  34 -> {7 9 18 21 24 33}
-35 -> {2 6 34}
-36 -> {35}
+            15
+            16
+          17 -> {15 16}
+        18 -> {14 17}
+        19
+      20 -> {18 19}
+    21 -> {13 20}
+          22 -> {}
+          23
+        24 -> {22 23}
+        25
+      26 -> {24 25}
+        27 -> {}
+        28
+      29 -> {27 28}
+    30 -> {26 29}
+  31 -> {3 5 12 21 30}
+    32
+     33
+    34 -> {33}
+      35
+          36
+          37
+        38 -> {36 37}
+        39
+      40 -> {38 39}
+    41 -> {35 40}
+      42
+      43
+    44 -> {42 43}
+      45
+      46
+    47 -> {45 46}
+            48 -> {}
+            49
+          50 -> {48 49}
+          51
+        52 -> {50 51}
+        53
+      54 -> {52 53}
+      55
+    56 -> {54 55}
+          57 -> {}
+          58
+        59 -> {57 58}
+        60
+      61 -> {59 60}
+        62
+        63
+      64 -> {62 63}
+    65 -> {61 64}
+  66 -> {32 34 41 44 47 56 65}
+67 -> {2 31 66}
+68 -> {}
+69 -> {}
+70 -> {67 68 69}
 
 1[label="MethodType {  -> int}"]
 2[label="VirtualMethod f"]
 3[label="MethodType {  -> int}"]
 4[label="VirtualCall to method f"]
 5[label="CallStatement"]
-6[label="VirtualMethod myFunc"]
-7[label="MethodType {string[] -> void}"]
-8[label="PrimitiveType string[]"]
-9[label="Formal args"]
-10[label="PrimitiveType int[][][]"]
-11[label="PrimitiveType string"]
-12[label="Literal 2"]
-13[label="NewArray allocation"]
-14[label="Literal 345"]
-15[label="ArrayLocation"]
-16[label="Literal 6"]
-17[label="ArrayLocation"]
-18[label="LocalVariable myArray"]
-19[label="PrimitiveType int[][]"]
-20[label="Literal null"]
-21[label="LocalVariable otherArray"]
-22[label="PrimitiveType int"]
-23[label="Literal 8"]
-24[label="LocalVariable x"]
-25[label="VariableLocation myArray"]
-26[label="Literal 1"]
-27[label="ArrayLocation"]
-28[label="Literal 2"]
+6[label="UserType A[][]"]
+7[label="UserType A"]
+8[label="Literal 3"]
+9[label="NewArray allocation"]
+10[label="Literal 456546"]
+11[label="ArrayLocation"]
+12[label="LocalVariable a"]
+13[label="UserType B[][]"]
+14[label="UserType B"]
+15[label="Literal 6"]
+16[label="Literal 3"]
+17[label="MathBinaryOp addition"]
+18[label="NewArray allocation"]
+19[label="Literal 456546"]
+20[label="ArrayLocation"]
+21[label="LocalVariable b"]
+22[label="VariableLocation a"]
+23[label="Literal 2"]
+24[label="ArrayLocation"]
+25[label="Literal 5"]
+26[label="ArrayLocation"]
+27[label="VariableLocation b"]
+28[label="Literal 6"]
 29[label="ArrayLocation"]
-30[label="Literal 3"]
-31[label="ArrayLocation"]
-32[label="Literal 2"]
-33[label="Assignment"]
-34[label="StaticMethod main"]
-35[label="Class MyClass"]
-36[label="Program"]
+30[label="Assignment"]
+31[label="VirtualMethod myFunc"]
+32[label="MethodType {string[] -> void}"]
+33[label="PrimitiveType string[]"]
+34[label="Formal args"]
+35[label="PrimitiveType int[][]"]
+36[label="PrimitiveType int"]
+37[label="Literal 2"]
+38[label="NewArray allocation"]
+39[label="Literal 4"]
+40[label="ArrayLocation"]
+41[label="LocalVariable otherArray"]
+42[label="PrimitiveType string[][][]"]
+43[label="Literal null"]
+44[label="LocalVariable myArray"]
+45[label="PrimitiveType int"]
+46[label="Literal 8"]
+47[label="LocalVariable x"]
+48[label="VariableLocation myArray"]
+49[label="Literal 6"]
+50[label="ArrayLocation"]
+51[label="Literal 9"]
+52[label="ArrayLocation"]
+53[label="Literal 8"]
+54[label="ArrayLocation"]
+55[label="Literal "sdf""]
+56[label="Assignment"]
+57[label="VariableLocation otherArray"]
+58[label="Literal 4"]
+59[label="ArrayLocation"]
+60[label="Literal 6"]
+61[label="ArrayLocation"]
+62[label="Literal 8"]
+63[label="Literal 9"]
+64[label="MathBinaryOp addition"]
+65[label="Assignment"]
+66[label="StaticMethod main"]
+67[label="Class MyClass"]
+68[label="Class A"]
+69[label="Class B has super classA"]
+70[label="Program"]
 
 }

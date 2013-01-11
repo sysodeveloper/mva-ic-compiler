@@ -189,7 +189,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			return varType;
 		}
 
-		semanticErrors.add(new SemanticError("Variable of type "+varType.getName()+" could not be assigned with value of type "+exprType.getName(),assignment.getLine()));
+		semanticErrors.add(new SemanticError("Variable of type "+varType.getName()+" could not be assigned in type "+exprType.getName(),assignment.getLine()));
 
 		//semanticErrors.add(new SemanticError("Cannot assign different types " + varType.getName() + " = " + exprType.getName(),assignment.getLine()));
 
@@ -295,10 +295,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		if(!localVariable.hasInitValue())
 			return varType;
 		MyType initType =  localVariable.getInitValue().accept(this, d);
-		//if(!TypeOK(varType, initType)){
-		//	semanticErrors.add(new SemanticError("Type of initializing expresion "+initType.getName()+" didnt match variable type "+varType.getName(),localVariable.getLine()));
-		//	return voidType;
-	//	}
+		if(!TypeOK(varType, initType)){
+			semanticErrors.add(new SemanticError("Type of initializing expresion "+initType.getName()+" didnt match variable type "+varType.getName(),localVariable.getLine()));
+			return voidType;
+		}
 		return varType;
 	}
 	@Override
@@ -337,27 +337,32 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		}
 
 		MyType mtype = location.getArray().accept(this, d); 
-			if(!(mtype instanceof MyArrayType)){
-				semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
-				return voidType;
-			}
+			//if(!(mtype instanceof MyArrayType)){
+				//semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
+				//return voidType;
+			//}
 			//return ((MyArrayType)mtype).getElementType();		
-			System.out.println("ARRAY LOCATION FROM VARIABLE LOCATION = " + fromVariableLocation);
-			System.out.println("ARRAY LOCATION FROM NEW ARRAY = " + fromNewArray);
-			System.out.println("ARRAY DIM = " + mtype.getDimention());
         if(this.fromVariableLocation){
 			if(mtype.getDimention() > 1){
 				//array type - get new from the table
-				MyArrayType newType = new MyArrayType();
-				newType.setElementType(((MyArrayType)mtype).getElementType());
+				MyArrayType newType = (MyArrayType) mtype.clone();
+/*				MyType elementType = ((MyArrayType)mtype).getElementType();  
+				newType.setElementType(elementType);
+				newType.setFullName();*/
 				newType.setDimention(newType.getDimention()-1);
-				return types.insertType(newType);
+				MyType ret = types.insertType(newType);
+				return ret;
 			}else if(mtype.getDimention() == 1){
 				//now array must be converted to base type
-				return types.insertType(((MyArrayType)mtype).getElementType());
+				MyType ret =  types.insertType(((MyArrayType)mtype).getElementType().clone());
+				return ret;
 			}
         }else if(this.fromNewArray){
-        	mtype.setDimention(mtype.getDimention()+1);
+			//array type - get new from the table
+			MyArrayType newType = (MyArrayType) mtype.clone();
+			newType.setDimention(newType.getDimention()+1);
+			newType.setFullName();
+			return types.insertType(newType);        	
         }
 		return mtype;
 
@@ -454,16 +459,17 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(NewArray newArray, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		this.fromNewArray = true;
 		if(newArray.getSize().accept(this, d) != intType){
 			semanticErrors.add(new SemanticError("Type of array size expression can be only int type",newArray.getLine()));
 			return voidType;
 		}
 		MyType baseType = newArray.getType().accept(this, d);
 		MyArrayType arr = new MyArrayType();
-		arr.setElementType(baseType);
+		arr.setElementType(baseType.clone());
 		arr.setDimention(1);
-		return arr;
+		arr.setFullName();
+		this.fromNewArray = true;
+		return this.types.insertType(arr);
 
 	}
 	@Override

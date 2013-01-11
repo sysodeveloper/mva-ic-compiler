@@ -7,6 +7,16 @@ public class MyClassType extends MyType {
 	private ICClass classAST;
 	private MyClassType superClass=null;
 	
+	public MyClassType clone(){
+		MyClassType t = new MyClassType();
+		t.setName(this.getName());
+		t.setDimention(this.getDimention());
+		t.setUnique_id(this.getUnique_id());
+		t.setClassAST(getClassAST());
+		t.setSuperClass(getSuperClass());
+		return t;
+	}
+	
 	public MyClassType(){
 		this.setUnique_id(this.run_id++);
 	}
