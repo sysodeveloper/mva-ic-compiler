@@ -428,7 +428,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		boolean returnValue = true;
 		returnValue &= newArray.getSize().accept(this, d);
 		returnValue &= newArray.getType().accept(this, d);
-				
+			
 		return new Boolean(returnValue);
 	}
 
