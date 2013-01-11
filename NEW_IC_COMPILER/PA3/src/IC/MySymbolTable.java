@@ -55,12 +55,12 @@ public class MySymbolTable {
 	}
 	
 	public boolean InsertRecord(String key, MySymbolRecord record){
-		System.out.print("***** tyring to insert " + key + " " + record.getKind() + " to table: " + this.id+ " line:" + record.getNode().getLine());
+		//System.out.print("***** tyring to insert " + key + " " + record.getKind() + " to table: " + this.id+ " line:" + record.getNode().getLine());
 		if(this.entries.get(key) == null){
 			this.entries.put(key, record);
-			System.out.print(" OK \n");
+			//System.out.print(" OK \n");
 		}else{
-			System.out.print(" FAILED \n");
+			//System.out.print(" FAILED \n");
 			return false;
 		}
 		return true;
