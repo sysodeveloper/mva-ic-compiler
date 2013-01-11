@@ -11,6 +11,18 @@ public class MyMethodType extends MyType {
 	
 	private ArrayList<MyType> paramTypes;
 	private MyType returnType;
+
+	
+	public MyMethodType clone(){
+		MyMethodType t = new MyMethodType();
+		t.setName(this.getName());
+		t.setDimention(this.getDimention());
+		t.setUnique_id(this.getUnique_id());
+		t.setParamTypes((ArrayList<MyType>) getParamTypes().clone());
+		t.setReturnType(getReturnType().clone());
+		t.setFullName();
+		return t;
+	}
 	
 	public MyMethodType(){
 		this.setUnique_id(this.run_id++);

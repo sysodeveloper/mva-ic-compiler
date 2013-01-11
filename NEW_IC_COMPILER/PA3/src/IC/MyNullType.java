@@ -11,4 +11,12 @@ public class MyNullType extends MyPrimitiveType {
 		// TODO Auto-generated method stub
 		return true;
 	}
+	
+	public MyNullType clone(){
+		MyNullType t = new MyNullType();
+		t.setName(this.getName());
+		t.setDimention(this.getDimention());
+		t.setUnique_id(this.getUnique_id());
+		return t;
+	}
 }

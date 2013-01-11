@@ -3,7 +3,17 @@ package IC;
 public class MyArrayType extends MyType {
 	
 	private MyType elementType;
-
+	
+	public MyArrayType clone(){
+		MyArrayType t = new MyArrayType();
+		t.setName(this.getName());
+		t.setUnique_id(this.getUnique_id());
+		t.setElementType(this.getElementType().clone());
+		t.setDimention(this.getDimention());
+		t.setFullName();
+		return t;
+	}
+	
 	public MyArrayType(){
 		this.setUnique_id(this.run_id++);
 	}

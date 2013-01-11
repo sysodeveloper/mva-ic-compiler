@@ -2,12 +2,14 @@ package IC;
 
 import IC.AST.Type;
 
-public abstract class MyType {
+public abstract class MyType implements Cloneable{
 	private int unique_id;
 	public static int run_id = 6;
 	private String name;	
 	private int dimention=0;
 	abstract boolean subtypeOf(MyType type) ;
+
+	public abstract MyType clone();
 	
 	public String getName() {
 		return name;
@@ -83,5 +85,4 @@ public abstract class MyType {
 			this.setName(elementBaseName.toString());
 		}
 	}
-	
 }

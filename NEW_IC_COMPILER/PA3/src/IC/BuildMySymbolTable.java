@@ -371,7 +371,11 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 			if(localVariable.getType().getDimension() > 0){
 				for(int i=1;i<localVariable.getType().getDimension();i++){
 					MyArrayType newArrType = new MyArrayType();
-					newArrType.setElementType(localVariable.getType().getMyType());
+					MyType base = localVariable.getType().getMyType().clone();
+					if(base instanceof MyArrayType){
+						base = ((MyArrayType)base).getElementType().clone();
+					}
+					newArrType.setElementType(base);
 					newArrType.setDimention(i);
 					newArrType.setFullName();
 					typeTable.insertType(newArrType);
