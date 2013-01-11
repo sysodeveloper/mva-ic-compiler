@@ -53,7 +53,7 @@ public class Compiler {
 		//find library file in the current directory
 		if(!foundlibrary){
 			String fileIC = args[0];
-			String sep = System.getProperty("path.separator");
+			String sep = File.separator;
 			fileIC = fileIC.substring(0,fileIC.lastIndexOf(sep));
 			String defLib = fileIC + sep + "libic.sig";
 			libraryClass = ParseLibraryFile(defLib);
