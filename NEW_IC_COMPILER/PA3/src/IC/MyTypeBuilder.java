@@ -337,10 +337,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		}
 
 		MyType mtype = location.getArray().accept(this, d); 
-			//if(!(mtype instanceof MyArrayType)){
-				//semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
-				//return voidType;
-			//}
+			if(!(mtype instanceof MyArrayType)){
+				semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
+				return voidType;
+			}
 			//return ((MyArrayType)mtype).getElementType();		
         if(this.fromVariableLocation){
 			if(mtype.getDimention() > 1){
