@@ -2,6 +2,7 @@ package IC;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
@@ -41,6 +42,7 @@ import IC.AST.VariableLocation;
 import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.While;
+import IC.MySymbolRecord.Kind;
 
 
 
@@ -91,7 +93,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		for(ICClass c : program.getClasses()){
 			c.accept(this,d);
 		}
-		if(mainMethods < 1){
+		if(mainMethods != 1){
 			semanticErrors.add(new SemanticError("Entry method is undefined " + mainMethods,program.getLine()));
 			return voidType;
 		}
@@ -157,12 +159,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Assignment assignment, Object d) {
-		MyType varType = assignment.getVariable().accept(this,d);
-		MyType exprType = assignment.getAssignment().accept(this,d);
+	
+		MyType varType = types.insertType(assignment.getVariable().accept(this,d));
+		MyType exprType = types.insertType(assignment.getAssignment().accept(this,d));
 		if(TypeOK(varType,exprType)){
-			if(varType == intType){ // here var and assignment are integers
-				
-			}
 			return varType;
 		}
 		semanticErrors.add(new SemanticError("Cannot assign different types",assignment.getLine()));
@@ -183,18 +183,18 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		MyType methodType = retRecord.getMyType();
 		
 		if(returnStatement.hasValue()){
-			MyType ret = returnStatement.getValue().accept(this,d);
+			MyType ret = types.insertType(returnStatement.getValue().accept(this,d));
 			if(TypeOK(methodType, ret)){
 				return methodType;
 			}
-			semanticErrors.add(new SemanticError("Cannot return different types",returnStatement.getLine()));
+			semanticErrors.add(new SemanticError("Return value type "+ret.getName()+" doesn't match function return type "+methodType.getName(),returnStatement.getLine()));
 			return voidType;
 		}
 		//void		
 		if(methodType==voidType){
 			return voidType;
 		}
-		semanticErrors.add(new SemanticError("Cannot return different types",returnStatement.getLine()));
+		semanticErrors.add(new SemanticError("Function return statement could not be empty",returnStatement.getLine()));
 		return voidType;
 	}
 	@Override
@@ -252,8 +252,33 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(VariableLocation location, Object d) {
-		if(location.isExternal())
-			return location.getLocation().accept(this, d);
+		
+		if(location.isExternal()){// need to check if exists in external context
+			MyType locType = types.insertType(location.getLocation().accept(this, d));				
+			
+			//current class field
+			if(location.getLocation() instanceof This){
+				return getVarType(location.getName(),location.enclosingScope(),Kind.Field);
+			}
+			//field of other class  need to check if exists
+			MySymbolRecord externalField = ((MyClassType)locType).getClassAST().enclosingScope().Lookup(location.getName());
+			if(externalField == null){
+				semanticErrors.add(new SemanticError("Field with the name "+location.getName()+" doesnt exists", location.getLine()));
+				return voidType;
+			}
+			return externalField.getMyType();
+		
+		}
+		
+		MyType mtype = location.enclosingScope().Lookup(location.getName()).getMyType();
+		if(location.getLocation() instanceof ArrayLocation){// array location
+			if(!(mtype instanceof MyArrayType)){
+				semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
+				return voidType;
+			}
+			return ((MyArrayType)mtype).getElementType();
+		}	
+				
 		return location.enclosingScope().Lookup(location.getName()).getMyType();
 	}
 	@Override
@@ -350,10 +375,15 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			return voidType;
 		}
 		MyType baseType = newArray.getType().accept(this, d);		
-		MyArrayType tempArray = new MyArrayType();
-		tempArray.setElementType(baseType);
-		tempArray.setDimention(baseType.getDimention());
-		return types.insertType(tempArray);
+
+		baseType.setDimention(1);
+		MyArrayType array = new MyArrayType();
+		array.setElementType(baseType);
+		//array.setDimantion(1);
+		array.setDimention(1);
+		return array;
+
+
 	}
 	@Override
 	public MyType visit(Length length, Object d) {
@@ -461,6 +491,17 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(MethodType methodType, Object d) {
 		// TODO Auto-generated method stub
 		return voidType;
+	}
+	
+	private MyType getVarType(String varName, MySymbolTable scope,Kind varKind){
+		while(scope!=null){
+			Map<String,MySymbolRecord> records = scope.getEntries();
+			if(records.containsKey(varName) && 
+					(records.get(varName).getKind()==varKind))
+				return records.get(varName).getMyType();
+			scope = scope.getParent();
+		}
+		return null;
 	}
 	
 	public void printErrorStack(){
