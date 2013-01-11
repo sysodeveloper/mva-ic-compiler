@@ -188,7 +188,11 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		if(TypeOK(varType,exprType)){
 			return varType;
 		}
-		semanticErrors.add(new SemanticError("Cannot assign different types " + varType.getName() + " = " + exprType.getName(),assignment.getLine()));
+
+		semanticErrors.add(new SemanticError("Variable of type "+varType.getName()+" could not be assigned with value of type "+exprType.getName(),assignment.getLine()));
+
+		//semanticErrors.add(new SemanticError("Cannot assign different types " + varType.getName() + " = " + exprType.getName(),assignment.getLine()));
+
 		return voidType;
 	}
 	@Override
