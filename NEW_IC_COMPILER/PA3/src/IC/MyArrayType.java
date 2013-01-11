@@ -3,8 +3,7 @@ package IC;
 public class MyArrayType extends MyType {
 	
 	private MyType elementType;
-	private int arrayDimention;
-	
+
 	public MyArrayType(){
 		this.setUnique_id(this.run_id++);
 	}
@@ -16,7 +15,7 @@ public class MyArrayType extends MyType {
 			return false;
 		if(!(elementType == ((MyArrayType)type).getElementType()))
 				return false;
-		if(arrayDimention != ((MyArrayType)type).getDimantion())
+		if(getDimention() != ((MyArrayType)type).getDimention())
 			return false;
 		return true;
 		
@@ -28,26 +27,19 @@ public class MyArrayType extends MyType {
 
 	public void setElementType(MyType elementType) {
 		this.elementType = elementType;
+		setDimention(this.elementType.getDimention());
+		this.elementType.setDimention(0);
 	}
 
-	public int getDimantion() {
-		return arrayDimention;
-	}
-
-	public void setDimantion(int dimantion) {
-		this.arrayDimention = dimantion;
-	}
-	
 	public void setFullName(){
 		StringBuilder dimentionString = new StringBuilder();
-		for (int i = 0; i < getDimantion(); i++) {
+		for (int i = 0; i < getDimention(); i++) {
 			dimentionString.append("[]");
 		}
-		
 		this.setName((elementType.getName()+dimentionString));
-	}
-	
+	}	
 	public String toString(){
-		return this.getUnique_id()+": Array type: "+this.getName();
+		return this.getUnique_id()+": Array type: "+this.getName() + " DIM " + this.getDimention();
 	}
+	 
 }

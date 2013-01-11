@@ -1,14 +1,11 @@
 class MyClass{
-	static int f(){
-	}
-	static void main3(string[] args){
-	
+	int f(){
 	}
 	int myFunc(){
 		f();
-	
 	}
 	static void main(string[] args){
-	
+		string[][][] myArray;// = new string[2][345][6];
 	}
+
 } 

@@ -77,7 +77,6 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		ArrayList<MyType> mainParams = new ArrayList<MyType>();
 		MyArrayType arrParam = new MyArrayType();
 		arrParam.setElementType(stringType);
-		arrParam.setDimantion(1);
 		arrParam.setDimention(1);
 		arrParam.setFullName();
 		mainParams.add(arrParam);
@@ -353,7 +352,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		MyType baseType = newArray.getType().accept(this, d);		
 		MyArrayType tempArray = new MyArrayType();
 		tempArray.setElementType(baseType);
-		tempArray.setDimantion(baseType.getDimention());
+		tempArray.setDimention(baseType.getDimention());
 		return types.insertType(tempArray);
 	}
 	@Override
