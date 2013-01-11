@@ -52,7 +52,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	private MyType stringType;
 	private MyType nullType;
 	private MyType voidType;
-	private MyMethodType mainMethodType;
+	private MyType mainMethodType;
 	//exactly one main
 	private int mainMethods = 0;
 	
@@ -71,7 +71,6 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		intType = table.insertType(new MyIntType());
 		boolType = table.insertType(new MyBoolType());
 		stringType = table.insertType(new MyStringType());
-		nullType = table.insertType(new MyNullType());
 		voidType = table.insertType(new MyVoidType());
 		//main
 		mainMethodType = new MyMethodType();
@@ -80,10 +79,13 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		arrParam.setElementType(stringType);
 		arrParam.setDimantion(1);
 		arrParam.setDimention(1);
+		arrParam.setFullName();
 		mainParams.add(arrParam);
-		mainMethodType.setParamTypes(mainParams);
-		mainMethodType.setReturnType(voidType);
-		mainMethodType.setFullName();
+		MyMethodType mainType = new MyMethodType();
+		mainType.setParamTypes(mainParams);
+		mainType.setReturnType(voidType);
+		mainType.setFullName();
+		mainMethodType = mainType;
 	}
 	@Override
 	public MyType visit(Program program, Object d) {
@@ -91,7 +93,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			c.accept(this,d);
 		}
 		if(mainMethods != 1){
-			semanticErrors.add(new SemanticError("Entry method is undefined",program.getLine()));
+			semanticErrors.add(new SemanticError("Entry method is undefined " + mainMethods,program.getLine()));
 			return voidType;
 		}
 		return voidType;
@@ -132,16 +134,14 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(StaticMethod method, Object d) {
-		if(method.getRecord().getMyType() == mainMethodType){
+		MyType fromTable = types.insertType(method.getRecord().getMyType());
+		if(fromTable.getName().compareTo(mainMethodType.getName()) == 0){
 			mainMethods++;
 		}
 		return visit((Method)method,d);
 	}
 	@Override
 	public MyType visit(LibraryMethod method, Object d) {
-		if(method.getRecord().getMyType() == mainMethodType){
-			mainMethods++;
-		}
 		return visit((Method)method,d);
 	}
 	@Override
