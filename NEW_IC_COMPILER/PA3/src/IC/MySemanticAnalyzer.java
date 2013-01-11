@@ -58,6 +58,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		Boolean result = true;
 		for(ICClass c:program.getClasses())
 			putAllClasseScopes(c.enclosingScope());
+		boolean g;
 		
 		for(ICClass c:program.getClasses())			
 			result &= c.accept(this,program.enclosingScope());
@@ -270,7 +271,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(StaticCall call, MySymbolTable d) {
 		// TODO Auto-generated method stub
 		boolean result = checkUserType(new UserType(0, call.getClassName()));
-		if(result == false){
+		if(result == false && call.getClassName().compareTo("Library")!=0){
 			semanticErrors.add(new SemanticError("undefined class for class name "+call.getClassName()+" in static call" , call.getLine()));			
 			return false;
 		}
