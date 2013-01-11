@@ -5,10 +5,9 @@ class MyClass{
 		f();
 	}
 	static void main(string[] args){
-		int[][][] myArray  = null;// new string[2][345][6];
+		int[][][] myArray  = new string[2][345][6];
 		int[][] otherArray = null;
 		int x= 8;
 		myArray[1][2][3] = 2;
 	}
-
 } 
