@@ -14,7 +14,7 @@ public class MyArrayType extends MyType {
 		// TODO Auto-generated method stub
 		if(!(type instanceof MyArrayType ))
 			return false;
-		if(! elementType.subtypeOf(((MyArrayType)type).getElementType()))
+		if(!(elementType == ((MyArrayType)type).getElementType()))
 				return false;
 		if(arrayDimention != ((MyArrayType)type).getDimantion())
 			return false;
