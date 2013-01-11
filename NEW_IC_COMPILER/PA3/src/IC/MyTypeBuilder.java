@@ -52,6 +52,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	private MyType stringType;
 	private MyType nullType;
 	private MyType voidType;
+	private MyMethodType mainMethodType;
+	//exactly one main
+	private int mainMethods = 0;
+	
 	private boolean TypeOK(MyType t1, MyType t2){
 		//left t1, right t2
 		if(t1 == t2){
@@ -69,11 +73,26 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		stringType = table.insertType(new MyStringType());
 		nullType = table.insertType(new MyNullType());
 		voidType = table.insertType(new MyVoidType());
+		//main
+		mainMethodType = new MyMethodType();
+		ArrayList<MyType> mainParams = new ArrayList<MyType>();
+		MyArrayType arrParam = new MyArrayType();
+		arrParam.setElementType(stringType);
+		arrParam.setDimantion(1);
+		arrParam.setDimention(1);
+		mainParams.add(arrParam);
+		mainMethodType.setParamTypes(mainParams);
+		mainMethodType.setReturnType(voidType);
+		mainMethodType.setFullName();
 	}
 	@Override
 	public MyType visit(Program program, Object d) {
 		for(ICClass c : program.getClasses()){
 			c.accept(this,d);
+		}
+		if(mainMethods != 1){
+			semanticErrors.add(new SemanticError("Entry method is undefined",program.getLine()));
+			return voidType;
 		}
 		return voidType;
 	}
@@ -94,6 +113,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 
 	public MyType visit(Method method, Object d){
+		if(mainMethods > 1){
+			semanticErrors.add(new SemanticError("Cannot have more than one main method",method.getLine()));
+			return voidType;
+		}
 		method.getType().accept(this,d);
 		for(Formal f : method.getFormals()){
 			f.accept(this,d);
@@ -109,10 +132,16 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(StaticMethod method, Object d) {
+		if(method.getRecord().getMyType() == mainMethodType){
+			mainMethods++;
+		}
 		return visit((Method)method,d);
 	}
 	@Override
 	public MyType visit(LibraryMethod method, Object d) {
+		if(method.getRecord().getMyType() == mainMethodType){
+			mainMethods++;
+		}
 		return visit((Method)method,d);
 	}
 	@Override
@@ -314,16 +343,17 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(NewArray newArray, Object d) {
+		System.out.println("NEW ARRAY TEST: ");
+		System.out.println("type = " + newArray.getType().getName());
+		
 		if(newArray.getSize().accept(this, d) != intType){
 			semanticErrors.add(new SemanticError("Type of array size expression can be only int type",newArray.getLine()));
 			return voidType;
 		}
-		
 		MyType baseType = newArray.getType().accept(this, d);		
 		MyArrayType tempArray = new MyArrayType();
 		tempArray.setElementType(baseType);
 		tempArray.setDimantion(baseType.getDimention());
-		
 		return types.insertType(tempArray);
 	}
 	@Override
