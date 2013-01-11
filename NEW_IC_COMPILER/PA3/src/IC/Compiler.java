@@ -148,6 +148,7 @@ public class Compiler {
 	private static void PrintASTCommand(Object root){
 		PrettyPrinter printer = new PrettyPrinter(ICFileParsed);
 		System.out.println(printer.visit((Program)root));
+		BuildSymbolTables((Program) root, ICFileParsed);
 		/*
 		try{
 			TreePrinter treePrinter = new TreePrinter();
@@ -272,8 +273,9 @@ public class Compiler {
 				if(!analyze) analyzer.printErrorStack();
 				MyTypeTable types = buider.getTypeTable();
 				types.printTypeTable();
-				//typeBuilder.visit(root, null);
-				//typeBuilder.printErrorStack();
+				MyTypeBuilder typeBuilder = new MyTypeBuilder(types);
+				typeBuilder.visit(root, null);
+				typeBuilder.printErrorStack();
 				return analyze;
 			}
 			return success;
