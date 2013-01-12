@@ -306,7 +306,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		fromNewArray = false;
 		fromVariableLocation = false;
 		this.fromVariableLocation = true;
-		System.out.println("FROM VARIABLE LOCATION ");
+		//System.out.println("FROM VARIABLE LOCATION ");
 		if(location.isExternal()){// need to check if exists in external context
 			MyType t = location.getLocation().accept(this, d);
 			MyType locType = types.insertType(t);
@@ -436,7 +436,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		// check every argument
 		for(int i=0;i<funcFormals.size();i++){
 			MyType formalType = funcFormals.get(i).accept(this, d);
-			if(formalType!= callArgs.get(i).accept(this, d)){
+			if(!callArgs.get(i).accept(this, d).subtypeOf(formalType)){
 				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type "+formalType.getName()+" as argument number "+(i+1),call.getLine()));
 				return voidType;
 			}
