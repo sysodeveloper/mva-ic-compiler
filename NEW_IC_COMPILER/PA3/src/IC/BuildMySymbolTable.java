@@ -370,7 +370,8 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 			record.setMyType(mt);
 			localVariable.setRecord(record);
 			//if array insert all its dimensions
-			if(localVariable.getType().getDimension() > 0){
+			if(localVariable.getType().getDimension() > 0){				
+				
 				for(int i=1;i<localVariable.getType().getDimension();i++){
 					MyArrayType newArrType = new MyArrayType();
 					MyType base = localVariable.getType().getMyType().clone();
@@ -408,8 +409,11 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(ArrayLocation location, MySymbolTable d) {
 		location.setEnclosingScope(d);
 		boolean returnValue = true;
+		
 		returnValue &= location.getArray().accept(this,d);
+		
 		returnValue &= location.getIndex().accept(this,d);
+		
 		return new Boolean(returnValue);
 	}
 
@@ -575,6 +579,31 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 	}
 	
 	private boolean checkVariableDeclaration(VariableLocation var, MySymbolTable scope,boolean checkInit){
+		String varName = var.getName();
+		while(scope.getParent()!=null){
+			if(scope.getEntries().containsKey(varName) && 
+					(scope.getEntries().get(varName).getKind() == Kind.Local_Variable || scope.getEntries().get(varName).getKind() == Kind.Field || scope.getEntries().get(varName).getKind() == Kind.Parameter))
+			{
+				//check initialization if needed
+				if(checkInit){
+					if(scope.getEntries().get(varName).getKind() == Kind.Local_Variable && !scope.getEntries().get(varName).isInitialized()){ // check for initialization
+						semanticErrors.add( new SemanticError("variable "+varName+" has not been initialized",var.getLine()));
+						
+						return false;
+					}
+					else
+						return true;
+				}
+				return true;
+			}
+			scope = scope.getParent();
+		}
+		
+		semanticErrors.add(new SemanticError("use of undefined variable "+varName,var.getLine()));
+		return false;
+	}
+	
+	private boolean checkLocalDeclaration(LocalVariable var, MySymbolTable scope,boolean checkInit){
 		String varName = var.getName();
 		while(scope.getParent()!=null){
 			if(scope.getEntries().containsKey(varName) && 
