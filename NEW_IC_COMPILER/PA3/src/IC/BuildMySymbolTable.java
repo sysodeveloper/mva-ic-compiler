@@ -184,7 +184,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		MySymbolRecord trecord = new MySymbolRecord(uniqueRecord++,method,kind,method.getType());
 		returnValue = d.InsertRecord(method.getName(),trecord);
 		if(!returnValue){
-			semanticErrors.add(new SemanticError("Method with the name "+method.getName()+" has already been defined", method.getLine()));
+			semanticErrors.add(new SemanticError("Method or field with the name "+method.getName()+" has already been defined", method.getLine()));
 			return false;
 		}
 		MyType methodType = typeTable.insertType(method.getMyType());

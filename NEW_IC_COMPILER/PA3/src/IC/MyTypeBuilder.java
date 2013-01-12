@@ -241,7 +241,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("If condition should be boolean type and not " + conditionType.getName(), ifStatement.getLine()));
 		}
 		//Continue traversing the tree
-		ifStatement.getElseOperation().accept(this,d);
+		
 		if(ifStatement.hasElse()){
 			ifStatement.getElseOperation().accept(this,d);
 		}
@@ -404,22 +404,28 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		MySymbolRecord func = null;
 		if(call.isExternal()){ // need to check if this function exists in external context
 			MyType exType = call.getLocation().accept(this, d);
-			if(!(exType instanceof MyClassType)){
-				semanticErrors.add(new SemanticError("Type of location expression can be only user defined type",call.getLine()));
+			if(!(exType instanceof MyClassType) && !(call.getLocation() instanceof This)){
+				semanticErrors.add(new SemanticError("Type of location expression for function calling can be only user defined type ot this keyword",call.getLine()));
 				return voidType;
 			}
 			// search for that function in the specified class
-			exType = types.insertType(exType);
-			func = ((MyClassType)exType).getClassAST().enclosingScope().Lookup(call.getName());
-			if(func == null){
-				semanticErrors.add(new SemanticError("function with the name "+call.getName()+"does not exsists in class "+exType.getName(),call.getLine()));
-				return voidType;
-			}			
+			if(exType instanceof MyClassType){
+				exType = types.insertType(exType);
+				func = ((MyClassType)exType).getClassAST().enclosingScope().Lookup(call.getName());
+				if(func == null){
+					semanticErrors.add(new SemanticError("function with the name "+call.getName()+"does not exsists in class "+exType.getName(),call.getLine()));
+					return voidType;
+				}		
+			}
+			
+			if(call.getLocation() instanceof This)
+				func = call.enclosingScope().Lookup(call.getName());
 		}
-		else{ // function exists in current context, checked before by analyzer
+		else{  // function exists in current context, checked before by analyzer
 			func = call.enclosingScope().Lookup(call.getName());
 		}
 		// check that types of formals match the types that the function expects 
+		
 		List<Formal> funcFormals = ((Method)func.getNode()).getFormals();
 		List<Expression> callArgs = call.getArguments();
 		
@@ -525,7 +531,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 				semanticErrors.add(new SemanticError("Cannot perform logical operation on different types",binaryOp.getLine()));
 				return voidType;
 			}
-			
+			return boolType;
 		}
 		// binaryOps && , || - only on booleans 
 		if(binaryOp.getOperator() == BinaryOps.LAND || binaryOp.getOperator() == BinaryOps.LOR){
