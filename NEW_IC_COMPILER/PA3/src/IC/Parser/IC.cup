@@ -378,7 +378,7 @@ Expr ::= Location:l{: RESULT = l ;:}|
 		
 		Literal:lt {: RESULT = lt; :}|
 		
-		MINUS:um Expr:e {: RESULT = new LogicalUnaryOp(UnaryOps.UMINUS,(Expression)e); :} %prec UNOP  |
+		MINUS:um Expr:e {: RESULT = new MathUnaryOp(UnaryOps.UMINUS,(Expression)e); :} %prec UNOP  |
 		
 		LNEG:not Expr:e {: RESULT = new LogicalUnaryOp(UnaryOps.LNEG,(Expression)e); :} %prec UNOP |
 
