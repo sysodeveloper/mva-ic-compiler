@@ -194,7 +194,7 @@ class Ops{
 		string s ="";
 		
 		x = 5+6/3 - y%4*x; //correct
-		x=-3;
+		//x=-3;
 		//y=-y;
 		b=x==y; // correct
 		b=x>y;// correct
@@ -239,6 +239,45 @@ class Ops{
 
 }
 
+/**************************************************************/
+/*********** Check types for classes and fields ******************/
+class A{
+	int intField;
+	string stringField;
+	boolean boolField;
+}
+class B extends A{}
+class C extends A{}
+class D extends B{}
+
+class Test{
+	static Test t(){
+		return new Test();
+	}
+	
+	static void main(string[] args){
+		A a = new A();
+		B b = new B();
+		C c = new C();
+		D d = new D();
+		
+		boolean res;
+		
+		res = a==b;
+		res = a!=b;
+		res = b!=a;
+		res = b==c;
+		res =  a !=c;
+		res =  d==a; 
+		res = d!=b;
+		res = d!=c;
+		res= d==t(); //error
+		//res = b!=3; //error
+	}
+}
+
+
+/**************************************************************/
 
 
 
