@@ -271,7 +271,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(StaticCall call, MySymbolTable d) {
 		// TODO Auto-generated method stub
 		boolean result = checkUserType(new UserType(0, call.getClassName()));
-		if(result == false && call.getClassName().compareTo("Library")!=0){
+		if(result == false){
 			semanticErrors.add(new SemanticError("undefined class for class name "+call.getClassName()+" in static call" , call.getLine()));			
 			return false;
 		}
@@ -283,7 +283,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 			return false;
 		}
 		
-		if(calledClass.getEntries().get(call.getName()).getKind() != Kind.Static_Method){
+		if(calledClass.getEntries().get(call.getName()).getKind() != Kind.Static_Method && calledClass.getEntries().get(call.getName()).getKind() != Kind.Library_Method){
 			semanticErrors.add(new SemanticError("function "+call.getName()+" in class "+ call.getClassName()+" is not static", call.getLine()));			
 			return false;
 		}
@@ -314,6 +314,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 			
 			if(call.getLocation() instanceof This){ // calling to virtual method of current class
 				result = checkFunction(call.getName(), d, Kind.Virtual_Method);
+				result |= checkFunction(call.getName(), d, Kind.Static_Method);
 				if(!result){
 					semanticErrors.add(new SemanticError("call to undefined virtual function "+call.getName(), call.getLine()));			
 					return false;
