@@ -184,8 +184,15 @@ class TestBaseDerived{
 **************************************************/
 
 /************ Type checks ***********************/
-
-/******   operations on types check ******************/
+class A{
+	int intField;
+	string stringField;
+	boolean boolField;
+}
+class B extends A{}
+class C extends A{}
+class D extends B{}
+/******   operations on types check ******************
 class Ops{
 	void test(){
 		int x=0;
@@ -194,8 +201,8 @@ class Ops{
 		string s ="";
 		
 		x = 5+6/3 - y%4*x; //correct
-		//x=-3;
-		//y=-y;
+		x=-3;
+		y=-y;
 		b=x==y; // correct
 		b=x>y;// correct
 		b=x>=y;// correct
@@ -239,16 +246,9 @@ class Ops{
 
 }
 
-/**************************************************************/
-/*********** Check types for classes and fields ******************/
-class A{
-	int intField;
-	string stringField;
-	boolean boolField;
-}
-class B extends A{}
-class C extends A{}
-class D extends B{}
+**************************************************************/
+/*********** Check types for classes and fields ******************
+
 
 class Test{
 	static Test t(){
@@ -271,13 +271,145 @@ class Test{
 		res =  d==a; 
 		res = d!=b;
 		res = d!=c;
-		res= d==t(); //error
+		//res= d==t(); //error
 		//res = b!=3; //error
+		
+		res = c.intField > 5; 
+		d.stringField = "a" + "b"; 
+		b.boolField = (d!=a)&&(a==c)||(!true);
 	}
 }
 
 
+**************************************************************/
+/*********** Check types for functions ************************/
+
+
+class FuncTest{
+	string s;
+	int function(boolean b, string f, int k, FuncTest ft){
+		return 1;
+	}
+	
+	void func0(){}
+	
+	static void inharitanceCheck(A a, B b, C c, D d){}
+	static void main(string[] args){
+		string h="";
+		int g=0;
+		boolean b=true;
+		function(true,"",3,new FuncTest());//correct
+		function(b,h,g,new FuncTest());//correct
+		function(b,s,g,new FuncTest());//correct
+		//function(s,h,g,new FuncTest());//error
+		//b = function(b,s,g,new FuncTest());//error
+		//return  function(b,s,g,new FuncTest()); //error
+		int r =  function(b,s,g,new FuncTest()); //correct
+		func0();//correct
+		//func0(6);//error
+	
+		this.inharitanceCheck(new A(),new B(),new C(),new D());//correct
+		this.inharitanceCheck(new C(),new D(),new D(),new D());//correct
+		
+		//this.inharitanceCheck(new A(),new A(),new A(),new A());//error
+	}
+	
+}
+
 /**************************************************************/
 
+/*********** Check types for statements ************************
+class StatementsCheck{
+	
+	// if check
+	void function(boolean b, string f, int k, FuncTest ft){
+		// if check correct
+		if(!b&&true||false&&(k!=k)||(k<1))
+			return;
+		else
+			k = k;
+		// if check error	
+		//if(f)
+			return;		
+	}
+	
+	//while check
+	void function2(boolean b, string f, int k, FuncTest ft){
+		while(!b&&true||false&&(k!=k)||(k<1))
+			break;
+		//while(4)
+		//	break;
+		while(true){
+			if(k==6){
+				{
+					{
+						break;
+						
+					}
+					continue;			
+				}
+			}
+			continue;
+		}
+		//continue; //error
+	}
+}
+**************************************************************/
+/**************************** Bonus 1 ************************
+class K{
+	int f;
+	
+	int t(int y){
+		return y;
+		return f;
+		int g;
+		int[] arr; 
+		//return g; // error
+		{
+			g=0;
+			{
+				return g;
+				{
+					arr[0]=0;
+					arr = new int[9];
+				
+				}
+			}
+		}
+		return g;
+	}
 
+}
+**************************************************************/
+/***************************** Bonus 2 ************************
+class K{
+	
+	void r(){
+		if(true)
+			return;
+		else
+			r();	
+			
+	}
+	
+	int t(boolean y){
+		if(y){
+			while(y){
+				{
+					break;
+				}
+				continue;
+				//return 1;
+			}
+		
+		}else{
+			y=false;
+			return 2;
+		}
+		//return 1;
+	}
+
+}
+
+**************************************************************/
 
