@@ -24,6 +24,8 @@ public class MyClassType extends MyType {
 	@Override
 	boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
+		if(!(type instanceof MyClassType))
+			return false;
 		if(this == type)
 			return true;
 		if(superClass == null)
@@ -34,6 +36,8 @@ public class MyClassType extends MyType {
 				return true;
 			c = c.getSuperClass();	
 		}
+		if(((MyClassType)type).hasSuperClass())
+			return subtypeOf(((MyClassType)type).getSuperClass());
 		return false;
 	}
 	
