@@ -1,148 +1,140 @@
 digraph G{
-    1
-  2 -> {1}
-    3
-     4 -> {}
-    5 -> {4}
-      6
-          7
-          8
-        9 -> {7 8}
-        10
-      11 -> {9 10}
-    12 -> {6 11}
-      13
-          14
-            15
-            16
-          17 -> {15 16}
-        18 -> {14 17}
-        19
-      20 -> {18 19}
-    21 -> {13 20}
-          22 -> {}
-          23
-        24 -> {22 23}
-        25
-      26 -> {24 25}
-          27 -> {}
-          28
-        29 -> {27 28}
-        30
-      31 -> {29 30}
-    32 -> {26 31}
-  33 -> {3 5 12 21 32}
+   1
+    2
+   3 -> {2}
+  4 -> {1 3}
+   5
+    6
+   7 -> {6}
+  8 -> {5 7}
+   9
+    10
+   11 -> {10}
+  12 -> {9 11}
+   13
+    14
+   15 -> {14}
+  16 -> {13 15}
+   17
+  18 -> {17}
+   19
+  20 -> {19}
+   21
+  22 -> {21}
+   23
+    24
+   25 -> {24}
+    26
+   27 -> {26}
+  28 -> {23 25 27}
+   29
+    30
+   31 -> {30}
+  32 -> {29 31}
+   33
     34
-     35
-    36 -> {35}
-      37
-          38
-          39
-        40 -> {38 39}
-        41
-      42 -> {40 41}
-    43 -> {37 42}
-      44
-      45
-    46 -> {44 45}
-      47
-      48
-    49 -> {47 48}
-            50 -> {}
-            51
-          52 -> {50 51}
-          53
-        54 -> {52 53}
-        55
-      56 -> {54 55}
-      57
-    58 -> {56 57}
-          59 -> {}
-          60
-        61 -> {59 60}
-        62
-      63 -> {61 62}
-        64
-        65
-      66 -> {64 65}
-    67 -> {63 66}
-  68 -> {34 36 43 46 49 58 67}
-69 -> {2 33 68}
-70 -> {}
-71 -> {}
-72 -> {69 70 71}
+   35 -> {34}
+  36 -> {33 35}
+   37
+    38
+   39 -> {38}
+  40 -> {37 39}
+   41
+    42
+   43 -> {42}
+  44 -> {41 43}
+   45
+  46 -> {45}
+   47
+    48
+   49 -> {48}
+  50 -> {47 49}
+51 -> {4 8 12 16 18 20 22 28 32 36 40 44 46 50}
+    52
+     53
+    54 -> {53}
+          55 -> {}
+          56
+        57 -> {55 56}
+        58
+      59 -> {57 58}
+      60
+    61 -> {59 60}
+  62 -> {52 54 61}
+    63
+     64
+    65 -> {64}
+  66 -> {63 65}
+67 -> {62 66}
+68 -> {51 67}
 
-1[label="MethodType {  -> int}"]
-2[label="VirtualMethod f"]
-3[label="MethodType {  -> int}"]
-4[label="VirtualCall to method f"]
-5[label="CallStatement"]
-6[label="UserType A[][]"]
-7[label="UserType A"]
-8[label="Literal 3"]
-9[label="NewArray allocation"]
-10[label="Literal 456546"]
-11[label="ArrayLocation"]
-12[label="LocalVariable a"]
-13[label="UserType B[][]"]
-14[label="UserType B"]
-15[label="Literal 6"]
-16[label="Literal 3"]
-17[label="MathBinaryOp addition"]
-18[label="NewArray allocation"]
-19[label="Literal 456546"]
-20[label="ArrayLocation"]
-21[label="LocalVariable b"]
-22[label="VariableLocation a"]
-23[label="Literal 2"]
-24[label="ArrayLocation"]
-25[label="Literal 5"]
-26[label="ArrayLocation"]
-27[label="VariableLocation a"]
-28[label="Literal 4"]
-29[label="ArrayLocation"]
-30[label="Literal 6"]
-31[label="ArrayLocation"]
-32[label="Assignment"]
-33[label="VirtualMethod myFunc"]
-34[label="MethodType {string[] -> void}"]
-35[label="PrimitiveType string[]"]
-36[label="Formal args"]
-37[label="PrimitiveType int[][]"]
-38[label="PrimitiveType int"]
-39[label="Literal 2"]
-40[label="NewArray allocation"]
-41[label="Literal 4"]
-42[label="ArrayLocation"]
-43[label="LocalVariable otherArray"]
-44[label="PrimitiveType string[][][]"]
-45[label="Literal null"]
-46[label="LocalVariable myArray"]
-47[label="PrimitiveType int"]
-48[label="Literal 8"]
-49[label="LocalVariable x"]
-50[label="VariableLocation myArray"]
-51[label="Literal 6"]
-52[label="ArrayLocation"]
-53[label="Literal 9"]
-54[label="ArrayLocation"]
-55[label="Literal 8"]
-56[label="ArrayLocation"]
-57[label="Literal "sdf""]
-58[label="Assignment"]
-59[label="VariableLocation otherArray"]
-60[label="Literal 4"]
-61[label="ArrayLocation"]
-62[label="Literal 6"]
-63[label="ArrayLocation"]
-64[label="Literal 8"]
-65[label="Literal 9"]
-66[label="MathBinaryOp addition"]
-67[label="Assignment"]
-68[label="StaticMethod main"]
-69[label="Class MyClass"]
-70[label="Class A"]
-71[label="Class B has super classA"]
-72[label="Program"]
+1[label="MethodType {string -> void}"]
+2[label="PrimitiveType string"]
+3[label="Formal s"]
+4[label="LibraryMethod println"]
+5[label="MethodType {string -> void}"]
+6[label="PrimitiveType string"]
+7[label="Formal s"]
+8[label="LibraryMethod print"]
+9[label="MethodType {int -> void}"]
+10[label="PrimitiveType int"]
+11[label="Formal i"]
+12[label="LibraryMethod printi"]
+13[label="MethodType {boolean -> void}"]
+14[label="PrimitiveType boolean"]
+15[label="Formal b"]
+16[label="LibraryMethod printb"]
+17[label="MethodType {  -> int}"]
+18[label="LibraryMethod readi"]
+19[label="MethodType {  -> string}"]
+20[label="LibraryMethod readln"]
+21[label="MethodType {  -> boolean}"]
+22[label="LibraryMethod eof"]
+23[label="MethodType {string, int -> int}"]
+24[label="PrimitiveType string"]
+25[label="Formal s"]
+26[label="PrimitiveType int"]
+27[label="Formal n"]
+28[label="LibraryMethod stoi"]
+29[label="MethodType {int -> string}"]
+30[label="PrimitiveType int"]
+31[label="Formal i"]
+32[label="LibraryMethod itos"]
+33[label="MethodType {string -> int[]}"]
+34[label="PrimitiveType string"]
+35[label="Formal s"]
+36[label="LibraryMethod stoa"]
+37[label="MethodType {int[] -> string}"]
+38[label="PrimitiveType int[]"]
+39[label="Formal a"]
+40[label="LibraryMethod atos"]
+41[label="MethodType {int -> int}"]
+42[label="PrimitiveType int"]
+43[label="Formal n"]
+44[label="LibraryMethod random"]
+45[label="MethodType {  -> int}"]
+46[label="LibraryMethod time"]
+47[label="MethodType {int -> int}"]
+48[label="PrimitiveType int"]
+49[label="Formal i"]
+50[label="LibraryMethod exit"]
+51[label="Class Library"]
+52[label="MethodType {  -> void}"]
+53[label="PrimitiveType int[][]"]
+54[label="LocalVariable arr"]
+55[label="VariableLocation arr"]
+56[label="Literal 2"]
+57[label="ArrayLocation"]
+58[label="Literal 3"]
+59[label="ArrayLocation"]
+60[label="Literal 6"]
+61[label="Assignment"]
+62[label="VirtualMethod foo"]
+63[label="MethodType {string[] -> void}"]
+64[label="PrimitiveType string[]"]
+65[label="Formal a"]
+66[label="StaticMethod main"]
+67[label="Class A"]
+68[label="Program"]
 
 }

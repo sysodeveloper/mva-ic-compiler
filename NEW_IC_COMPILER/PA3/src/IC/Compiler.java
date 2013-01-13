@@ -64,14 +64,33 @@ public class Compiler {
 			if(args[i].compareTo("-print-ast") == 0){
 				LabelAST(root, 0);
 				PrintASTCommand(root);
-				GraphvizAST((Program)root);
+				//GraphvizAST((Program)root);
 				break;
 			}
 		}
+		System.out.println();
+		//handle symbol and type tables
+		MyTypeTable types = null;
+		try{
+			types = BuildSymbolTables((Program) root, getICFileParsed());
+			if(types == null) return;
+			boolean semanticPass = SemanticChecks((Program) root);
+			if(semanticPass){
+				boolean typesPass = TypeChecks((Program) root, types);
+				if(!typesPass){
+					return;
+				}
+			}else{
+				return;
+			}
+		}catch(Exception exp){
+			
+		}
 		//check if needs to dump symbol table and type table.
+		if(types == null) return;
 		for(int i = 1; i < args.length; ++i){
 			if(args[i].compareTo("-dump-symtab") == 0){
-				dumpTable(args[0]);
+				dumpTable((Program) root,types);
 				break;
 			}
 		}
@@ -137,8 +156,12 @@ public class Compiler {
 	 * @param startFrom - a number to start the ids of the nodes from
 	 */
 	private static void LabelAST(Object root, int startFrom){
-		Labeling l = new Labeling();
-		l.visit((Program)root, startFrom);
+		try{
+			Labeling l = new Labeling();
+			l.visit((Program)root, startFrom);
+		}catch(Exception exp){
+			System.out.println("Error lanbeling ast " + exp.getMessage());
+		}
 	}
 	
 	/**
@@ -146,23 +169,12 @@ public class Compiler {
 	 * Prints the ast tree, needs to run after LabelAst(root,someNumber)
 	 */
 	private static void PrintASTCommand(Object root){
-		PrettyPrinter printer = new PrettyPrinter(ICFileParsed);
-		System.out.println(printer.visit((Program)root));
-		BuildSymbolTables((Program) root, ICFileParsed);
-		/*
 		try{
-			TreePrinter treePrinter = new TreePrinter();
-			String[] out = ((String)treePrinter.visit((Program)root)).split("\n");
-			for(int i=out.length-1;i>=0;i--){
-				System.out.println(out[i]);
-			}
-		}catch(ClassCastException e){
-			System.out.println("Error printing program: " + e.getMessage());
-		}catch(NullPointerException e1){
-			System.out.println("Null Pointer in PrintASTCommand");
-		}catch(Exception e2){
-			System.out.println("Error while printing: " + e2.getMessage());
-		}*/
+			PrettyPrinter printer = new PrettyPrinter(ICFileParsed);
+			System.out.println(printer.visit((Program)root));
+		}catch(Exception exp){
+			System.out.println("Error printing ast " + exp.getMessage());
+		}
 	}
 	
 	/**
@@ -198,7 +210,7 @@ public class Compiler {
 			LibraryParser libParser = new LibraryParser(lex);
 			//libParser.printTokens = false;
 			Symbol parsedSymbol = libParser.parse();
-			System.out.println("Successfully parsed library file " +libPath);
+			System.out.println("Parsed " +libPath + " successfully!");
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
 			System.out.println(libPath + " " + e3.getMessage());
@@ -227,7 +239,7 @@ public class Compiler {
 			Parser parser = new Parser(lex);
 			parser.printTokens = false;
 			Symbol parsedSymbol = parser.parse();
-			System.out.println("Successfully parsed " +filePath);
+			System.out.println("Parsed " +filePath + " successfully!");
 			Compiler.ICFileParsed = filePath;
 			return parsedSymbol.value;
 		}catch (SyntaxError e3){
@@ -242,74 +254,75 @@ public class Compiler {
 		return null;
 	}
 	
-	
-	/*private static Boolean BuildSymbolTables(Program root, String filePath){
-		SemanticAnalyse sa = SemanticAnalyse.getInstance();
-		sa.setRoot(root);
-		sa.analyze();
-		
-		if(!sa.getErrors().isEmpty()) {
-			for (Exception e : sa.getErrors()) {
-				System.err.println(e.getMessage());
-			}
-			return false;
-		}
-		
-		return true;
-	}
-	*/
-	
-	
-	private static Boolean BuildSymbolTables(Program root, String filePath){
-			BuildMySymbolTable buider = new BuildMySymbolTable();
-			boolean success = buider.visit(root, null);
-			System.out.println("Symbol tables builded? " + success);
-			if(!success){
-				buider.printErrorStack();
-				return false;
-			}
+	private static void PrintSymbolTables(Program root){
+		try{
 			MySymbolTablePrinter printer = new MySymbolTablePrinter();
 			System.out.println(printer.visit(root));
-			if(!success){
-				buider.printErrorStack();
+		}catch(Exception exp){
+			
+		}
+	}
+	
+	private static void PrintTypeTable(Program root, MyTypeTable types){
+		try{
+			types.printTypeTable();
+		}catch(Exception exp){
+			exp.printStackTrace();
+		}
+	}
+	
+	private static boolean TypeChecks(Program root, MyTypeTable types){
+		MyTypeBuilder typeBuilder = new MyTypeBuilder(types);
+		try{
+			typeBuilder.visit(root, null);
+			if(typeBuilder.hasErrors()){
+				typeBuilder.printErrorStack();
 				return false;
 			}
-			if(success){
-				MySemanticAnalyzer analyzer = new MySemanticAnalyzer();
-				boolean analyze = analyzer.visit(root,null);
-				
-				if(!analyze){
-					analyzer.printErrorStack();
-					return false;
-				}
-				
-				MyTypeTable types = buider.getTypeTable();
-				types.printTypeTable();
-				MyTypeBuilder typeBuilder = new MyTypeBuilder(types);
-				typeBuilder.visit(root, null);
-				typeBuilder.printErrorStack();
-				
-				ReturnCheck returnChecker = new ReturnCheck();
-				Boolean correctReturns = returnChecker.visit(root);
-				if(!correctReturns){
-					returnChecker.printErrorStack();
-				}
-				analyze &= correctReturns;
-				return analyze;
+			ReturnCheck returnChecker = new ReturnCheck();
+			Boolean correctReturns = returnChecker.visit(root);
+			if(!correctReturns){
+				returnChecker.printErrorStack();
+				return false;
 			}
-			return success;
-			
+		}catch(Exception exp){
+			typeBuilder.printErrorStack();
+			return false;
+		}
+		return true;
+	}
+	
+	private static boolean SemanticChecks(Program root){
+		boolean analyze = false;
+		MySemanticAnalyzer analyzer = new MySemanticAnalyzer();
+		try{
+			analyze = analyzer.visit(root,null);
+			if(!analyze){
+				analyzer.printErrorStack();
+				return false;
+			}
+		}catch(Exception exp){
+			analyzer.printErrorStack();
+			return false;
+		}
+		return analyze;
+	}
+	
+	private static MyTypeTable BuildSymbolTables(Program root, String filePath){
+		BuildMySymbolTable buider = new BuildMySymbolTable();
+		boolean success = buider.visit(root, null);
+		if(!success){
+			buider.printErrorStack();
+			return null;
+		}			
+		return buider.getTypeTable();
 	}
 	
 	/**
 	 * Dump the symbol and type table.
 	 */
-	private static void dumpTable(String fileName) {
-		/*SymbolTablePrinter tablePrinter = new SymbolTablePrinter(fileName, 
-				(Program)(SymbolTable.getRoot().getParentNode()));
-		TypeTablePrinter typePrinter = new TypeTablePrinter(
-				SymbolTable.getUsedType(), fileName);
-		System.out.println(tablePrinter);
-		System.out.println(typePrinter);*/
+	private static void dumpTable(Program root, MyTypeTable types) {
+		PrintSymbolTables(root);
+		PrintTypeTable(root, types);
 	}
 }

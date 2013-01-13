@@ -55,7 +55,7 @@ public class ReturnCheck implements Visitor<Boolean>{
 		for(ICClass c : program.getClasses()){
 			returnValue &= c.accept(this);
 		}
-		return returnValue;
+		return (semanticErrors.size() <= 0);
 	}
 
 	@Override

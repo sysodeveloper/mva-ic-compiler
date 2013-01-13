@@ -1,25 +1,44 @@
-class MyClass{
-	int f(){
-	}
-	int myFunc(){
-		f();
-		A[][] a = new A[3][456546];
-		B[][] b = new B[6+3][456546];
-		a[2][5] = a[4][6];
-		
-	}
-	static void main(string[] args){
-		int[][] otherArray = new int[2][4];
-		string[][][] myArray  = null;
-		int x= 8;
-		myArray[6][9][8] = "sdf";
-		otherArray[4][6] = 8+9;
-	}
-	
-	
+class A {
+  string str;
+  int i;
+
+  static int sfunc(boolean b) {
+    if (b) {
+      {
+        int k = 5;
+      }
+      return 1;
+    }
+    else {
+      A x = new A();
+      x.i = 9;
+      x.str = "hello";
+      return 0;
+    }
+  }
+
+  void vfunc(A a, int max, int val) {
+    int[] arr = new int[max];
+    int i = 0;
+    while (i < max){
+        arr[i] = val;
+        i = i + 1;
+        Library.printi(i);
+        if (a == null)
+          break;
+    }
+  }
 }
 
-class A{ 
+class B extends A {
+    int j;
+
+    void vfunc(A a, int max, int val) {
+    }
 }
-class B extends A{
+
+class C {
+  static void main(string[] args) {
+    A[][] a;
+  }
 }

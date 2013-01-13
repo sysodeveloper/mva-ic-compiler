@@ -51,9 +51,10 @@ public class MyClassType extends MyType {
 	public String toString(){
 		String r = this.getUnique_id()+": Class: "+this.getName();
 		if(hasSuperClass())
-			r+=", Superclass Name: "+getSuperClass().getName();
-		return r;
+			r+=", Superclass ID: "+getSuperClass().getUnique_id();
+		return r;		
 	}
+
 	public MyClassType getSuperClass() {
 		return superClass;
 	}
