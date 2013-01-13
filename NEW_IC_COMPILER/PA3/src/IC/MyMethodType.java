@@ -66,6 +66,11 @@ public class MyMethodType extends MyType {
 	}
 	
 	public String toString(){
-		return this.getUnique_id()+": Method type: "+this.getName();
+		if(this.getParamTypes().size() > 0){
+			return this.getUnique_id()+": Method type: "+this.getName();
+		}
+		String str = this.getName();
+		str = str.replaceAll("  ", " ");
+		return this.getUnique_id()+": Method type: "+str;
 	}
 }

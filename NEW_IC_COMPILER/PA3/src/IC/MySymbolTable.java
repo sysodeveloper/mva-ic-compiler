@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import IC.AST.ASTNode;
 import IC.AST.INameable;
 import IC.AST.LocalVariable;
+import IC.AST.MethodType;
 import IC.AST.StaticMethod;
 import IC.AST.Type;
 
@@ -134,7 +135,13 @@ public class MySymbolTable {
 			}else if(!printTypeFirst && printType){
 				chunks[i].append(key);
 				chunks[i].append(" ");
-				chunks[i].append(entries.get(key).getType().getFullName());
+				if(entries.get(key).getType() instanceof MethodType){
+					String str = entries.get(key).getType().getFullName();
+					str = str.replaceAll("  ", " ");
+					chunks[i].append(str);
+				}else{
+					chunks[i].append(entries.get(key).getType().getFullName());
+				}
 			}else{
 				chunks[i].append(key);
 			}

@@ -70,6 +70,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		return false;
 	}
 	
+	public boolean hasErrors(){
+		return (this.semanticErrors.size() > 0);
+	}
+	
 	public MyTypeBuilder(MyTypeTable table){
 		this.types = table;
 		intType = table.insertType(new MyIntType());

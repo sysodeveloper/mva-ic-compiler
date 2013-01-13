@@ -23,4 +23,8 @@ public class SemanticError extends Exception {
 	public SemanticError(int line) {
 		this("", line);
 	}
+	
+	public String toString(){
+		return this.getMessage();
+	}
 }

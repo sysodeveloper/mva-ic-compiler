@@ -1,6 +1,8 @@
 package IC;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -9,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import java_cup.Main;
 
 import IC.AST.ICClass;
 import IC.AST.Method;
@@ -94,15 +98,31 @@ public class MyTypeTable {
 	}
 	
 	public void printTypeTable(){
-		System.out.println("Type Table: ");
-		for(MyPrimitiveType t :uniquePrimitiveType)
+		System.out.println("Type Table: " + Compiler.getICFileParsed());
+		Collections.sort(uniquePrimitiveType, new Comparator<MyPrimitiveType>() {
+
+			@Override
+			public int compare(MyPrimitiveType o1, MyPrimitiveType o2) {
+				return o1.getUnique_id()-o2.getUnique_id();
+			}
+			
+		});
+		for(MyPrimitiveType t :uniquePrimitiveType){
+			System.out.print("\t");
 			System.out.println(t);
-		for(MyClassType t :uniqueClassTypes.values())
+		}
+		for(MyClassType t :uniqueClassTypes.values()){
+			System.out.print("\t");
 			System.out.println(t);
-		for(MyArrayType t :uniqueArrayTypes.values())
+		}
+		for(MyArrayType t :uniqueArrayTypes.values()){
+			System.out.print("\t");
 			System.out.println(t);
-		for(MyMethodType t:uniqueMethodTypes.values())
+		}
+		for(MyMethodType t:uniqueMethodTypes.values()){
+			System.out.print("\t");
 			System.out.println(t);
+		}
 	}
 	
 }
