@@ -1,7 +1,4 @@
-/**
- * 
- */
-package IC;
+package IC.semanticChecks;
 
 /**
  *  Semantic errors.

@@ -1,4 +1,4 @@
-package IC;
+package IC.myTypes;
 
 import IC.AST.Type;
 
@@ -7,7 +7,7 @@ public abstract class MyType implements Cloneable{
 	public static int run_id = 6;
 	private String name;	
 	private int dimention=0;
-	abstract boolean subtypeOf(MyType type) ;
+	public abstract boolean subtypeOf(MyType type) ;
 
 	public abstract MyType clone();
 	

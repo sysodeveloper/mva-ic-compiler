@@ -1,6 +1,9 @@
 package IC.AST;
 
-import IC.MyType;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 /**
  * Abstract base class for data type AST nodes.

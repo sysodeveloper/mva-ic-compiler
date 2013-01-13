@@ -1,13 +1,8 @@
 package IC.AST;
-
-import IC.DataTypes;
-import IC.MyArrayType;
-import IC.MyBoolType;
-import IC.MyIntType;
-import IC.MyStringType;
-import IC.MyType;
-import IC.MyVoidType;
-
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 /**
  * Primitive data type AST node.
  * 

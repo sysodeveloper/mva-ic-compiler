@@ -1,9 +1,10 @@
-package IC;
+package IC.semanticChecks;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import IC.BinaryOps;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
 import IC.AST.Break;
@@ -42,7 +43,9 @@ import IC.AST.VariableLocation;
 import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.While;
-import IC.MySymbolRecord.Kind;
+import IC.myTypes.*;
+import IC.mySymbolTable.*;
+import IC.mySymbolTable.MySymbolRecord.Kind;
 
 
 

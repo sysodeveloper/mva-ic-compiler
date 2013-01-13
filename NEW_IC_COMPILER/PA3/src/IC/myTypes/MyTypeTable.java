@@ -1,4 +1,4 @@
-package IC;
+package IC.myTypes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,7 +98,7 @@ public class MyTypeTable {
 	}
 	
 	public void printTypeTable(){
-		System.out.println("Type Table: " + Compiler.getICFileParsed());
+		System.out.println("Type Table: " + IC.Compiler.getICFileParsed());
 		Collections.sort(uniquePrimitiveType, new Comparator<MyPrimitiveType>() {
 
 			@Override

@@ -1,10 +1,11 @@
-package IC;
+package IC.mySymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import IC.AST.ASTNode;
 import IC.AST.Type;
+import IC.myTypes.MyType;
 
 public class MySymbolRecord {
 	public enum Kind{

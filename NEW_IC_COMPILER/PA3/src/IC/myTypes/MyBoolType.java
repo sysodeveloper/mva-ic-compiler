@@ -1,4 +1,4 @@
-package IC;
+package IC.myTypes;
 
 public class MyBoolType extends MyPrimitiveType {
 

@@ -2,17 +2,17 @@ package IC.AST;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import IC.MyMethodType;
-import IC.MyType;
-import IC.SymbolTable;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 /**
  * Abstract base class for method AST nodes.
  * 
  * @author Tovi Almozlino
  */
-public abstract class Method extends ASTNode implements SymbolTableContainer, INameable {
+public abstract class Method extends ASTNode implements INameable {
 
 	protected Type type;
 	
@@ -24,23 +24,6 @@ public abstract class Method extends ASTNode implements SymbolTableContainer, IN
 
 	protected List<Statement> statements;
 	
-	/** The symbol table of this method.
-	 */
-	private SymbolTable m_InnerTable;
-	
-	/**
-	 * @return The table.
-	 */
-	public SymbolTable getInnerTable() {
-		return m_InnerTable;
-	}
-
-	/**
-	 * @param table The table to set.
-	 */
-	public void setInnerTable(SymbolTable table) {
-		m_InnerTable = table;		
-	}
 
 	/**
 	 * Constructs a new method node. Used by subclasses.
@@ -57,7 +40,6 @@ public abstract class Method extends ASTNode implements SymbolTableContainer, IN
 	protected Method(Type type, String name, List<Formal> formals,
 			List<Statement> statements) {
 		super(type.getLine());
-		setInnerTable(new SymbolTable(SymbolTable.getNextId(), null, this));
 		this.type = type;
 		this.name = name;
 		this.formals = formals;

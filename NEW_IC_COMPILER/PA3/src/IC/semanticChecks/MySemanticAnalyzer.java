@@ -1,11 +1,12 @@
-package IC;
+package IC.semanticChecks;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import IC.MySymbolRecord.Kind;
+import IC.mySymbolTable.*;
+import IC.mySymbolTable.MySymbolRecord.Kind;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
 import IC.AST.Break;
@@ -44,6 +45,7 @@ import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.While;
 import IC.AST.Statement;
+import IC.mySymbolTable.MySymbolTable;
 
 public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boolean> {
 	private MySymbolTable globalScope;

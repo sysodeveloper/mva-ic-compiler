@@ -1,4 +1,4 @@
-package IC;
+package IC.myTypes;
 
 import java.util.ArrayList;
 
@@ -6,6 +6,10 @@ import IC.AST.Formal;
 import IC.AST.Method;
 import IC.AST.MethodType;
 import IC.AST.Type;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 public class MyMethodType extends MyType {
 	
@@ -29,7 +33,7 @@ public class MyMethodType extends MyType {
 	}
 	
 	@Override
-	boolean subtypeOf(MyType type) {
+	public boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
 		return false;
 	}

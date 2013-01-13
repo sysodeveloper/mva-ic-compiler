@@ -2,11 +2,10 @@ package IC.AST;
 
 import IC.DataTypes;
 import IC.LiteralTypes;
-import IC.MyBoolType;
-import IC.MyIntType;
-import IC.MyNullType;
-import IC.MyStringType;
-import IC.MyType;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 /**
  * Literal value AST node.

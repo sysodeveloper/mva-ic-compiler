@@ -1,5 +1,8 @@
-package IC;
-
+package IC.myTypes;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 import IC.AST.ICClass;
 
 public class MyClassType extends MyType {
@@ -22,7 +25,7 @@ public class MyClassType extends MyType {
 	}
 	
 	@Override
-	boolean subtypeOf(MyType type) {
+	public boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
 		if(!(type instanceof MyClassType))
 			return false;

@@ -17,6 +17,12 @@ import IC.AST.PrettyPrinter;
 import IC.AST.Program;
 import IC.AST.TreePrinter;
 import IC.Parser.*;
+import IC.mySymbolTable.BuildMySymbolTable;
+import IC.mySymbolTable.MySymbolTablePrinter;
+import IC.myTypes.MyTypeTable;
+import IC.semanticChecks.MySemanticAnalyzer;
+import IC.semanticChecks.MyTypeBuilder;
+import IC.semanticChecks.ReturnCheck;
 
 /**
  * The IC Compiler.
