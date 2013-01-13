@@ -4,13 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import IC.DataTypes;
-import IC.MyArrayType;
-import IC.MyBoolType;
-import IC.MyClassType;
-import IC.MyIntType;
-import IC.MyStringType;
-import IC.MyType;
-import IC.MyVoidType;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 /**
  * User-defined data type AST node.

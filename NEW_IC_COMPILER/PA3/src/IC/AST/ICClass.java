@@ -1,18 +1,16 @@
 package IC.AST;
 
 import java.util.List;
-
-import IC.MyArrayType;
-import IC.MyClassType;
-import IC.MyType;
-import IC.SymbolTable;
-
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 /**
  * Class declaration AST node.
  * 
  * @author Tovi Almozlino
  */
-public class ICClass extends ASTNode implements SymbolTableContainer, INameable {
+public class ICClass extends ASTNode implements INameable {
 
 	private String name;
 
@@ -24,28 +22,6 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 
 	private List<Method> methods;
 	
-	/** The symbol table of this class.
-	 */
-	private SymbolTable m_InnerTable;
-	
-	/**
-	 * The static table of that class;
-	 */
-	private SymbolTable m_staticTable;
-
-	/**
-	 * @return The table.
-	 */
-	public SymbolTable getInnerTable() {
-		return m_InnerTable;
-	}
-
-	/**
-	 * @param table The table to set.
-	 */
-	public void setInnerTable(SymbolTable table) {
-		m_InnerTable = table;
-	}
 
 	@Override
 	public <UpType> UpType accept(Visitor<UpType> visitor) {
@@ -76,8 +52,6 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 		this.name = name;
 		this.fields = fields;
 		this.methods = methods;
-		setInnerTable(new SymbolTable(SymbolTable.getNextId(), null, this));
-		setStaticTable(new SymbolTable(SymbolTable.getNextId(), null, this));
 		setUserType(new UserType(this));
 	}
 
@@ -135,19 +109,6 @@ public class ICClass extends ASTNode implements SymbolTableContainer, INameable 
 		this.m_userType = m_userType;
 	}
 	
-	/**
-	 * @return the m_staticTable
-	 */
-	public SymbolTable getStaticTable() {
-		return m_staticTable;
-	}
-
-	/**
-	 * @param m_staticTable the m_staticTable to set
-	 */
-	public void setStaticTable(SymbolTable m_staticTable) {
-		this.m_staticTable = m_staticTable;
-	}
 	
 	public MyType getMyType(){
 		MyClassType returnType = new MyClassType();

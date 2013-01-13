@@ -1,4 +1,4 @@
-package IC;
+package IC.mySymbolTable;
 
 import IC.AST.Type;
 

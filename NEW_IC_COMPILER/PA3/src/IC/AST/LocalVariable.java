@@ -1,7 +1,8 @@
 package IC.AST;
-
-import IC.MyArrayType;
-import IC.MyType;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 /**
  * Local variable declaration statement AST node.

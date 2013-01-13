@@ -1,4 +1,8 @@
-package IC;
+package IC.myTypes;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 public class MyArrayType extends MyType {
 	
@@ -19,7 +23,7 @@ public class MyArrayType extends MyType {
 	}
 	
 	@Override
-	boolean subtypeOf(MyType type) {
+	public boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
 		if(!(type instanceof MyArrayType ))
 			return false;

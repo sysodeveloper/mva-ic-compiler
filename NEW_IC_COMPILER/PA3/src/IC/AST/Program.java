@@ -1,15 +1,17 @@
 package IC.AST;
 
 import java.util.List;
-
-import IC.SymbolTable;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 /**
  * Root AST node for an IC program.
  * 
  * @author Tovi Almozlino
  */
-public class Program extends ASTNode implements SymbolTableContainer {
+public class Program extends ASTNode {
 
 	private List<ICClass> classes;
 	
@@ -35,18 +37,4 @@ public class Program extends ASTNode implements SymbolTableContainer {
 	public List<ICClass> getClasses() {
 		return classes;
 	}
-
-	@Override
-	public SymbolTable getInnerTable() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * The global symbolTable.
-	 */
-	@Override
-	public void setInnerTable(SymbolTable table) {
-	}
-
 }

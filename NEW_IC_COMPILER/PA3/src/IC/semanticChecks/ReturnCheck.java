@@ -1,4 +1,4 @@
-package IC;
+package IC.semanticChecks;
 
 import java.util.ArrayList;
 import java.util.List;

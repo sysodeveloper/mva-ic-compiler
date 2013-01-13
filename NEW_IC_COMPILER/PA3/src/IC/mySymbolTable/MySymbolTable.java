@@ -1,4 +1,4 @@
-package IC;
+package IC.mySymbolTable;
 
 import java.util.ArrayList;
 import java.util.HashMap;

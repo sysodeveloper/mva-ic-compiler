@@ -1,35 +1,20 @@
 package IC.AST;
 
 import java.util.List;
-
-import IC.SymbolTable;
+import IC.*;
+import IC.mySymbolTable.*;
+import IC.myTypes.*;
+import IC.semanticChecks.*;
 
 /**
  * Statements block AST node.
  * 
  * @author Tovi Almozlino
  */
-public class StatementsBlock extends Statement implements SymbolTableContainer {
+public class StatementsBlock extends Statement {
 
 	private List<Statement> statements;
-	
-	/** The symbol table of this block.
-	 */
-	private SymbolTable m_InnerTable;
-	
-	/**
-	 * @return The table.
-	 */
-	public SymbolTable getInnerTable() {
-		return m_InnerTable;
-	}
 
-	/**
-	 * @param table The table to set.
-	 */
-	public void setInnerTable(SymbolTable table) {
-		m_InnerTable = table;		
-	}
 
 	public Object accept(Visitor visitor) {
 		return visitor.visit(this);
@@ -50,7 +35,6 @@ public class StatementsBlock extends Statement implements SymbolTableContainer {
 	 */
 	public StatementsBlock(int line, List<Statement> statements) {
 		super(line);
-		setInnerTable(new SymbolTable(SymbolTable.getNextId(), null, this));
 		this.statements = statements;
 	}
 

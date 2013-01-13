@@ -1,4 +1,4 @@
-package IC;
+package IC.myTypes;
 
 public class MyVoidType extends MyPrimitiveType {
 
@@ -9,7 +9,7 @@ public class MyVoidType extends MyPrimitiveType {
 	}
 	
 	@Override
-	boolean subtypeOf(MyType type) {
+	public boolean subtypeOf(MyType type) {
 		// TODO Auto-generated method stub
 		return false;
 	}

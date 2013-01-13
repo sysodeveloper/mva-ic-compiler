@@ -1,4 +1,4 @@
-package IC;
+package IC.myTypes;
 
 public class MyStringType extends MyPrimitiveType {
 

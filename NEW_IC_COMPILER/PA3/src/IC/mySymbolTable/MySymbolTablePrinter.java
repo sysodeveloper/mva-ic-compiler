@@ -1,4 +1,4 @@
-package IC;
+package IC.mySymbolTable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,7 +43,6 @@ import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
-import IC.MySymbolRecord.Kind;
 
 public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 
@@ -51,7 +50,7 @@ public class MySymbolTablePrinter implements Visitor<StringBuffer>{
 	public StringBuffer visit(Program program) {
 		StringBuffer output = new StringBuffer();
 		output.append("Global Symbol Table: ");
-		output.append(new File(Compiler.getICFileParsed()).getName());
+		output.append(new File(IC.Compiler.getICFileParsed()).getName());
 		output.append("\n");
 		output.append(program.enclosingScope());
 		for(ICClass c : program.getClasses()){

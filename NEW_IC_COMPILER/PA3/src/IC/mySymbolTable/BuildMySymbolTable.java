@@ -1,12 +1,15 @@
-package IC;
+package IC.mySymbolTable;
 
 import java.util.ArrayList;
+
+import IC.mySymbolTable.MySymbolRecord.Kind;
+import IC.myTypes.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import IC.MySymbolRecord.Kind;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
 import IC.AST.Break;
@@ -45,6 +48,9 @@ import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.Visitor;
 import IC.AST.While;
+import IC.myTypes.MyTypeTable;
+import IC.semanticChecks.SemanticError;
+import IC.*;
 
 public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boolean>{
 	static int uniqueTable = 0;
