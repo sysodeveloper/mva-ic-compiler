@@ -151,6 +151,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(Assignment assignment, Object d) {
+		if(hasErrors()){
+			return voidType;
+		}
 		fromNewArray = false;
 		fromVariableLocation = false;
 		MyType varType = types.insertType(assignment.getVariable().accept(this,d));
@@ -265,6 +268,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		if(!localVariable.hasInitValue())
 			return varType;
 		MyType initType =  localVariable.getInitValue().accept(this, d);
+		if(hasErrors()){
+			return voidType;
+		}
 		if(!TypeOK(varType, initType)){
 			semanticErrors.add(new SemanticError("Type of initializing expresion "+initType.getName()+" didnt match variable type "+varType.getName(),localVariable.getLine()));
 			return voidType;
@@ -273,6 +279,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(VariableLocation location, Object d) {
+		if(hasErrors()){
+			return voidType;
+		}
 		fromNewArray = false;
 		fromVariableLocation = false;
 		this.fromVariableLocation = true;
@@ -288,7 +297,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			//field of other class  need to check if exists
 			MySymbolRecord externalField = ((MyClassType)locType).getClassAST().enclosingScope().Lookup(location.getName());
 			if(externalField == null){
-				semanticErrors.add(new SemanticError("Field with the name "+location.getName()+" doesnt exists", location.getLine()));
+				semanticErrors.add(new SemanticError("Field with the name "+location.getName()+" does not exist", location.getLine()));
 				return voidType;
 			}
 			return externalField.getMyType();
@@ -298,17 +307,26 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(ArrayLocation location, Object d) {
+		if(hasErrors()){
+			return voidType;
+		}
 		//DO NOT !!
 		//fromNewArray = false;
 		//fromVariableLocation = false;
 		if(location.getIndex().accept(this, d) != intType){
+			if(hasErrors()){
+				return voidType;
+			}
 			semanticErrors.add(new SemanticError("Type of array index expression can be only int type",location.getLine()));
 			return voidType;
 		}
 
 		MyType mtype = location.getArray().accept(this, d); 
 			if(!(mtype instanceof MyArrayType)){
-				semanticErrors.add(new SemanticError("Type of the expression must be an array type, not  "+mtype.getName(), location.getLine()));
+				if(hasErrors()){
+					return voidType;
+				}
+				semanticErrors.add(new SemanticError("Type of the expression must be an array type, not "+mtype.getName(), location.getLine()));
 				return voidType;
 			}
 			//return ((MyArrayType)mtype).getElementType();		
@@ -469,6 +487,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		
 		MyType leftType = binaryOp.getFirstOperand().accept(this, d);
 		MyType rightType = binaryOp.getSecondOperand().accept(this, d);
+		if(hasErrors()){
+			return voidType;
+		}
 		
 		if(leftType != rightType){		
 			semanticErrors.add(new SemanticError("Cannot perform math operation on different types",binaryOp.getLine()));
@@ -563,6 +584,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	}
 	@Override
 	public MyType visit(ExpressionBlock expressionBlock, Object d) {
+		if(hasErrors()){
+			return voidType;
+		}
 		
 		return  expressionBlock.getExpression().accept(this, d);
 	}
