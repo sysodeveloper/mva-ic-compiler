@@ -112,6 +112,8 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 							returnValue &= c.accept(this,rec.getNode().enclosingScope());
 							removeClasses.add(c);
 							changed = true;
+							getTypeTable().updateSuperClass((MyClassType) c.getMyType());
+							
 						}
 					}else{
 						//System.out.println("Undefined Class " + c.getSuperClassName());

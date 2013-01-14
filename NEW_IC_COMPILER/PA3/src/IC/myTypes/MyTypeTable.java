@@ -47,6 +47,19 @@ public class MyTypeTable {
 			}		
 	}
 	
+	public void updateSuperClass(MyClassType elemType){
+		if(uniqueClassTypes.containsKey(elemType.getName())){
+			MyClassType singeltonElement = uniqueClassTypes.get(elemType.getName());
+			if(elemType.hasSuperClass()){
+				MyClassType superClass = elemType.getSuperClass();
+				if(uniqueClassTypes.containsKey(elemType.getSuperClass().getName()))
+					superClass = uniqueClassTypes.get(elemType.getSuperClass().getName());
+				singeltonElement.setSuperClass(superClass);
+			}
+			uniqueClassTypes.put(elemType.getName(), singeltonElement);
+		}
+	}
+	
 	// Returns unique class type object
 	public MyClassType classType(MyClassType elemType){
 		if(uniqueClassTypes.containsKey(elemType.getName()))

@@ -1,4 +1,4 @@
-package IC.semanticChecks;
+package IC.semanticChecks; 
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -46,7 +46,6 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(Field field, MySymbolTable d){
-		// TODO Auto-generated method stub
 		if(field.getType() instanceof PrimitiveType)
 			return true;
 		if (!checkUserType(field.getType())){
@@ -195,15 +194,27 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		boolean param = checkVariable(location.getName(), d,Kind.Parameter);
 		boolean local = checkVariable(location.getName(), d,Kind.Local_Variable);
 		
-		if(location.isExternal()){ // 
+		if(location.isExternal()){
 			boolean result = location.getLocation().accept(this, d);
 			if(!result)
 				return false;
 			
-			if(location.getLocation() instanceof This){				
+			if(location.getLocation() instanceof This){
 				if(!filed){
 					semanticErrors.add(new SemanticError("undefined field with the name "+location.getName() , location.getLine()));
 					return false;
+				}
+				if(filed){
+					//check that it is not a call from static method
+					String desc = d.getDescription();
+					MySymbolTable enc = location.enclosingScope();
+					MySymbolRecord rec = location.enclosingScope().Lookup(desc);
+					if(rec != null){
+						if(rec.getKind() == Kind.Static_Method || rec.getKind() == Kind.Library_Method){
+							semanticErrors.add(new SemanticError("Cannot call field "+location.getName() + " from a static method" , location.getLine()));
+							return false;						
+						}
+					}
 				}
 			}
 			//field of another class - check in type rules
@@ -213,7 +224,20 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		
 		
 		// direct reference
-		else{		
+		else{	
+			if(filed){
+				//check that it is not a call from static method
+				String desc = d.getDescription();
+				MySymbolTable enc = location.enclosingScope();
+				MySymbolRecord rec = location.enclosingScope().Lookup(desc);
+				if(rec != null){
+					if(rec.getKind() == Kind.Static_Method || rec.getKind() == Kind.Library_Method){
+						semanticErrors.add(new SemanticError("Cannot call field "+location.getName() + " from a static method" , location.getLine()));
+						return false;						
+					}
+				}
+			}
+			
 			if(!(filed || param  || local )){
 				semanticErrors.add(new SemanticError("undefined variable/field with the name "+location.getName() , location.getLine()));
 				return false;
@@ -263,6 +287,19 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		boolean result = true;
 		if(!call.isExternal()){ // direct calling
 			result = checkFunction(call.getName(), d, Kind.Virtual_Method);
+			if(result){
+				//virtual call cannot be made from a static scope
+				String desc = d.getDescription();
+				MySymbolTable enc = call.enclosingScope();
+				MySymbolRecord rec = call.enclosingScope().Lookup(desc);
+				if(rec != null){
+					if(rec.getKind() == Kind.Static_Method || rec.getKind() == Kind.Library_Method){
+						semanticErrors.add(new SemanticError("virtual call cannot be made from a static method" , call.getLine()));
+						return false;						
+					}
+				}
+
+			}
 			result |= checkFunction(call.getName(), d, Kind.Static_Method);
 			if(!result){
 				semanticErrors.add(new SemanticError("call to undefined  function "+call.getName(), call.getLine()));			
@@ -323,7 +360,16 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	@Override
 	public Boolean visit(This thisExpression, MySymbolTable d) {
 		// TODO Auto-generated method stub
-		
+		//check that the scope is not static
+		String desc = d.getDescription();
+		MySymbolTable enc = thisExpression.enclosingScope();
+		MySymbolRecord rec = thisExpression.enclosingScope().Lookup(desc);
+		if(rec != null){
+			if(rec.getKind() == Kind.Static_Method || rec.getKind() == Kind.Library_Method){
+				semanticErrors.add(new SemanticError("Cannot use 'this' in a static method" , thisExpression.getLine()));
+				return false;						
+			}
+		}
 		return true;
 	}
 

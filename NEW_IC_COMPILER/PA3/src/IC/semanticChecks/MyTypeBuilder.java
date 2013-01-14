@@ -68,7 +68,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			c.accept(this,d);
 		}
 		if(mainMethods != 1){
-			semanticErrors.add(new SemanticError("Entry method is undefined " + mainMethods,program.getLine()));
+			semanticErrors.add(new SemanticError("Entry method is undefined",program.getLine()));
 			return voidType;
 		}
 		return voidType;
@@ -358,7 +358,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		// check every argument
 		for(int i=0;i<funcFormals.size();i++){
 			MyType formalType = funcFormals.get(i).accept(this, d);
-			if(formalType!= callArgs.get(i).accept(this, d)){
+			if(!TypeOK(formalType,callArgs.get(i).accept(this, d))){
 				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type "+formalType.getName()+" as argument number "+(i+1),call.getLine()));
 				return voidType;
 			}
@@ -405,8 +405,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		}
 		// check every argument
 		for(int i=0;i<funcFormals.size();i++){
-			MyType formalType = funcFormals.get(i).accept(this, d);
-			if(!callArgs.get(i).accept(this, d).subtypeOf(formalType)){
+			MyType formalType = types.insertType(funcFormals.get(i).accept(this, d));
+			//if(!callArgs.get(i).accept(this, d).subtypeOf(formalType)){
+			MyType argType = types.insertType(callArgs.get(i).accept(this, d));
+			if(!TypeOK(formalType,argType)){
 				semanticErrors.add(new SemanticError("function "+call.getName()+" expects parameter of type "+formalType.getName()+" as argument number "+(i+1),call.getLine()));
 				return voidType;
 			}
