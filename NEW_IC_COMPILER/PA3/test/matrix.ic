@@ -4,7 +4,7 @@ class B extends A{
 
 class A{
 	int myField;
-	A a;
+	A[] az;
 }
 
 class D extends C{
@@ -17,7 +17,7 @@ class C extends B{
 		A a = new A();
 		E e = new E();
 		a.myField = 5;
-		//foo(c,c,myField);
+		foo(c,c,a.myField);
 	}
 	
 	int w(){ 
