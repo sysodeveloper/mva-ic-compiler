@@ -1,7 +1,5 @@
 package IC.myTypes;
 
-import IC.AST.Type;
-
 public abstract class MyType implements Cloneable{
 	private int unique_id;
 	public static int run_id = 6;

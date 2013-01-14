@@ -2,9 +2,7 @@ package IC.AST;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import IC.DataTypes;
-import IC.*;
 import IC.mySymbolTable.*;
 import IC.myTypes.*;
 import IC.semanticChecks.*;

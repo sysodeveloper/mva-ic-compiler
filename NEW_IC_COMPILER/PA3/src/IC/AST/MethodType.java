@@ -4,7 +4,6 @@
 package IC.AST;
 
 import java.util.List;
-import IC.*;
 import IC.mySymbolTable.*;
 import IC.myTypes.*;
 import IC.semanticChecks.*;

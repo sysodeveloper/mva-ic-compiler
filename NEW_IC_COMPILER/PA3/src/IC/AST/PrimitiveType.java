@@ -1,8 +1,6 @@
 package IC.AST;
-import IC.*;
-import IC.mySymbolTable.*;
+import IC.DataTypes;
 import IC.myTypes.*;
-import IC.semanticChecks.*;
 /**
  * Primitive data type AST node.
  * 
