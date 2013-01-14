@@ -4,6 +4,7 @@ class B extends A{
 
 class A{
 	int myField;
+	A a;
 }
 
 class D extends C{
@@ -26,7 +27,7 @@ class C extends B{
 	
 	static void foo(A a, B b, int x){
 		C c = new C();
-		int y = (new E()).f[5] + 2;
+	
 	}
 	
 	

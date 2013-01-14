@@ -190,10 +190,28 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(VariableLocation location, MySymbolTable d) {
-		boolean filed = checkVariable(location.getName(), d,Kind.Field);
+		/*boolean filed = checkVariable(location.getName(), d,Kind.Field);
 		boolean param = checkVariable(location.getName(), d,Kind.Parameter);
-		boolean local = checkVariable(location.getName(), d,Kind.Local_Variable);
+		boolean local = checkVariable(location.getName(), d,Kind.Local_Variable);*/
 		
+		MySymbolRecord locationRecord = location.enclosingScope().Lookup(location.getName());
+		if(locationRecord == null){
+			return false;
+		}
+		boolean filed = false;
+		boolean param = false;
+		boolean local = false;
+		switch(locationRecord.getKind()){
+		case Field:
+			filed = true;
+			break;
+		case Parameter:
+			param = true;
+			break;
+		case Local_Variable:
+			local = true;
+			break;
+		}
 		if(location.isExternal()){
 			boolean result = location.getLocation().accept(this, d);
 			if(!result)
