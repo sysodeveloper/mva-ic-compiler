@@ -1,44 +1,37 @@
-class A {
-  string str;
-  int i;
+class B extends A{
 
-  static int sfunc(boolean b) {
-    if (b) {
-      {
-        int k = 5;
-      }
-      return 1;
-    }
-    else {
-      A x = new A();
-      x.i = 9;
-      x.str = "hello";
-      return 0;
-    }
-  }
-
-  void vfunc(A a, int max, int val) {
-    int[] arr = new int[max];
-    int i = 0;
-    while (i < max){
-        arr[i] = val;
-        i = i + 1;
-        Library.printi(i);
-        if (a == null)
-          break;
-    }
-  }
 }
 
-class B extends A {
-    int j;
-
-    void vfunc(A a, int max, int val) {
-    }
+class A{
+	int myField;
 }
 
-class C {
-  static void main(string[] args) {
-    A[][] a;
-  }
+class D extends C{
 }
+
+class C extends B{
+	static void main(string[] args){
+		C c = new C();
+		B b = new B();
+		A a = new A();
+		E e = new E();
+		a.myField = 5;
+		//foo(c,c,myField);
+	}
+	
+	int w(){ 
+		this.myField = 3;
+		return 3;
+	}
+	
+	static void foo(A a, B b, int x){
+		C c = new C();
+		int y = c.w() + 2;
+	}
+	
+	
+}
+
+class E {
+}
+

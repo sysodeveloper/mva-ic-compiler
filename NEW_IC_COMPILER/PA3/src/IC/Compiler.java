@@ -38,21 +38,27 @@ public class Compiler {
 	 *            - Supports -print-ast command 
 	 */
 	private static String ICFileParsed;
-	
+	private static boolean libraryExists = false;
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Error: No input IC file.");
 		}
 		//check which arguments are entered
 		Object root = ParseICFile(args[0]);
+		if(root == null){
+			return;
+		}
 		Object libraryClass = null;
 		//check if the library needs to be parsed
 		boolean foundlibrary = false;
 		for(int i=1;i<args.length;i++){
 			if(args[i].startsWith("-L")){
 				libraryClass = ParseLibraryFile(args[i].substring(2));
-				AddLibraryToRoot(root,libraryClass);
-				foundlibrary = true;
+				if(libraryClass == null && libraryExists) return;
+				if(libraryExists && libraryClass != null){
+					AddLibraryToRoot(root,libraryClass);
+					foundlibrary = true;
+				}
 				break;
 			}
 		}
@@ -63,14 +69,18 @@ public class Compiler {
 			fileIC = fileIC.substring(0,fileIC.lastIndexOf(sep));
 			String defLib = fileIC + sep + "libic.sig";
 			libraryClass = ParseLibraryFile(defLib);
-			AddLibraryToRoot(root,libraryClass);
+			if(libraryClass == null && libraryExists){
+				return;
+			}else if(libraryClass != null && libraryExists){
+				AddLibraryToRoot(root,libraryClass);
+			}
 		}
 		//check if needs to be printed
 		for(int i=1;i<args.length;i++){
 			if(args[i].compareTo("-print-ast") == 0){
 				LabelAST(root, 0);
 				PrintASTCommand(root);
-				//GraphvizAST((Program)root);
+				GraphvizAST((Program)root);
 				break;
 			}
 		}
@@ -208,6 +218,7 @@ public class Compiler {
 
 	private static Object ParseLibraryFile(String libPath){
 		try{ 
+			libraryExists = true;
 			File f = new File(libPath);
 			FileReader fr = null;
 			//Lexer
@@ -224,6 +235,7 @@ public class Compiler {
 			System.out.println(libPath + " " +e1.getMessage());
 		}catch (FileNotFoundException e) {
 			System.out.println("Error: The file " + libPath + " doesn't exist.");
+			libraryExists = false;
 		} catch (Exception e2) {
 			System.out.println(libPath + " " + e2.getMessage());
 		}
