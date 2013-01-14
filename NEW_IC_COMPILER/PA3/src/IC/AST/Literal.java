@@ -2,7 +2,6 @@ package IC.AST;
 
 import IC.DataTypes;
 import IC.LiteralTypes;
-import IC.*;
 import IC.mySymbolTable.*;
 import IC.myTypes.*;
 import IC.semanticChecks.*;

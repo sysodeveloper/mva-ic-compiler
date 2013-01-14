@@ -50,7 +50,6 @@ import IC.AST.Visitor;
 import IC.AST.While;
 import IC.myTypes.MyTypeTable;
 import IC.semanticChecks.SemanticError;
-import IC.*;
 
 public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boolean>{
 	static int uniqueTable = 0;

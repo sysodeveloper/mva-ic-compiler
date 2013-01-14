@@ -1,6 +1,4 @@
 package IC.AST;
-
-import IC.*;
 import IC.mySymbolTable.*;
 import IC.myTypes.*;
 import IC.semanticChecks.*;

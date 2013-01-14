@@ -1,8 +1,4 @@
 package IC.myTypes;
-import IC.*;
-import IC.mySymbolTable.*;
-import IC.myTypes.*;
-import IC.semanticChecks.*;
 
 public class MyArrayType extends MyType {
 	
