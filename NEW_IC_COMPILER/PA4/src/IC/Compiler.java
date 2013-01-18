@@ -18,6 +18,7 @@ import IC.Parser.LexicalError;
 import IC.Parser.LibraryParser;
 import IC.Parser.Parser;
 import IC.Parser.SyntaxError;
+import IC.lir.LayoutsManager;
 import IC.mySymbolTable.BuildMySymbolTable;
 import IC.mySymbolTable.MySymbolTablePrinter;
 import IC.myTypes.MyTypeTable;
@@ -98,6 +99,10 @@ public class Compiler {
 				if(!typesPass){
 					return;
 				}
+				LayoutsManager lm = new LayoutsManager();
+				lm.createClassLayouts(null, ((Program)root).enclosingScope());
+				lm.printLayouts();
+				
 			}else{
 				return;
 			}
