@@ -1,12 +1,10 @@
 package IC;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.StringReader;
 
 import java_cup.runtime.Symbol;
 import IC.AST.GraphEdgesPrinter;
@@ -15,8 +13,11 @@ import IC.AST.ICClass;
 import IC.AST.Labeling;
 import IC.AST.PrettyPrinter;
 import IC.AST.Program;
-import IC.AST.TreePrinter;
-import IC.Parser.*;
+import IC.Parser.Lexer;
+import IC.Parser.LexicalError;
+import IC.Parser.LibraryParser;
+import IC.Parser.Parser;
+import IC.Parser.SyntaxError;
 import IC.mySymbolTable.BuildMySymbolTable;
 import IC.mySymbolTable.MySymbolTablePrinter;
 import IC.myTypes.MyTypeTable;
@@ -42,6 +43,7 @@ public class Compiler {
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Error: No input IC file.");
+			return;
 		}
 		//check which arguments are entered
 		Object root = ParseICFile(args[0]);

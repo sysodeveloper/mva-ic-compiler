@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import java_cup.Main;
-
 import IC.AST.ICClass;
 import IC.AST.Method;
 import IC.AST.MethodType;

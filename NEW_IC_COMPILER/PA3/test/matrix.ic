@@ -16,7 +16,7 @@ class C extends B{
 		B b = new B();
 		A a = new A();
 		E e = new E();
-		a.myField = 5;
+		a.myField = -9 +9;
 		foo(c,c,a.myField);
 	}
 	

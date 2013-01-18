@@ -1,140 +1,117 @@
 digraph G{
-   1
-    2
-   3 -> {2}
-  4 -> {1 3}
-   5
-    6
-   7 -> {6}
-  8 -> {5 7}
-   9
-    10
-   11 -> {10}
-  12 -> {9 11}
-   13
-    14
-   15 -> {14}
-  16 -> {13 15}
-   17
-  18 -> {17}
-   19
-  20 -> {19}
-   21
-  22 -> {21}
-   23
-    24
-   25 -> {24}
-    26
-   27 -> {26}
-  28 -> {23 25 27}
-   29
-    30
-   31 -> {30}
-  32 -> {29 31}
-   33
-    34
-   35 -> {34}
-  36 -> {33 35}
-   37
-    38
-   39 -> {38}
-  40 -> {37 39}
-   41
-    42
-   43 -> {42}
-  44 -> {41 43}
-   45
-  46 -> {45}
-   47
-    48
-   49 -> {48}
-  50 -> {47 49}
-51 -> {4 8 12 16 18 20 22 28 32 36 40 44 46 50}
-    52
-     53
-    54 -> {53}
-          55 -> {}
-          56
-        57 -> {55 56}
-        58
-      59 -> {57 58}
-      60
-    61 -> {59 60}
-  62 -> {52 54 61}
-    63
-     64
-    65 -> {64}
-  66 -> {63 65}
-67 -> {62 66}
-68 -> {51 67}
+1 -> {}
+   2
+3 -> {2}
+   4
+5 -> {4}
+6 -> {3 5}
+7 -> {}
+    8
+     9
+    10 -> {9}
+      11
+      12    13 -> {11 12}
+      14
+      15    16 -> {14 15}
+      17
+      18    19 -> {17 18}
+      20
+      21    22 -> {20 21}
+       23 -> {}
+      24 in external scope -> {23}
+         25
+        26 -> {25}
+        27
+      28 -> {26 27}
+    29 -> {24 28}
+       30 -> {}
+       31 -> {}
+        32 -> {}
+       33 in external scope -> {32}
+     34 -> {30 31 33}
+    35 -> {34}
+  36 -> {8 10 13 16 19 22 29 35}
+    37
+       38      39 in external scope -> {38}
+      40
+    41 -> {39 40}
+     42
+    43 -> {42}
+  44 -> {37 41 43}
+    45
+     46
+    47 -> {46}
+     48
+    49 -> {48}
+     50
+    51 -> {50}
+      52
+      53    54 -> {52 53}
+  55 -> {45 47 49 51 54}
+56 -> {36 44 55}
+57 -> {}
+58 -> {1 6 7 56 57}
 
-1[label="MethodType {string -> void}"]
-2[label="PrimitiveType string"]
-3[label="Formal s"]
-4[label="LibraryMethod println"]
-5[label="MethodType {string -> void}"]
-6[label="PrimitiveType string"]
-7[label="Formal s"]
-8[label="LibraryMethod print"]
-9[label="MethodType {int -> void}"]
-10[label="PrimitiveType int"]
-11[label="Formal i"]
-12[label="LibraryMethod printi"]
-13[label="MethodType {boolean -> void}"]
-14[label="PrimitiveType boolean"]
-15[label="Formal b"]
-16[label="LibraryMethod printb"]
-17[label="MethodType {  -> int}"]
-18[label="LibraryMethod readi"]
-19[label="MethodType {  -> string}"]
-20[label="LibraryMethod readln"]
-21[label="MethodType {  -> boolean}"]
-22[label="LibraryMethod eof"]
-23[label="MethodType {string, int -> int}"]
-24[label="PrimitiveType string"]
-25[label="Formal s"]
-26[label="PrimitiveType int"]
-27[label="Formal n"]
-28[label="LibraryMethod stoi"]
-29[label="MethodType {int -> string}"]
-30[label="PrimitiveType int"]
-31[label="Formal i"]
-32[label="LibraryMethod itos"]
-33[label="MethodType {string -> int[]}"]
-34[label="PrimitiveType string"]
-35[label="Formal s"]
-36[label="LibraryMethod stoa"]
-37[label="MethodType {int[] -> string}"]
-38[label="PrimitiveType int[]"]
-39[label="Formal a"]
-40[label="LibraryMethod atos"]
-41[label="MethodType {int -> int}"]
-42[label="PrimitiveType int"]
-43[label="Formal n"]
-44[label="LibraryMethod random"]
-45[label="MethodType {  -> int}"]
-46[label="LibraryMethod time"]
-47[label="MethodType {int -> int}"]
-48[label="PrimitiveType int"]
-49[label="Formal i"]
-50[label="LibraryMethod exit"]
-51[label="Class Library"]
-52[label="MethodType {  -> void}"]
-53[label="PrimitiveType int[][]"]
-54[label="LocalVariable arr"]
-55[label="VariableLocation arr"]
-56[label="Literal 2"]
-57[label="ArrayLocation"]
-58[label="Literal 3"]
-59[label="ArrayLocation"]
-60[label="Literal 6"]
-61[label="Assignment"]
-62[label="VirtualMethod foo"]
-63[label="MethodType {string[] -> void}"]
-64[label="PrimitiveType string[]"]
-65[label="Formal a"]
-66[label="StaticMethod main"]
-67[label="Class A"]
-68[label="Program"]
+1[label="Class B has super classA"]
+2[label="PrimitiveType int"]
+3[label="Field  myField"]
+4[label="UserType A[]"]
+5[label="Field  az"]
+6[label="Class A"]
+7[label="Class D has super classC"]
+8[label="MethodType {string[] -> void}"]
+9[label="PrimitiveType string[]"]
+10[label="Formal args"]
+11[label="UserType C"]
+12[label="NewClass instantiation C"]
+13[label="LocalVariable c"]
+14[label="UserType B"]
+15[label="NewClass instantiation B"]
+16[label="LocalVariable b"]
+17[label="UserType A"]
+18[label="NewClass instantiation A"]
+19[label="LocalVariable a"]
+20[label="UserType E"]
+21[label="NewClass instantiation E"]
+22[label="LocalVariable e"]
+23[label="VariableLocation a"]
+24[label="VariableLocation myField in external scope"]
+24[label="VariableLocation myField"]
+25[label="Literal 9"]
+26[label="MathUnaryOp unary subtraction"]
+27[label="Literal 9"]
+28[label="MathBinaryOp addition"]
+29[label="Assignment"]
+30[label="VariableLocation c"]
+31[label="VariableLocation c"]
+32[label="VariableLocation a"]
+33[label="VariableLocation myField in external scope"]
+33[label="VariableLocation myField"]
+34[label="VirtualCall to method foo"]
+35[label="CallStatement"]
+36[label="StaticMethod main"]
+37[label="MethodType {  -> int}"]
+38[label="This reference"]
+39[label="VariableLocation myField in external scope"]
+39[label="VariableLocation myField"]
+40[label="Literal 3"]
+41[label="Assignment"]
+42[label="Literal 3"]
+43[label="ReturnStatement"]
+44[label="VirtualMethod w"]
+45[label="MethodType {A, B, int -> void}"]
+46[label="UserType A"]
+47[label="Formal a"]
+48[label="UserType B"]
+49[label="Formal b"]
+50[label="PrimitiveType int"]
+51[label="Formal x"]
+52[label="UserType C"]
+53[label="NewClass instantiation C"]
+54[label="LocalVariable c"]
+55[label="StaticMethod foo"]
+56[label="Class C has super classB"]
+57[label="Class E"]
+58[label="Program"]
 
 }
