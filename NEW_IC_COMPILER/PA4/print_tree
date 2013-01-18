@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Build the project
+ant
+
+CLASSPATH="/etc/java/cup/";"/home/maor/workspace/compilation/IC_COMPILER/PA3/classes/"
+java -cp $CLASSPATH IC/Compiler $1 -print-ast

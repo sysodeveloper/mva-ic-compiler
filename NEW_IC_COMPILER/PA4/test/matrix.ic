@@ -1,0 +1,38 @@
+class B extends A{
+
+}
+
+class A{
+	int myField;
+	A[] az;
+}
+
+class D extends C{
+}
+
+class C extends B{
+	static void main(string[] args){
+		C c = new C();
+		B b = new B();
+		A a = new A();
+		E e = new E();
+		a.myField = -9 +9;
+		foo(c,c,a.myField);
+	}
+	
+	int w(){ 
+		this.myField = 3;
+		return 3;
+	}
+	
+	static void foo(A a, B b, int x){
+		C c = new C();
+	
+	}
+	
+	
+}
+
+class E {
+}
+

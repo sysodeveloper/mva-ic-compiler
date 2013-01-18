@@ -1,0 +1,415 @@
+/*** Shadowing checks from spec- error cases ****
+class CheckShadowing{
+	int foo;
+	void foo(){} //  error here
+}
+
+class CheckShadowingParams{	
+	void foo(int x){
+		int x = 1; // error here 	
+	}
+}
+
+class A {
+	int foo;
+}
+class B extends A {
+	void foo() {}
+}
+
+
+*******************************************************/ 
+
+/************* Shadowing checks from spec- legal cases ****
+class A {
+	int x;
+	void foo() {
+		int x;
+		x = 1; // here 'x' refers to the local variable 'x'
+		this.x = 1; // here 'x' refers to the field 'x'
+	}
+}
+
+class B {
+	void foo() {
+		int x;
+		{
+		boolean x;
+		x = true; // 'x' refers to the variable defined in the inner scope.
+		}
+	}
+}
+
+*****************************************************/
+
+/********* Variable definition and use checks*********
+
+class CheckUseAfterDefine{
+	int f;
+	void check(){
+		x=0; // here x is undefined
+		return;
+		int x;
+		x=8;
+	}
+}
+
+
+******************************/
+
+/*********** Local variables VS Fields ***************
+
+class CheckLocalVSFields{
+	int var;
+	
+	void func(string param){
+		string var;
+		var=1;// refer to local var , could'nt be assigned with string
+		boolean b;
+		{
+			string s;
+			param = "r"; 
+			b = true;
+			{
+				s = "";
+			}
+		}
+		
+		this.var = 33;
+		var= "";
+	}
+
+}
+************************************************/
+
+/************ Use of fields and methods ***********
+
+class CheckUseOfFieldsAndMethods{
+	string field;
+	static void stf(){}
+	void vf(){}
+	
+	void test(){
+		string field2;
+		stf(); // correct
+		this.stf(); //correct
+		vf(); //correct
+		this.vf(); //correct
+		
+		(new CheckUseOfFieldsAndMethods()).vf(); //correct
+		CheckUseOfFieldsAndMethods c = new CheckUseOfFieldsAndMethods();
+		c.vf(); // correct
+		c.stf(); //correct 
+		field = ""; //correct
+		this.field=""; //correct
+		c.field=""; //correct
+		c.field2=""; // error
+		//return 1;
+		fieldX = 5; // correct - declartion after use
+		funcX(); //correct
+	}
+	
+	int fieldX;
+	void funcX(){}
+}
+**************************************************/
+
+/************ Use of methods and fields with inharitance **********
+
+class Base{
+	int field1;
+	int field2;
+	
+	static void stf(){}
+	string vtf(){}
+
+}
+
+class Derived extends Base{
+	int field3;
+	static int myStaticFunc(){}
+	int myFunc(){}
+	
+	void innerTest(){
+		//fields test
+		field3 =0; //correct;
+		this.field3 =0; //correct
+		
+		field1=field2; // correct
+		this.field3 = field2; //correct 
+		
+		//methods test 
+		
+		myFunc(); //correct
+		myStaticFunc();//correct
+		this.myFunc(); //correct
+		this.myStaticFunc();//correct		
+		
+		vtf(); //correct
+		stf(); //correct
+		this.vtf(); //correct
+		this.stf(); //correct
+		
+		
+	}
+}
+
+class TestBaseDerived{
+	int local;
+	
+	static void main(string[] args){
+		Base b = new Base();
+		Derived d = new Derived();
+		Base g = new Derived();
+		
+		b.vtf(); //correct
+		b.stf(); //correct
+		b.field1=b.field2; // correct
+		//b.field3 = 1; // error
+		
+		d.field1 = d.field3; //correct;
+		d.innerTest(); //correct
+		d.myStaticFunc(); //correct
+		
+		Base.stf(); //correct
+		Derived.myStaticFunc(); //correct
+		g.field1=1; //correct
+		//g.field3=1; // error
+		
+		//Derived.innerTest(); // error 
+		
+	}
+
+}
+**************************************************/
+
+/************ Type checks ***********************/
+class A{
+	int intField;
+	string stringField;
+	boolean boolField;
+}
+class B extends A{}
+class C extends A{}
+class D extends B{}
+/******   operations on types check ******************
+class Ops{
+	void test(){
+		int x=0;
+		int y=0;
+		boolean b;
+		string s ="";
+		
+		x = 5+6/3 - y%4*x; //correct
+		x=-3;
+		y=-y;
+		b=x==y; // correct
+		b=x>y;// correct
+		b=x>=y;// correct
+		b=x<y;// correct
+		b=x<=y;// correct
+		b=x!=y;// correct
+		
+		b = true; // correct
+		b=false; // correct
+		b=b&&b;// correct
+		b=b||b;// correct
+		b=!b; //correct
+		s = s + "sss";// correct
+		
+		//x=x&&y; // error
+		//x=x+b; // error
+		//x= y + s + "k"; // error
+		
+		//s=s+5; // error
+		//s=s||b&&b;// error
+		//s=s-"r";// error
+		
+		//b=!x; // error
+		
+		//arrays check
+		
+		string[] words = new string[7];
+		s=words[1]; //correct
+		words[1]= "sdf";//correct
+		//words[1] = x; //error
+		
+		x= words.length; //correct
+		words[words.length]="4";//correct
+		words[3+4+x-5%3+y/y] = s; //correct
+		//words[b]="t";//error		
+		//boolean[] arb= new boolean[s]; //error
+		b=null; //correct
+		//words[null] = ""; //error
+		
+	}
+
+}
+
+**************************************************************/
+/*********** Check types for classes and fields ******************
+
+
+class Test{
+	static Test t(){
+		return new Test();
+	}
+	
+	static void main(string[] args){
+		A a = new A();
+		B b = new B();
+		C c = new C();
+		D d = new D();
+		
+		boolean res;
+		
+		res = a==b;
+		res = a!=b;
+		res = b!=a;
+		res = b==c;
+		res =  a !=c;
+		res =  d==a; 
+		res = d!=b;
+		res = d!=c;
+		//res= d==t(); //error
+		//res = b!=3; //error
+		
+		res = c.intField > 5; 
+		d.stringField = "a" + "b"; 
+		b.boolField = (d!=a)&&(a==c)||(!true);
+	}
+}
+
+
+**************************************************************/
+/*********** Check types for functions ************************/
+
+
+class FuncTest{
+	string s;
+	int function(boolean b, string f, int k, FuncTest ft){
+		return 1;
+	}
+	
+	void func0(){}
+	
+	static void inharitanceCheck(A a, B b, C c, D d){}
+	static void main(string[] args){
+		string h="";
+		int g=0;
+		boolean b=true;
+		function(true,"",3,new FuncTest());//correct
+		function(b,h,g,new FuncTest());//correct
+		function(b,s,g,new FuncTest());//correct
+		//function(s,h,g,new FuncTest());//error
+		//b = function(b,s,g,new FuncTest());//error
+		//return  function(b,s,g,new FuncTest()); //error
+		int r =  function(b,s,g,new FuncTest()); //correct
+		func0();//correct
+		//func0(6);//error
+	
+		this.inharitanceCheck(new A(),new B(),new C(),new D());//correct
+		this.inharitanceCheck(new C(),new D(),new D(),new D());//correct
+		
+		//this.inharitanceCheck(new A(),new A(),new A(),new A());//error
+	}
+	
+}
+
+/**************************************************************/
+
+/*********** Check types for statements ************************
+class StatementsCheck{
+	
+	// if check
+	void function(boolean b, string f, int k, FuncTest ft){
+		// if check correct
+		if(!b&&true||false&&(k!=k)||(k<1))
+			return;
+		else
+			k = k;
+		// if check error	
+		//if(f)
+			return;		
+	}
+	
+	//while check
+	void function2(boolean b, string f, int k, FuncTest ft){
+		while(!b&&true||false&&(k!=k)||(k<1))
+			break;
+		//while(4)
+		//	break;
+		while(true){
+			if(k==6){
+				{
+					{
+						break;
+						
+					}
+					continue;			
+				}
+			}
+			continue;
+		}
+		//continue; //error
+	}
+}
+**************************************************************/
+/**************************** Bonus 1 ************************
+class K{
+	int f;
+	
+	int t(int y){
+		return y;
+		return f;
+		int g;
+		int[] arr; 
+		//return g; // error
+		{
+			g=0;
+			{
+				return g;
+				{
+					arr[0]=0;
+					arr = new int[9];
+				
+				}
+			}
+		}
+		return g;
+	}
+
+}
+**************************************************************/
+/***************************** Bonus 2 ************************
+class K{
+	
+	void r(){
+		if(true)
+			return;
+		else
+			r();	
+			
+	}
+	
+	int t(boolean y){
+		if(y){
+			while(y){
+				{
+					break;
+				}
+				continue;
+				//return 1;
+			}
+		
+		}else{
+			y=false;
+			return 2;
+		}
+		//return 1;
+	}
+
+}
+
+**************************************************************/
+
