@@ -39,8 +39,24 @@ public class ClassLayout {
 	}
 	
 	public void addMethod(String methodName){
-		if(!methodToOffset.containsKey(methodName))
-			methodToOffset.put(methodName, nextMethod++);
+		boolean found = false;
+		String fName="";
+		for(String m : methodToOffset.keySet()){
+			String name = m.split("_")[2];
+			if(name.compareTo(methodName)==0){
+				found = true;
+				fName=m;
+				break;
+			}
+		}
+		if(!found)//new method 
+			methodToOffset.put(makeSymbolicName(methodName), nextMethod++);
+		else{ // overridden method - remove and put current method
+			int offset = methodToOffset.get(fName);
+			methodToOffset.remove(fName);
+			methodToOffset.put(makeSymbolicName(methodName), offset);
+		}
+			
 	}
 	
 	private String makeSymbolicName(String name){
