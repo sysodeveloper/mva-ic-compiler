@@ -202,11 +202,11 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	@Override
 	public List<String> visit(Assignment assignment, ClassLayout d) {
 		List<String> instructions = new ArrayList<String>();
-		instructions.addAll(assignment.getVariable().accept(this,d));
-		String varResultReg = resultRegister;	//could be in the form of R#[R#]
 		instructions.addAll(assignment.getAssignment().accept(this,d));
 		String exprResultReg = resultRegister;
-		instructions.add(spec.MoveArray(exprResultReg, varResultReg));
+		instructions.addAll(assignment.getVariable().accept(this,d));
+		String varResultReg = resultRegister;
+		instructions.add(spec.Move(resultRegister, varResultReg));
 		return instructions;
 	}
 
