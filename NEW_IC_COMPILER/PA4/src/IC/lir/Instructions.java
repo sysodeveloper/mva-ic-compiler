@@ -179,4 +179,96 @@ public class Instructions {
 		output.append(label);		
 		return output.toString(); 
 	}
+	
+	public String JumpTrue(String label){
+		StringBuffer output = new StringBuffer();
+		output.append("JumpTrue ");
+		output.append(label);		
+		return output.toString(); 
+	}
+	
+	public String JumpFalse(String label){
+		StringBuffer output = new StringBuffer();
+		output.append("JumpFalse ");
+		output.append(label);		
+		return output.toString(); 
+	}
+	
+	public String JumpG(String label){
+		StringBuffer output = new StringBuffer();
+		output.append("JumpG ");
+		output.append(label);		
+		return output.toString(); 
+	}
+	
+	public String JumpGE(String label){
+		StringBuffer output = new StringBuffer();
+		output.append("JumpGE ");
+		output.append(label);		
+		return output.toString(); 
+	}
+	
+	public String JumpL(String label){
+		StringBuffer output = new StringBuffer();
+		output.append("JumpL ");
+		output.append(label);		
+		return output.toString(); 
+	}
+	
+	public String JumpLE(String label){
+		StringBuffer output = new StringBuffer();
+		output.append("JumpLE ");
+		output.append(label);		
+		return output.toString(); 
+	}
+	
+	public String Library(String func_name_params, String reg){
+		StringBuffer output = new StringBuffer();
+		output.append("Library ");
+		output.append(func_name_params);
+		output.append(",");
+		output.append(reg);
+		return output.toString(); 
+	}
+	
+	public String StaticCall(String func_name_params, String reg){
+		StringBuffer output = new StringBuffer();
+		output.append("StaticCall ");
+		output.append(func_name_params);
+		output.append(",");
+		output.append(reg);
+		return output.toString(); 
+	}
+	
+	public String VirtualCall(String func_name_params, String reg){
+		StringBuffer output = new StringBuffer();
+		output.append("VirtualCall ");
+		output.append(func_name_params);
+		output.append(",");
+		output.append(reg);
+		return output.toString(); 
+	}
+	
+	public String Return(String param){
+		StringBuffer output = new StringBuffer();
+		output.append("Return ");
+		output.append(param);		
+		return output.toString(); 
+	}
+	
+	public String allocateObject(String s){
+		StringBuffer output = new StringBuffer();
+		output.append("__allocateObject(");
+		output.append(s);		
+		output.append(")");	
+		return output.toString(); 
+	}
+	
+	public String allocateArray(String s){
+		StringBuffer output = new StringBuffer();
+		output.append("__allocateArray(");
+		output.append(s);		
+		output.append(")");	
+		return output.toString(); 
+	}
 }
