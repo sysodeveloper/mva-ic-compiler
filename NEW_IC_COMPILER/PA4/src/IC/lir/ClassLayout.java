@@ -118,8 +118,8 @@ public class ClassLayout {
 	
 	public int getMethodOffset(String methodName){
 		String methodSymbolicName = makeSymbolicName(methodName);
-		if(fieldToOffset.containsKey(methodSymbolicName)){
-			return fieldToOffset.get(methodSymbolicName);
+		if(methodToOffset.containsKey(methodSymbolicName)){
+			return methodToOffset.get(methodSymbolicName);
 		}
 		return -1;
 	}	
