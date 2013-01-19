@@ -45,8 +45,10 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	//Global instructions
 	private List<String> dispatchVectors;
 	private List<String> stringLiterals;
+	private Instructions spec;
 	//Register Manager
 	private RegisterManager registers;
+	private String resultRegister;
 	//Naming conventions
 	private int variableUnique;
 	private int parameterUnique;
@@ -76,6 +78,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		this.stringLiterals = new ArrayList<String>();
 		this.dispatchVectors = new ArrayList<String>();
 		registers = new RegisterManager();
+		resultRegister = null;
 	}
 
 	@Override
@@ -148,38 +151,63 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 
 	@Override
 	public List<String> visit(StaticMethod method, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(makeComment("Static Method " + method.getName()));
+		/* Allocate Registers */
+		registers.addAllocator();
+		/* Method Label */
+		instructions.add(d.makeSymbolicName(method.getName()+":"));
+		/* Method Translation */
+		instructions.addAll(method.getType().accept(this,d));
+		for(Formal f : method.getFormals()){
+			instructions.addAll(f.accept(this,d));
+		}
+		for(Statement s : method.getStatements()){
+			instructions.addAll(s.accept(this,d));
+		}
+		/* Method Return If Void */
+		if(method.getReturnType().getName().compareTo("void") == 0){
+			instructions.add("Return 9999");
+		}
+		/* Free Register Allocated */
+		registers.freeRegisters();
+		return instructions;
+		
 	}
 
 	@Override
 	public List<String> visit(LibraryMethod method, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(Formal formal, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(PrimitiveType type, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		return instructions;	
 	}
 
 	@Override
 	public List<String> visit(UserType type, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(Assignment assignment, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.addAll(assignment.getVariable().accept(this,d));
+		String varResultReg = resultRegister;	//could be in the form of R#[R#]
+		instructions.addAll(assignment.getAssignment().accept(this,d));
+		String exprResultReg = resultRegister;
+		instructions.add(spec.MoveArray(exprResultReg, varResultReg));
+		return instructions;
 	}
 
 	@Override
