@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import IC.BinaryOps;
+import IC.LiteralTypes;
 import IC.AST.ASTNode;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
@@ -68,6 +70,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	private int parameterUnique;
 	private int fieldUnique;
 	private int labelUnique;
+	private int stringLiteralUnique;
 	
 	private String getVariableTranslationName(String varName,MySymbolTable enclosingScope){
 		int id = enclosingScope.Lookup(varName).getId();
@@ -87,6 +90,10 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	private String getLabelName(String labelName){
 		return labelName+(labelUnique++);
 	}
+	
+	private String getStringLiteralTranslationName(String strLiteral){
+		return "str"+stringLiteralUnique+": "+"''"+strLiteral+"''";
+	}
 	//Comments
 	private String makeComment(String str){ 
 		return "#"+str;
@@ -97,6 +104,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		parameterUnique = 0;
 		fieldUnique = 0;
 		labelUnique = 0;
+		stringLiteralUnique =0;
 		this.layoutManager = layoutManager;
 		this.stringLiterals = new ArrayList<String>();
 		this.dispatchVectors = new ArrayList<String>();
@@ -419,44 +427,127 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 
 	@Override
 	public List<String> visit(NewArray newArray, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		newArray.getType().accept(this, d);		
+		String regType = resultRegister;
+		newArray.getSize().accept(this,d);		
+		String regSize = resultRegister;
+		String arrHolder = registers.nextRegister();
+		instructions.add(makeComment(""));
+		if(!(newArray.getType() instanceof PrimitiveType)){
+			// need to get size of classlayout for this type			
+			int typeFactor = layoutManager.getClassLayout(newArray.getType().getName()).getLayoutSize(); 
+			instructions.add(spec.Mul(Integer.toString(typeFactor), regSize));
+		}
+				
+		String newArrInst = spec.allocateArray(regSize);
+		
+		instructions.add(spec.Library(newArrInst, arrHolder));
+		resultRegister = arrHolder;
+		
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(Length length, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		length.getArray().accept(this, d);
+		String newReg = registers.nextRegister();
+		instructions.add(spec.ArrayLength(resultRegister, newReg));
+		resultRegister=newReg;
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(MathBinaryOp binaryOp, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.addAll(binaryOp.getFirstOperand().accept(this,d));
+		String firstReg = resultRegister;
+		instructions.addAll(binaryOp.getSecondOperand().accept(this,d));
+		if(binaryOp.getOperator()==BinaryOps.PLUS)
+			instructions.add(spec.Add(firstReg, resultRegister));
+		if(binaryOp.getOperator()==BinaryOps.MINUS)
+			instructions.add(spec.Sub(firstReg, resultRegister));
+		if(binaryOp.getOperator()==BinaryOps.MULTIPLY)
+			instructions.add(spec.Mul(firstReg, resultRegister));
+		if(binaryOp.getOperator()==BinaryOps.DIVIDE)
+			instructions.add(spec.Div(firstReg, resultRegister));
+		if(binaryOp.getOperator()==BinaryOps.MOD)
+			instructions.add(spec.Mod(firstReg, resultRegister));
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(LogicalBinaryOp binaryOp, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.addAll(binaryOp.getFirstOperand().accept(this,d));
+		String firstReg = resultRegister;
+		instructions.addAll(binaryOp.getSecondOperand().accept(this,d));
+		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
+		
+		if(binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR){
+			instructions.add(spec.Compare(firstReg, resultRegister));			
+			if(binaryOp.getOperator() == BinaryOps.EQUAL)
+				instructions.add(spec.JumpTrue(label));
+			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
+				instructions.add(spec.JumpFalse(label));
+			if(binaryOp.getOperator() == BinaryOps.GT)
+				instructions.add(spec.JumpG(label));
+			if(binaryOp.getOperator() == BinaryOps.GTE)
+				instructions.add(spec.JumpGE(label));
+			if(binaryOp.getOperator() == BinaryOps.LT)
+				instructions.add(spec.JumpL(label));
+			if(binaryOp.getOperator() == BinaryOps.LTE)
+				instructions.add(spec.JumpLE(label));
+			}
+		else{
+			if(binaryOp.getOperator()==BinaryOps.LAND){
+				instructions.add(spec.Compare("0",firstReg));
+				instructions.add(spec.JumpTrue(label));
+				instructions.add(spec.And(firstReg, resultRegister));				
+			}
+			if(binaryOp.getOperator()==BinaryOps.LOR){
+				instructions.add(spec.Compare("1",firstReg));
+				instructions.add(spec.JumpTrue(label));
+				instructions.add(spec.Or(firstReg, resultRegister));				
+			}
+			
+		}
+		instructions.add(label+":");
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(MathUnaryOp unaryOp, ClassLayout d) {
 		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.addAll(unaryOp.getOperand().accept(this, d));
+		instructions.add(makeComment("- "+resultRegister));
+		instructions.add(spec.Neg(resultRegister));		
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(LogicalUnaryOp unaryOp, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.addAll(unaryOp.getOperand().accept(this, d));
+		instructions.add(makeComment("! "+resultRegister));
+		instructions.add(spec.Not(resultRegister));		
+		
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(Literal literal, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		if(literal.getType() == LiteralTypes.STRING){
+			if(!stringNames.containsKey(literal.getValue())){
+				String strLiteral = getStringLiteralTranslationName((String)literal.getValue());
+				stringNames.put((String)literal.getValue(), strLiteral);
+				stringLiterals.add(strLiteral);
+			}		
+		}
+		return instructions;
 	}
 
 	@Override
