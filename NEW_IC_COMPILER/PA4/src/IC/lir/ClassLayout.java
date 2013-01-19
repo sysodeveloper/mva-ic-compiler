@@ -2,6 +2,7 @@ package IC.lir;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ClassLayout {
 	private int nextField;
@@ -63,7 +64,7 @@ public class ClassLayout {
 			
 	}
 	
-	private String makeSymbolicName(String name){
+	public String makeSymbolicName(String name){
 		return "_"+this.className+"_"+name;
 	}
 	
@@ -122,4 +123,21 @@ public class ClassLayout {
 		}
 		return -1;
 	}	
+	
+	public boolean hasVirtaulMethos(){
+		return this.methodToOffset.size() > 0;
+	}
+	
+	public StringBuffer printDispatchVector(){
+		StringBuffer dispatchVector = new StringBuffer();
+		if(hasVirtaulMethos()){
+			dispatchVector.append("_DV_"+this.className+":");
+			for(String methodName : this.methodToOffset.keySet()){
+				dispatchVector.append(methodName);
+				dispatchVector.append(",");
+			}
+			dispatchVector.deleteCharAt(dispatchVector.length()-1);
+		}
+		return dispatchVector;
+	}
 }

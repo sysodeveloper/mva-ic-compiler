@@ -29,6 +29,7 @@ import IC.AST.PrimitiveType;
 import IC.AST.Program;
 import IC.AST.PropagatingVisitor;
 import IC.AST.Return;
+import IC.AST.Statement;
 import IC.AST.StatementsBlock;
 import IC.AST.StaticCall;
 import IC.AST.StaticMethod;
@@ -41,28 +42,37 @@ import IC.AST.While;
 
 public class Translator implements PropagatingVisitor<ClassLayout, TranslationInfo>{
 	LayoutsManager layoutManager;
+	//Global instructions
+	private TranslationInfo dispatchVectors;
+	private TranslationInfo stringLiterals;
 	//Naming conventions
 	private int variableUnique;
 	private int parameterUnique;
 	private int fieldUnique;
 	
-	public String getVariableTranslationName(String varName){
+	private String getVariableTranslationName(String varName){
 		return "v"+(variableUnique++) + varName;
 	}
 	
-	public String getParameterTranslationName(String parName){
+	private String getParameterTranslationName(String parName){
 		return "p"+(parameterUnique++) + parName;
 	}
 	
-	public String getFieldTranslationName(String fieldName){
+	private String getFieldTranslationName(String fieldName){
 		return "f"+(fieldUnique++) + fieldName;
 	}	
+	//Comments
+	private StringBuffer makeComment(String str){ 
+		return new StringBuffer("#"+str);
+	}
 	//Start of visitor
 	public Translator(LayoutsManager layoutManager){
 		variableUnique = 0;
 		parameterUnique = 0;
 		fieldUnique = 0;
 		this.layoutManager = layoutManager;
+		this.stringLiterals = new TranslationInfo();
+		this.dispatchVectors = new TranslationInfo();
 	}
 
 	@Override
@@ -70,6 +80,13 @@ public class Translator implements PropagatingVisitor<ClassLayout, TranslationIn
 		TranslationInfo tInfo = new TranslationInfo();
 		TranslationInfo classInfo = null;
 		/* Program Translation */
+		tInfo.instructions.add(makeComment("A new program begins..."));
+		tInfo.instructions.add(makeComment(""));
+		tInfo.instructions.add(makeComment(""));
+		tInfo.instructions.add(makeComment("String Literals"));
+		tInfo.instructions.addAll(stringLiterals.instructions);
+		tInfo.instructions.add(makeComment("Dispatch Vectors"));
+		tInfo.instructions.addAll(dispatchVectors.instructions);
 		for(ICClass c : program.getClasses()){
 			classInfo = c.accept(this,d);
 			tInfo.instructions.addAll(classInfo.instructions);
@@ -81,8 +98,13 @@ public class Translator implements PropagatingVisitor<ClassLayout, TranslationIn
 	public TranslationInfo visit(ICClass icClass, ClassLayout d) {
 		TranslationInfo tInfo = new TranslationInfo();
 		TranslationInfo childInfo = null;
+		tInfo.instructions.add(makeComment("Class " + icClass.getName()));
 		/* Class layout */
 		ClassLayout cl =  layoutManager.getClassLayout(icClass.getName());
+		/* Class Dispatch Vector */
+		if(cl.hasVirtaulMethos()){
+			dispatchVectors.instructions.add(cl.printDispatchVector());
+		}
 		/* Class Translation */
 		for(Field f : icClass.getFields()){
 			childInfo = f.accept(this,cl);
@@ -99,14 +121,32 @@ public class Translator implements PropagatingVisitor<ClassLayout, TranslationIn
 
 	@Override
 	public TranslationInfo visit(Field field, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		TranslationInfo tInfo = new TranslationInfo();
+		return tInfo;
 	}
 
 	@Override
 	public TranslationInfo visit(VirtualMethod method, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		TranslationInfo tInfo = new TranslationInfo();
+		TranslationInfo childInfo = null;
+		tInfo.instructions.add(makeComment("Virtual Method " + method.getName()));
+		/* Method Label */
+		tInfo.instructions.add(new StringBuffer(d.makeSymbolicName(method.getName())+":"));
+		/* Method Translation */
+		for(Formal f : method.getFormals()){
+			childInfo = f.accept(this,d);
+			childInfo.instructions.addAll(childInfo.instructions);
+		}
+		childInfo = null;
+		for(Statement s : method.getStatements()){
+			childInfo = s.accept(this,d);
+			tInfo.instructions.addAll(childInfo.instructions);
+		}
+		/* Method Return If Void */
+		if(method.getReturnType().getName().compareTo("void") == 0){
+			tInfo.instructions.add("Return")
+		}
+		return tInfo;
 	}
 
 	@Override
