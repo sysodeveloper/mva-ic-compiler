@@ -140,4 +140,8 @@ public class ClassLayout {
 		}
 		return dispatchVector.toString();
 	}
+	
+	public int getLayoutSize(){
+		return nextField;
+	}
 }
