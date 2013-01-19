@@ -433,7 +433,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		newArray.getSize().accept(this,d);		
 		String regSize = resultRegister;
 		String arrHolder = registers.nextRegister();
-		instructions.add(makeComment(""));
+		instructions.add(makeComment(arrHolder+" = new "+newArray.getType().getName()+"[]"));
 		if(!(newArray.getType() instanceof PrimitiveType)){
 			// need to get size of classlayout for this type			
 			int typeFactor = layoutManager.getClassLayout(newArray.getType().getName()).getLayoutSize(); 
@@ -443,8 +443,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		String newArrInst = spec.allocateArray(regSize);
 		
 		instructions.add(spec.Library(newArrInst, arrHolder));
-		resultRegister = arrHolder;
-		
+		resultRegister = arrHolder;		
 		return instructions;
 	}
 
