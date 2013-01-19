@@ -1,8 +1,11 @@
 package IC.lir;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import IC.AST.ASTNode;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
 import IC.AST.Break;
@@ -39,6 +42,9 @@ import IC.AST.VariableLocation;
 import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.While;
+import IC.mySymbolTable.MySymbolRecord;
+import IC.mySymbolTable.MySymbolTable;
+import IC.mySymbolTable.MySymbolRecord.Kind;
 
 public class Translator implements PropagatingVisitor<ClassLayout, List<String>>{
 	LayoutsManager layoutManager;
@@ -46,25 +52,33 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	private List<String> dispatchVectors;
 	private List<String> stringLiterals;
 	private Instructions spec;
+	//String Literals
+	Map<String,String> stringNames;
 	//Register Manager
 	private RegisterManager registers;
 	private String resultRegister;
+	//While labels for continue and break
+	private String whileBeginLoop;
+	private String whileEndLoop;
 	//Naming conventions
 	private int variableUnique;
 	private int parameterUnique;
 	private int fieldUnique;
 	private int labelUnique;
 	
-	private String getVariableTranslationName(String varName){
-		return "v"+(variableUnique++) + varName;
+	private String getVariableTranslationName(String varName,MySymbolTable enclosingScope){
+		int id = enclosingScope.Lookup(varName).getId();
+		return "v"+id + varName;
 	}
 	
-	private String getParameterTranslationName(String parName){
-		return "p"+(parameterUnique++) + parName;
+	private String getParameterTranslationName(String parName,MySymbolTable enclosingScope){
+		int id = enclosingScope.Lookup(parName).getId();
+		return "p"+id + parName;
 	}
 	
-	private String getFieldTranslationName(String fieldName){
-		return "f"+(fieldUnique++) + fieldName;
+	private String getFieldTranslationName(String fieldName,MySymbolTable enclosingScope){
+		int id = enclosingScope.Lookup(fieldName).getId();
+		return "f"+id + fieldName;
 	}	
 	
 	private String getLabelName(String labelName){
@@ -79,11 +93,15 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		variableUnique = 0;
 		parameterUnique = 0;
 		fieldUnique = 0;
+		labelUnique = 0;
 		this.layoutManager = layoutManager;
 		this.stringLiterals = new ArrayList<String>();
 		this.dispatchVectors = new ArrayList<String>();
 		registers = new RegisterManager();
+		stringNames = new HashMap<String, String>();
 		resultRegister = null;
+		whileBeginLoop = null;
+		whileEndLoop = null;
 	}
 
 	@Override
@@ -267,44 +285,86 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		instructions.add(makeComment("While Line " + whileStatement.getLine()));
 		String testLabel = getLabelName("_test_label");
 		String endLabel = getLabelName("_end_label");
+		whileBeginLoop = testLabel;
+		whileEndLoop = endLabel;
+		instructions.add(testLabel+":");
 		instructions.addAll(whileStatement.getCondition().accept(this,d));
+		instructions.add(spec.Compare("0", resultRegister));
+		instructions.add(spec.JumpTrue(endLabel));
+		instructions.addAll(whileStatement.getOperation().accept(this,d));
+		instructions.add(spec.Jump(testLabel));
+		instructions.add(endLabel+":");
 		return instructions;
 	}
 
 	@Override
 	public List<String> visit(Break breakStatement, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(spec.Jump(whileEndLoop));
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(Continue continueStatement, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(spec.Jump(whileBeginLoop));
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(StatementsBlock statementsBlock, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		for(Statement s : statementsBlock.getStatements()){
+			instructions.addAll(s.accept(this,d));
+		}
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(LocalVariable localVariable, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.addAll(localVariable.getType().accept(this,d));
+		if(localVariable.hasInitValue()){
+			//int x = 5;
+			instructions.addAll(localVariable.getInitValue().accept(this,d));
+			String name = getVariableTranslationName(localVariable.getName(),localVariable.enclosingScope());
+			instructions.add(spec.Move(resultRegister, name));
+		}
+		//int x - nothing...
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(VariableLocation location, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		String externalResult = null;
+		if(location.isExternal()){
+			instructions.addAll(location.getLocation().accept(this,d));
+			externalResult = resultRegister;
+		}else{
+			MySymbolRecord rec = location.enclosingScope().Lookup(location.getName());
+			if(rec == null) return instructions;
+		}
+		
+		if(rec.getKind() == Kind.Field){
+			//Field
+			String name = getFieldTranslationName(location.getName(), location.enclosingScope());
+			if(externalResult != null){
+				instructions.add(spec.MoveFieldLoad(name,, registers.nextRegister()));
+			}
+		}else if(rec.getKind() == Kind.Local_Variable){
+			//Local Variable	
+		}
+		String name = getVariableTranslationName(location.getName(),location.enclosingScope());
+		instructions.add(spec.Move(name,registers.nextRegister()));
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(ArrayLocation location, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		
+		return instructions;
 	}
 
 	@Override
