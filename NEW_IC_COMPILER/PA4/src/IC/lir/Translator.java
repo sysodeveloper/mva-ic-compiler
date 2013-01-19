@@ -125,6 +125,8 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	public List<String> visit(VirtualMethod method, ClassLayout d) {
 		List<String> instructions = new ArrayList<String>();
 		instructions.add(makeComment("Virtual Method " + method.getName()));
+		/* Allocate Registers */
+		registers.addAllocator();
 		/* Method Label */
 		instructions.add(d.makeSymbolicName(method.getName()+":"));
 		/* Method Translation */
@@ -139,6 +141,8 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		if(method.getReturnType().getName().compareTo("void") == 0){
 			instructions.add("Return 9999");
 		}
+		/* Free Register Allocated */
+		registers.freeRegisters();
 		return instructions;
 	}
 
