@@ -13,6 +13,7 @@ import IC.AST.Assignment;
 import IC.AST.Break;
 import IC.AST.CallStatement;
 import IC.AST.Continue;
+import IC.AST.Expression;
 import IC.AST.ExpressionBlock;
 import IC.AST.Field;
 import IC.AST.Formal;
@@ -51,6 +52,7 @@ import IC.mySymbolTable.MySymbolRecord.Kind;
 public class Translator implements PropagatingVisitor<ClassLayout, List<String>>{
 	LayoutsManager layoutManager;
 	//Global instructions
+	private Map<String,String> dispatchNames;
 	private List<String> dispatchVectors;
 	private List<String> stringLiterals;
 	private Instructions spec;
@@ -110,6 +112,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		this.dispatchVectors = new ArrayList<String>();
 		registers = new RegisterManager();
 		stringNames = new HashMap<String, String>();
+		dispatchNames = new HashMap<String, String>();
 		resultRegister = null;
 		whileBeginLoop = null;
 		whileEndLoop = null;
@@ -142,6 +145,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		/* Class Dispatch Vector */
 		if(cl.hasVirtaulMethos()){
 			dispatchVectors.add(cl.printDispatchVector());
+			dispatchNames.put(icClass.getName(), cl.printDispatchVector());
 		}
 		/* Class Translation */
 		for(Field f : icClass.getFields()){
@@ -410,13 +414,29 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	@Override
 	public List<String> visit(VirtualCall call, ClassLayout d) {
 		// TODO Auto-generated method stub
+		List<String> instructions = new ArrayList<String>();
+		List<String> regParams = new ArrayList<String>();
+		String resReg = registers.nextRegister();
+		for(Expression arg :call.getArguments()){
+			instructions.addAll((arg.accept(this, d)));
+			regParams.add(resultRegister);
+		}
+		
+		if(!call.isExternal() || call.getLocation() instanceof This){
+			int call_offset = d.getMethodOffset(call.getName());
+			String dvReg = registers.nextRegister();			
+			instructions.add(spec.Move("_DV_"+d.getClassName(), dvReg));
+			String callExp = dvReg+"."+Integer.toString(call_offset)+"(";
+			// now need to know the name of every parameter to this function - continue tomorrow
+		}
 		return null;
 	}
 
 	@Override
 	public List<String> visit(This thisExpression, ClassLayout d) {
 		// TODO Auto-generated method stub
-		return null;
+	
+		return new ArrayList<String>();
 	}
 
 	@Override
