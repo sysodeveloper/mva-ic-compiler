@@ -28,7 +28,7 @@ public class LayoutsManager {
 				for(Entry<String,MySymbolRecord> entry : child.getEntries().entrySet()){
 					if(entry.getValue().getKind()==Kind.Field)
 						newClass.addField(entry.getKey());
-					else
+					if(entry.getValue().getKind()==Kind.Virtual_Method)
 						newClass.addMethod(entry.getKey());
 				}
 				
