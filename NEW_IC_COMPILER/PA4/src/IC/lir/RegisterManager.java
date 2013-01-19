@@ -9,10 +9,11 @@ import java.util.Stack;
 public class RegisterManager {
 	ArrayList<Boolean> registers;
 	Stack<List<Integer>> allocators;
-	
+	private String lastRegister;
 	public RegisterManager(){
 		registers = new ArrayList<Boolean>();
 		allocators = new Stack<List<Integer>>();
+		lastRegister = null;
 	}
 	
 	public void addAllocator(){
@@ -34,7 +35,9 @@ public class RegisterManager {
 		registers.add(false);
 		//add to allocator stack
 		allocators.peek().add(r);
-		return registerDescription(r);
+		//save last register
+		lastRegister = registerDescription(r);
+		return lastRegister;
 	}
 	
 	public void freeRegisters(){
@@ -59,6 +62,10 @@ public class RegisterManager {
 				this.registers.set(regNumber, true);
 			}
 		}
+	}
+	
+	public String lastRegisterUsed(){
+		return lastRegister;
 	}
 	
 	private String registerDescription(int registerNumber){
