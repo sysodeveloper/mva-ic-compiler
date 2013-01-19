@@ -63,6 +63,5 @@ public class RegisterManager {
 	
 	private String registerDescription(int registerNumber){
 		return "R"+registerNumber;
-		
 	}
 }
