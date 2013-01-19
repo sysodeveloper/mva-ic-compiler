@@ -128,7 +128,7 @@ public class ClassLayout {
 		return this.methodToOffset.size() > 0;
 	}
 	
-	public StringBuffer printDispatchVector(){
+	public String printDispatchVector(){
 		StringBuffer dispatchVector = new StringBuffer();
 		if(hasVirtaulMethos()){
 			dispatchVector.append("_DV_"+this.className+":");
@@ -138,6 +138,6 @@ public class ClassLayout {
 			}
 			dispatchVector.deleteCharAt(dispatchVector.length()-1);
 		}
-		return dispatchVector;
+		return dispatchVector.toString();
 	}
 }

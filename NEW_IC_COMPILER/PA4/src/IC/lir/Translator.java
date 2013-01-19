@@ -62,8 +62,8 @@ public class Translator implements PropagatingVisitor<ClassLayout, TranslationIn
 		return "f"+(fieldUnique++) + fieldName;
 	}	
 	//Comments
-	private StringBuffer makeComment(String str){ 
-		return new StringBuffer("#"+str);
+	private String makeComment(String str){ 
+		return "#"+str;
 	}
 	//Start of visitor
 	public Translator(LayoutsManager layoutManager){
@@ -131,8 +131,12 @@ public class Translator implements PropagatingVisitor<ClassLayout, TranslationIn
 		TranslationInfo childInfo = null;
 		tInfo.instructions.add(makeComment("Virtual Method " + method.getName()));
 		/* Method Label */
-		tInfo.instructions.add(new StringBuffer(d.makeSymbolicName(method.getName())+":"));
+		tInfo.instructions.add(d.makeSymbolicName(method.getName()+":"));
 		/* Method Translation */
+		childInfo = method.getType().accept(this,d);
+		tInfo.instructions.addAll(childInfo.instructions);
+		childInfo = null;
+		
 		for(Formal f : method.getFormals()){
 			childInfo = f.accept(this,d);
 			childInfo.instructions.addAll(childInfo.instructions);
@@ -144,7 +148,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, TranslationIn
 		}
 		/* Method Return If Void */
 		if(method.getReturnType().getName().compareTo("void") == 0){
-			tInfo.instructions.add("Return")
+			tInfo.instructions.add("Return 9999");
 		}
 		return tInfo;
 	}
