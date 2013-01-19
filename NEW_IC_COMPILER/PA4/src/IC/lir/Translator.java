@@ -421,8 +421,14 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 
 	@Override
 	public List<String> visit(NewClass newClass, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		String holder = registers.nextRegister();		
+		int classSize = layoutManager.getClassLayout(newClass.getName()).getLayoutSize();
+		String newClassInst = spec.allocateObject(Integer.toString(classSize));
+		instructions.add(makeComment(holder+" = new "+newClass.getName()+"()"));
+		instructions.add(spec.Library(newClassInst, holder));
+		resultRegister = holder;
+		return instructions;
 	}
 
 	@Override
