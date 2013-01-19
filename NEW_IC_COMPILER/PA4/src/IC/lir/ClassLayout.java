@@ -9,7 +9,7 @@ public class ClassLayout {
 	private String className;
 	private Map<String,Integer> fieldToOffset;
 	private Map<String,Integer> methodToOffset;
-	
+	private ClassLayout superClassLayout;
 	//for new class without superclasses
 	
 	
@@ -25,7 +25,8 @@ public class ClassLayout {
 	
 	public ClassLayout(String className, ClassLayout superClassLayout ){				
 		initiallize( className);		
-		if(superClassLayout!=null){			
+		if(superClassLayout!=null){		
+			this.superClassLayout = superClassLayout;
 			this.setFieldToOffset(superClassLayout.getFieldToOffset());
 			this.setFieldOffset(superClassLayout.getFieldOffset());
 			this.setMethodToOffset(superClassLayout.getMethodToOffset());
@@ -33,7 +34,9 @@ public class ClassLayout {
 		}
 	}
 
-	
+	public ClassLayout getSuperClassLayout(){
+		return this.superClassLayout;
+	}
 	
 	public void addField(String fieldName){
 		fieldToOffset.put(fieldName, nextField++);

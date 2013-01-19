@@ -38,7 +38,15 @@ import IC.AST.VirtualMethod;
 import IC.AST.While;
 
 public class Translator implements PropagatingVisitor<Object, List<StringBuffer>>{
-
+	private class TranslationInfo{
+		public ClassLayout classLayout;
+		public List<Integer> freeRegisters;
+		
+		public TranslationInfo(ClassLayout cl, List<Integer> fr) {
+			this.classLayout = cl;
+			this.freeRegisters = fr;
+		}
+	}
 	@Override
 	public List<StringBuffer> visit(Program program, Object d) {
 		// TODO Auto-generated method stub
@@ -167,7 +175,7 @@ public class Translator implements PropagatingVisitor<Object, List<StringBuffer>
 
 	@Override
 	public List<StringBuffer> visit(VirtualCall call, Object d) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
