@@ -1,5 +1,7 @@
 package IC.lir;
 
+import IC.BinaryOps;
+
 public class Instructions {
 	public Instructions(){
 		
