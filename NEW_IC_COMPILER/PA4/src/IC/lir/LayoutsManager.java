@@ -10,7 +10,10 @@ import IC.mySymbolTable.MySymbolTable;
 
 public class LayoutsManager {
 	private List<ClassLayout> classLayouts;
-	
+	//Maybe we need to save classlayouts in a map? classname -> classlayout?
+	//we need for the translation to get each class it's classlayout and pass it to each accept
+	//for now i've added a function that gets a class name and returns it's layout, we can keep it
+	//if we want
 	public LayoutsManager(){
 		classLayouts = new ArrayList<ClassLayout>();
 	}
@@ -39,6 +42,15 @@ public class LayoutsManager {
 
 	public List<ClassLayout> getClassLayouts() {
 		return classLayouts;
+	}
+	
+	public ClassLayout getClassLayout(String className){
+		for(ClassLayout cl : classLayouts){
+			if(cl.getClassName().compareTo(className) == 0){
+				return cl;
+			}
+		}
+		return null;
 	}
 	
 	public void printLayouts(){
