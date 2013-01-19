@@ -16,7 +16,8 @@ public class ClassLayout {
 	public void initiallize(String className){
 		fieldToOffset = new LinkedHashMap<String, Integer>();
 		methodToOffset = new LinkedHashMap<String, Integer>();
-		nextField=0;
+		//0 is dispatch vector
+		nextField=1;
 		nextMethod=0;	
 		this.className=className;
 	}
@@ -104,5 +105,18 @@ public class ClassLayout {
 		this.methodToOffset.putAll(methodToOffset);
 	}
 	
+	public int getFieldOffset(String fieldName){
+		if(fieldToOffset.containsKey(fieldName)){
+			return fieldToOffset.get(fieldName);
+		}
+		return -1;
+	}
 	
+	public int getMethodOffset(String methodName){
+		String methodSymbolicName = makeSymbolicName(methodName);
+		if(fieldToOffset.containsKey(methodSymbolicName)){
+			return fieldToOffset.get(methodSymbolicName);
+		}
+		return -1;
+	}	
 }
