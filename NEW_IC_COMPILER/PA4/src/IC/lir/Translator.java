@@ -357,6 +357,9 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		if(location.isExternal()){
 			instructions.addAll(location.getLocation().accept(this,d));
 			externalResult = resultRegister;
+			//Get the correct class layout
+			
+			
 		}else{
 			MySymbolRecord rec = location.enclosingScope().Lookup(location.getName());
 			if(rec == null) return instructions;
@@ -370,10 +373,13 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 				assignmentKind = Kind.Field;
 			}else if(rec.getKind() == Kind.Local_Variable){
 				//Local variable
-				String name = getVariableTranslationName(location.getName(), location.enclosingScope());
+				if(!assignmentLeft){
+					String name = getVariableTranslationName(location.getName(), location.enclosingScope());
+					instructions.add(spec.Move(name, registers.nextRegister()));
+					resultRegister = registers.lastRegisterUsed();
+				}
 				assignmentKind = Kind.Local_Variable;
 			}
-
 		}
 		
 
