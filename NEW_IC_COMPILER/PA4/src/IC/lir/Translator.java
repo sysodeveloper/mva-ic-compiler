@@ -40,11 +40,13 @@ import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.While;
 
-public class Translator implements PropagatingVisitor<ClassLayout, TranslationInfo>{
+public class Translator implements PropagatingVisitor<ClassLayout, List<String>>{
 	LayoutsManager layoutManager;
 	//Global instructions
-	private TranslationInfo dispatchVectors;
-	private TranslationInfo stringLiterals;
+	private List<String> dispatchVectors;
+	private List<String> stringLiterals;
+	//Register Manager
+	private RegisterManager registers;
 	//Naming conventions
 	private int variableUnique;
 	private int parameterUnique;
@@ -71,259 +73,246 @@ public class Translator implements PropagatingVisitor<ClassLayout, TranslationIn
 		parameterUnique = 0;
 		fieldUnique = 0;
 		this.layoutManager = layoutManager;
-		this.stringLiterals = new TranslationInfo();
-		this.dispatchVectors = new TranslationInfo();
+		this.stringLiterals = new ArrayList<String>();
+		this.dispatchVectors = new ArrayList<String>();
+		registers = new RegisterManager();
 	}
 
 	@Override
-	public TranslationInfo visit(Program program, ClassLayout d) {
-		TranslationInfo tInfo = new TranslationInfo();
-		TranslationInfo classInfo = null;
+	public List<String> visit(Program program, ClassLayout d) {
+		List<String> instructions = new ArrayList<String>();
 		/* Program Translation */
-		tInfo.instructions.add(makeComment("A new program begins..."));
-		tInfo.instructions.add(makeComment(""));
-		tInfo.instructions.add(makeComment(""));
-		tInfo.instructions.add(makeComment("String Literals"));
-		tInfo.instructions.addAll(stringLiterals.instructions);
-		tInfo.instructions.add(makeComment("Dispatch Vectors"));
-		tInfo.instructions.addAll(dispatchVectors.instructions);
+		instructions.add(makeComment("A new program begins..."));
+		instructions.add(makeComment(""));
+		instructions.add(makeComment(""));
+		instructions.add(makeComment("String Literals"));
+		instructions.addAll(stringLiterals);
+		instructions.add(makeComment("Dispatch Vectors"));
+		instructions.addAll(dispatchVectors);
 		for(ICClass c : program.getClasses()){
-			classInfo = c.accept(this,d);
-			tInfo.instructions.addAll(classInfo.instructions);
+			instructions.addAll(c.accept(this,d));
 		}
-		return tInfo;
+		return instructions;
 	}
 
 	@Override
-	public TranslationInfo visit(ICClass icClass, ClassLayout d) {
-		TranslationInfo tInfo = new TranslationInfo();
-		TranslationInfo childInfo = null;
-		tInfo.instructions.add(makeComment("Class " + icClass.getName()));
+	public List<String> visit(ICClass icClass, ClassLayout d) {
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(makeComment("Class " + icClass.getName()));
 		/* Class layout */
 		ClassLayout cl =  layoutManager.getClassLayout(icClass.getName());
 		/* Class Dispatch Vector */
 		if(cl.hasVirtaulMethos()){
-			dispatchVectors.instructions.add(cl.printDispatchVector());
+			dispatchVectors.add(cl.printDispatchVector());
 		}
 		/* Class Translation */
 		for(Field f : icClass.getFields()){
-			childInfo = f.accept(this,cl);
-			tInfo.instructions.addAll(childInfo.instructions);
+			instructions.addAll(f.accept(this,cl));
 		}
-		childInfo = null;
 		for(Method m : icClass.getMethods()){
-			childInfo = m.accept(this,cl);
-			tInfo.instructions.addAll(childInfo.instructions);
+			instructions.addAll(m.accept(this,cl));
 			/* Registers are freed after each method */
 		}
-		return tInfo;		
+		return instructions;		
 	}
 
 	@Override
-	public TranslationInfo visit(Field field, ClassLayout d) {
-		TranslationInfo tInfo = new TranslationInfo();
-		return tInfo;
+	public List<String> visit(Field field, ClassLayout d) {
+		return new ArrayList<String>();
 	}
 
 	@Override
-	public TranslationInfo visit(VirtualMethod method, ClassLayout d) {
-		TranslationInfo tInfo = new TranslationInfo();
-		TranslationInfo childInfo = null;
-		tInfo.instructions.add(makeComment("Virtual Method " + method.getName()));
+	public List<String> visit(VirtualMethod method, ClassLayout d) {
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(makeComment("Virtual Method " + method.getName()));
 		/* Method Label */
-		tInfo.instructions.add(d.makeSymbolicName(method.getName()+":"));
+		instructions.add(d.makeSymbolicName(method.getName()+":"));
 		/* Method Translation */
-		childInfo = method.getType().accept(this,d);
-		tInfo.instructions.addAll(childInfo.instructions);
-		childInfo = null;
-		
+		instructions.addAll(method.getType().accept(this,d));
 		for(Formal f : method.getFormals()){
-			childInfo = f.accept(this,d);
-			childInfo.instructions.addAll(childInfo.instructions);
+			instructions.addAll(f.accept(this,d));
 		}
-		childInfo = null;
 		for(Statement s : method.getStatements()){
-			childInfo = s.accept(this,d);
-			tInfo.instructions.addAll(childInfo.instructions);
+			instructions.addAll(s.accept(this,d));
 		}
 		/* Method Return If Void */
 		if(method.getReturnType().getName().compareTo("void") == 0){
-			tInfo.instructions.add("Return 9999");
+			instructions.add("Return 9999");
 		}
-		return tInfo;
+		return instructions;
 	}
 
 	@Override
-	public TranslationInfo visit(StaticMethod method, ClassLayout d) {
+	public List<String> visit(StaticMethod method, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(LibraryMethod method, ClassLayout d) {
+	public List<String> visit(LibraryMethod method, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(Formal formal, ClassLayout d) {
+	public List<String> visit(Formal formal, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(PrimitiveType type, ClassLayout d) {
+	public List<String> visit(PrimitiveType type, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(UserType type, ClassLayout d) {
+	public List<String> visit(UserType type, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(Assignment assignment, ClassLayout d) {
+	public List<String> visit(Assignment assignment, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(CallStatement callStatement, ClassLayout d) {
+	public List<String> visit(CallStatement callStatement, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(Return returnStatement, ClassLayout d) {
+	public List<String> visit(Return returnStatement, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(If ifStatement, ClassLayout d) {
+	public List<String> visit(If ifStatement, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(While whileStatement, ClassLayout d) {
+	public List<String> visit(While whileStatement, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(Break breakStatement, ClassLayout d) {
+	public List<String> visit(Break breakStatement, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(Continue continueStatement, ClassLayout d) {
+	public List<String> visit(Continue continueStatement, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(StatementsBlock statementsBlock, ClassLayout d) {
+	public List<String> visit(StatementsBlock statementsBlock, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(LocalVariable localVariable, ClassLayout d) {
+	public List<String> visit(LocalVariable localVariable, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(VariableLocation location, ClassLayout d) {
+	public List<String> visit(VariableLocation location, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(ArrayLocation location, ClassLayout d) {
+	public List<String> visit(ArrayLocation location, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(StaticCall call, ClassLayout d) {
+	public List<String> visit(StaticCall call, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(VirtualCall call, ClassLayout d) {
+	public List<String> visit(VirtualCall call, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(This thisExpression, ClassLayout d) {
+	public List<String> visit(This thisExpression, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(NewClass newClass, ClassLayout d) {
+	public List<String> visit(NewClass newClass, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(NewArray newArray, ClassLayout d) {
+	public List<String> visit(NewArray newArray, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(Length length, ClassLayout d) {
+	public List<String> visit(Length length, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(MathBinaryOp binaryOp, ClassLayout d) {
+	public List<String> visit(MathBinaryOp binaryOp, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(LogicalBinaryOp binaryOp, ClassLayout d) {
+	public List<String> visit(LogicalBinaryOp binaryOp, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(MathUnaryOp unaryOp, ClassLayout d) {
+	public List<String> visit(MathUnaryOp unaryOp, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(LogicalUnaryOp unaryOp, ClassLayout d) {
+	public List<String> visit(LogicalUnaryOp unaryOp, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(Literal literal, ClassLayout d) {
+	public List<String> visit(Literal literal, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(ExpressionBlock expressionBlock, ClassLayout d) {
+	public List<String> visit(ExpressionBlock expressionBlock, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TranslationInfo visit(MethodType methodType, ClassLayout d) {
+	public List<String> visit(MethodType methodType, ClassLayout d) {
 		// TODO Auto-generated method stub
 		return null;
-	}
+	}	
 }
