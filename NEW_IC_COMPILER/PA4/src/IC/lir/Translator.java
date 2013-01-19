@@ -344,19 +344,17 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		}else{
 			MySymbolRecord rec = location.enclosingScope().Lookup(location.getName());
 			if(rec == null) return instructions;
+			if(rec.getKind() == Kind.Field){
+				//Field - Class Layout is d
+				String name = getFieldTranslationName(location.getName(), location.enclosingScope());
+				instructions.add(spec.MoveFieldLoad(name, d.getFieldOffset(location.getName())+"", registers.nextRegister()));
+			}else if(rec.getKind() == Kind.Local_Variable){
+				//Local variable
+			}
+
 		}
 		
-		if(rec.getKind() == Kind.Field){
-			//Field
-			String name = getFieldTranslationName(location.getName(), location.enclosingScope());
-			if(externalResult != null){
-				instructions.add(spec.MoveFieldLoad(name,, registers.nextRegister()));
-			}
-		}else if(rec.getKind() == Kind.Local_Variable){
-			//Local Variable	
-		}
-		String name = getVariableTranslationName(location.getName(),location.enclosingScope());
-		instructions.add(spec.Move(name,registers.nextRegister()));
+
 		return instructions;
 	}
 
