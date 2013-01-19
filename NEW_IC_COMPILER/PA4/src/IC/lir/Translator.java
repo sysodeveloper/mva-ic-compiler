@@ -53,6 +53,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	private int variableUnique;
 	private int parameterUnique;
 	private int fieldUnique;
+	private int labelUnique;
 	
 	private String getVariableTranslationName(String varName){
 		return "v"+(variableUnique++) + varName;
@@ -65,6 +66,10 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	private String getFieldTranslationName(String fieldName){
 		return "f"+(fieldUnique++) + fieldName;
 	}	
+	
+	private String getLabelName(String labelName){
+		return labelName+(labelUnique++);
+	}
 	//Comments
 	private String makeComment(String str){ 
 		return "#"+str;
@@ -184,6 +189,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	@Override
 	public List<String> visit(Formal formal, ClassLayout d) {
 		List<String> instructions = new ArrayList<String>();
+		instructions.addAll(formal.getType().accept(this,d));
 		return instructions;
 	}
 
@@ -202,36 +208,67 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	@Override
 	public List<String> visit(Assignment assignment, ClassLayout d) {
 		List<String> instructions = new ArrayList<String>();
+		instructions.add(makeComment("Assignment Line " + assignment.getLine()));
 		instructions.addAll(assignment.getAssignment().accept(this,d));
 		String exprResultReg = resultRegister;
 		instructions.addAll(assignment.getVariable().accept(this,d));
 		String varResultReg = resultRegister;
-		instructions.add(spec.Move(resultRegister, varResultReg));
+		instructions.add(spec.Move(exprResultReg, varResultReg));
 		return instructions;
 	}
 
 	@Override
 	public List<String> visit(CallStatement callStatement, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.addAll(callStatement.getCall().accept(this,d));
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(Return returnStatement, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(makeComment("Return Line " + returnStatement.getLine()));
+		if(returnStatement.hasValue()){
+			instructions.addAll(returnStatement.getValue().accept(this,d));
+			instructions.add(spec.Return(resultRegister));
+		}else{
+			instructions.add(spec.Return("9999"));
+		}
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(If ifStatement, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(makeComment("If Line " + ifStatement.getLine()));
+		instructions.addAll(ifStatement.getCondition().accept(this,d));
+		instructions.add(spec.Compare("0", resultRegister));
+		if(ifStatement.hasElse()){
+			String falseLabel = getLabelName("_false_label");
+			String endLabel = getLabelName("_end_label");
+			instructions.add(spec.JumpTrue(falseLabel));
+			instructions.addAll(ifStatement.getOperation().accept(this,d));
+			instructions.add(spec.Jump(endLabel));
+			instructions.add(falseLabel);
+			instructions.addAll(ifStatement.getElseOperation().accept(this,d));
+			instructions.add(endLabel+":");
+		}else{
+			String endLabel = getLabelName("_end_label");
+			instructions.add(spec.JumpTrue(endLabel));
+			instructions.addAll(ifStatement.getOperation().accept(this,d));
+			instructions.add(getLabelName(endLabel+":"));
+		}
+		return instructions;	
 	}
 
 	@Override
 	public List<String> visit(While whileStatement, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(makeComment("While Line " + whileStatement.getLine()));
+		String testLabel = getLabelName("_test_label");
+		String endLabel = getLabelName("_end_label");
+		instructions.addAll(whileStatement.getCondition().accept(this,d));
+		return instructions;
 	}
 
 	@Override
