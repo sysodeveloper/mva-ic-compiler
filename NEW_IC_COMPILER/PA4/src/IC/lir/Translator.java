@@ -60,6 +60,9 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	//While labels for continue and break
 	private String whileBeginLoop;
 	private String whileEndLoop;
+	//Assignment
+	private Kind assignmentKind;
+	private boolean assignmentLeft;
 	//Naming conventions
 	private int variableUnique;
 	private int parameterUnique;
@@ -102,6 +105,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		resultRegister = null;
 		whileBeginLoop = null;
 		whileEndLoop = null;
+		assignmentLeft = false;
 	}
 
 	@Override
@@ -226,12 +230,23 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	@Override
 	public List<String> visit(Assignment assignment, ClassLayout d) {
 		List<String> instructions = new ArrayList<String>();
+		Kind leftSide, rightSide;
 		instructions.add(makeComment("Assignment Line " + assignment.getLine()));
 		instructions.addAll(assignment.getAssignment().accept(this,d));
+		rightSide = assignmentKind;
 		String exprResultReg = resultRegister;
+		assignmentLeft = true;
 		instructions.addAll(assignment.getVariable().accept(this,d));
+		assignmentLeft = false;
+		leftSide = assignmentKind;
 		String varResultReg = resultRegister;
-		instructions.add(spec.Move(exprResultReg, varResultReg));
+		switch(assignmentKind){
+		case Local_Variable:
+			instructions.add(spec.Move(exprResultReg, varResultReg));
+			break;
+		case Field:
+			break;
+		}
 		return instructions;
 	}
 
@@ -331,6 +346,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 			instructions.add(spec.Move(resultRegister, name));
 		}
 		//int x - nothing...
+		assignmentKind = Kind.Local_Variable;
 		return instructions;
 	}
 
@@ -346,10 +362,16 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 			if(rec == null) return instructions;
 			if(rec.getKind() == Kind.Field){
 				//Field - Class Layout is d
-				String name = getFieldTranslationName(location.getName(), location.enclosingScope());
-				instructions.add(spec.MoveFieldLoad(name, d.getFieldOffset(location.getName())+"", registers.nextRegister()));
+				if(!assignmentLeft){
+					String name = getFieldTranslationName(location.getName(), location.enclosingScope());
+					instructions.add(spec.MoveFieldLoad(name,d.getFieldOffset(location.getName())+"",registers.nextRegister()));
+					resultRegister = registers.lastRegisterUsed();
+				}
+				assignmentKind = Kind.Field;
 			}else if(rec.getKind() == Kind.Local_Variable){
 				//Local variable
+				String name = getVariableTranslationName(location.getName(), location.enclosingScope());
+				assignmentKind = Kind.Local_Variable;
 			}
 
 		}
