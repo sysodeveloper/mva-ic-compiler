@@ -48,6 +48,7 @@ import IC.AST.While;
 import IC.mySymbolTable.MySymbolRecord;
 import IC.mySymbolTable.MySymbolTable;
 import IC.mySymbolTable.MySymbolRecord.Kind;
+import IC.myTypes.MyType;
 
 public class Translator implements PropagatingVisitor<ClassLayout, List<String>>{
 	LayoutsManager layoutManager;
@@ -370,6 +371,12 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 			instructions.addAll(location.getLocation().accept(this,d));
 			externalResult = resultRegister;
 			//Get the correct class layout
+			MyType t = location.getLocation().getTypeFromTable();
+			if(t == null){
+				System.out.println("Huge error in linking types to nodes!");
+				return null;
+			}
+			ClassLayout cl = layoutManager.getClassLayout(t.getName());
 			
 			
 		}else{
