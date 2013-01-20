@@ -68,12 +68,15 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	//Assignment
 	private Kind assignmentKind;
 	private boolean assignmentLeft;
+	private int assignmentLeftOffset;
 	//Naming conventions
 	private int variableUnique;
 	private int parameterUnique;
 	private int fieldUnique;
 	private int labelUnique;
 	private int stringLiteralUnique;
+	//Global symbol table
+	MySymbolTable globalScope;
 	
 	private String getVariableTranslationName(String varName,MySymbolTable enclosingScope){
 		int id = enclosingScope.Lookup(varName).getId();
@@ -118,6 +121,8 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		whileBeginLoop = null;
 		whileEndLoop = null;
 		assignmentLeft = false;
+		globalScope = null;
+		assignmentLeftOffset = -1;
 	}
 
 	@Override
@@ -134,6 +139,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		for(ICClass c : program.getClasses()){
 			instructions.addAll(c.accept(this,d));
 		}
+		globalScope = program.enclosingScope(); 
 		return instructions;
 	}
 
@@ -253,11 +259,12 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		assignmentLeft = false;
 		leftSide = assignmentKind;
 		String varResultReg = resultRegister;
-		switch(assignmentKind){
+		switch(leftSide){
 		case Local_Variable:
 			instructions.add(spec.Move(exprResultReg, varResultReg));
 			break;
 		case Field:
+			instructions.add(spec.MoveFieldStore(exprResultReg, varResultReg, assignmentLeftOffset+""));
 			break;
 		}
 		return instructions;
@@ -368,6 +375,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		List<String> instructions = new ArrayList<String>();
 		String externalResult = null;
 		if(location.isExternal()){
+			//Must be a field
 			instructions.addAll(location.getLocation().accept(this,d));
 			externalResult = resultRegister;
 			//Get the correct class layout
@@ -377,8 +385,20 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 				return null;
 			}
 			ClassLayout cl = layoutManager.getClassLayout(t.getName());
-			
-			
+			//find the scope that the cl opens
+			MySymbolTable externalTable = globalScope.getChildTable(cl.getClassName());
+			if(externalTable == null){
+				System.out.println("******************* Get Child Table failed! *******************");
+				return null;
+			}
+			//find offset
+			if(!assignmentLeft){
+				String name = getFieldTranslationName(location.getName(), externalTable);
+				instructions.add(spec.MoveFieldLoad(name,cl.getFieldOffset(location.getName())+"",registers.nextRegister()));
+				resultRegister = registers.lastRegisterUsed();				
+			}
+			assignmentLeftOffset = cl.getFieldOffset(location.getName());
+			assignmentKind = Kind.Field;
 		}else{
 			MySymbolRecord rec = location.enclosingScope().Lookup(location.getName());
 			if(rec == null) return instructions;
@@ -389,6 +409,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 					instructions.add(spec.MoveFieldLoad(name,d.getFieldOffset(location.getName())+"",registers.nextRegister()));
 					resultRegister = registers.lastRegisterUsed();
 				}
+				assignmentLeftOffset = d.getFieldOffset(location.getName());
 				assignmentKind = Kind.Field;
 			}else if(rec.getKind() == Kind.Local_Variable){
 				//Local variable
@@ -414,8 +435,9 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 
 	@Override
 	public List<String> visit(StaticCall call, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		
+		return instructions;
 	}
 
 	@Override
@@ -584,13 +606,13 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 
 	@Override
 	public List<String> visit(ExpressionBlock expressionBlock, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		return instructions;
 	}
 
 	@Override
 	public List<String> visit(MethodType methodType, ClassLayout d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		return instructions;
 	}	
 }

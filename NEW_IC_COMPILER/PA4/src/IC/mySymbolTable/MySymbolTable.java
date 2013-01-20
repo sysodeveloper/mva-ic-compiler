@@ -163,4 +163,16 @@ public class MySymbolTable {
 		}
 		return output.toString();
 	}
+	
+	public MySymbolTable getChildTable(String description){
+		MySymbolTable ret = null;
+		for(MySymbolTable child : this.getChildren()){
+			if(child.getDescription().compareTo(description) == 0){
+				return child;
+			}else{
+				return child.getChildTable(description);
+			}
+		}
+		return ret;
+	}
 }
