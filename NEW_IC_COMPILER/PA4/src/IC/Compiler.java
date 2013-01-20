@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.List;
 
 import java_cup.runtime.Symbol;
 import IC.AST.GraphEdgesPrinter;
@@ -19,6 +20,7 @@ import IC.Parser.LibraryParser;
 import IC.Parser.Parser;
 import IC.Parser.SyntaxError;
 import IC.lir.LayoutsManager;
+import IC.lir.Translator;
 import IC.mySymbolTable.BuildMySymbolTable;
 import IC.mySymbolTable.MySymbolTablePrinter;
 import IC.myTypes.MyTypeTable;
@@ -102,12 +104,15 @@ public class Compiler {
 				LayoutsManager lm = new LayoutsManager();
 				lm.createClassLayouts(null, ((Program)root).enclosingScope());
 				lm.printLayouts();
+				Translator trans = new Translator(lm);
+				System.out.println("***************************************************************");
+				List<String> lst = trans.visit((Program)root,null);
 				
 			}else{
 				return;
 			}
 		}catch(Exception exp){
-			
+			exp.printStackTrace();
 		}
 		//check if needs to dump symbol table and type table.
 		if(types == null) return;
