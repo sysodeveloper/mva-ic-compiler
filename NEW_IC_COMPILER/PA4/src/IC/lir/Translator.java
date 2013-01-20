@@ -76,7 +76,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	private int labelUnique;
 	private int stringLiteralUnique;
 	//Global symbol table
-	MySymbolTable globalScope;
+	private MySymbolTable globalScope;
 	
 	private String getVariableTranslationName(String varName,MySymbolTable enclosingScope){
 		int id = enclosingScope.Lookup(varName).getId();
@@ -127,6 +127,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 
 	@Override
 	public List<String> visit(Program program, ClassLayout d) {
+		globalScope = program.enclosingScope();
 		List<String> instructions = new ArrayList<String>();
 		/* Program Translation */
 		instructions.add(makeComment("A new program begins..."));
@@ -139,7 +140,6 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		for(ICClass c : program.getClasses()){
 			instructions.addAll(c.accept(this,d));
 		}
-		globalScope = program.enclosingScope(); 
 		return instructions;
 	}
 
@@ -386,6 +386,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 			}
 			ClassLayout cl = layoutManager.getClassLayout(t.getName());
 			//find the scope that the cl opens
+			String className = cl.getClassName();
 			MySymbolTable externalTable = globalScope.getChildTable(cl.getClassName());
 			if(externalTable == null){
 				System.out.println("******************* Get Child Table failed! *******************");
