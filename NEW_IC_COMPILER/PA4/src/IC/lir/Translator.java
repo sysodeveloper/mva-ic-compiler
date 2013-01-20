@@ -123,6 +123,7 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		assignmentLeft = false;
 		globalScope = null;
 		assignmentLeftOffset = -1;
+		spec = new Instructions();
 	}
 
 	@Override
@@ -261,12 +262,13 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 		String varResultReg = resultRegister;
 		switch(leftSide){
 		case Local_Variable:
-			instructions.add(spec.Move(exprResultReg, varResultReg));
+			instructions.add(spec.Move(exprResultReg, registers.nextRegister()));
 			break;
 		case Field:
-			instructions.add(spec.MoveFieldStore(exprResultReg, varResultReg, assignmentLeftOffset+""));
+			instructions.add(spec.MoveFieldStore(exprResultReg, registers.nextRegister(), assignmentLeftOffset+""));
 			break;
 		}
+		resultRegister = registers.lastRegisterUsed();
 		return instructions;
 	}
 
@@ -385,6 +387,9 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 				return null;
 			}
 			ClassLayout cl = layoutManager.getClassLayout(t.getName());
+			if(location.getLocation() instanceof This){
+				cl = d;
+			}
 			//find the scope that the cl opens
 			String className = cl.getClassName();
 			MySymbolTable externalTable = globalScope.getChildTable(cl.getClassName());
@@ -397,6 +402,8 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 				String name = getFieldTranslationName(location.getName(), externalTable);
 				instructions.add(spec.MoveFieldLoad(name,cl.getFieldOffset(location.getName())+"",registers.nextRegister()));
 				resultRegister = registers.lastRegisterUsed();				
+			}else{
+				resultRegister = null;
 			}
 			assignmentLeftOffset = cl.getFieldOffset(location.getName());
 			assignmentKind = Kind.Field;
@@ -409,6 +416,8 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 					String name = getFieldTranslationName(location.getName(), location.enclosingScope());
 					instructions.add(spec.MoveFieldLoad(name,d.getFieldOffset(location.getName())+"",registers.nextRegister()));
 					resultRegister = registers.lastRegisterUsed();
+				}else{
+					resultRegister = null;
 				}
 				assignmentLeftOffset = d.getFieldOffset(location.getName());
 				assignmentKind = Kind.Field;
@@ -418,12 +427,12 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 					String name = getVariableTranslationName(location.getName(), location.enclosingScope());
 					instructions.add(spec.Move(name, registers.nextRegister()));
 					resultRegister = registers.lastRegisterUsed();
+				}else{
+					resultRegister = null;
 				}
 				assignmentKind = Kind.Local_Variable;
 			}
 		}
-		
-
 		return instructions;
 	}
 
@@ -596,11 +605,23 @@ public class Translator implements PropagatingVisitor<ClassLayout, List<String>>
 	public List<String> visit(Literal literal, ClassLayout d) {
 		List<String> instructions = new ArrayList<String>();
 		if(literal.getType() == LiteralTypes.STRING){
+			String strLiteral = null;
 			if(!stringNames.containsKey(literal.getValue())){
-				String strLiteral = getStringLiteralTranslationName((String)literal.getValue());
+				strLiteral = getStringLiteralTranslationName((String)literal.getValue());
 				stringNames.put((String)literal.getValue(), strLiteral);
 				stringLiterals.add(strLiteral);
-			}		
+			}else{
+				strLiteral = stringNames.get(literal.getValue().toString());
+			}
+			//load to register
+			instructions.add(spec.Move(strLiteral, registers.nextRegister()));
+			resultRegister = registers.lastRegisterUsed();
+		}else{
+			String val = literal.getValue().toString();
+			String reg = registers.nextRegister();
+			String ins = spec.Move(val, reg);
+			instructions.add(ins);
+			resultRegister = registers.lastRegisterUsed();
 		}
 		return instructions;
 	}
