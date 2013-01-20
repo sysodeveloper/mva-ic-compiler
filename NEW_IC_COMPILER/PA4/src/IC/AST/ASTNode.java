@@ -18,13 +18,13 @@ public abstract class ASTNode {
 	
 	private MySymbolRecord record;
 	
-	private Type tableType;
+	private MyType tableType;
 	
-	public Type getTypeFromTable() {
+	public MyType getTypeFromTable() {
 		return tableType;
 	}
 
-	public void setTypeFromTable(Type type) {
+	public void setTypeFromTable(MyType type) {
 		this.tableType = type;
 	}
 
