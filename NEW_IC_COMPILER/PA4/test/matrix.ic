@@ -1,38 +1,17 @@
-class B extends A{
-
-}
-
 class A{
-	int myField;
-	A[] az;
-}
-
-class D extends C{
-}
-
-class C extends B{
+	int x;
+	int y(){
+		this.x = 6;
+		(new B()).x = 8;
+		int u;
+		u = 5;
+		int[] arr = new int[10];
+		return 7;
+	}
 	static void main(string[] args){
-		C c = new C();
-		B b = new B();
-		A a = new A();
-		E e = new E();
-		a.myField = -9 +9;
-		foo(c,c,a.myField);
 	}
-	
-	int w(){ 
-		this.myField = 3;
-		return 3;
-	}
-	
-	static void foo(A a, B b, int x){
-		C c = new C();
-	
-	}
-	
-	
 }
 
-class E {
+class B{
+	int x;
 }
-
