@@ -134,11 +134,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(Program program, DownType d) {
 		DownType down = new DownType(null, false, program, -1);			
-		globalScope = program.enclosingScope();		
 		
-		
+		globalScope = program.enclosingScope();			
 		for(ICClass c : program.getClasses()){			
-			if(c.accept(this,d)==null)
+			if(c.accept(this,down)==null)
 				return null;
 		}
 		List<String> tempInst = new ArrayList<String>(); 	
@@ -161,6 +160,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		instructions.add(makeComment("Class " + icClass.getName()));
 		/* Class layout */
 		ClassLayout cl =  layoutManager.getClassLayout(icClass.getName());
+		d.currentClassLayout = cl; //To check with Ahia 
 		/* Class Dispatch Vector */
 		if(cl.hasVirtaulMethos()){
 			dispatchVectors.add(cl.printDispatchVector());
@@ -416,6 +416,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			if(upType == null) return null;
 			/* Get Class Layout, class is external */
 			MyType t = location.getLocation().getTypeFromTable();
+			
 			if(t == null){
 				System.out.println("Huge error in linking types to nodes!");
 				return null;
