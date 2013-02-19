@@ -415,7 +415,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			UpType upType = location.getLocation().accept(this,d);
 			if(upType == null) return null;
 			/* Get Class Layout, class is external */
-			MyType t = location.getLocation().getTypeFromTable();
+			MyType t = location.getLocation().getTypeFromTable();			
 			
 			if(t == null){
 				System.out.println("Huge error in linking types to nodes!");
