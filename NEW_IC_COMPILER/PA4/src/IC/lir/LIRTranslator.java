@@ -67,7 +67,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	UpType upInfo;
 	//String Literals
 	Map<String,String> stringNames;
-	List<String> instructions;
+	private List<String> instructions;
 	//While labels for continue and break
 	private String whileBeginLoop;
 	private String whileEndLoop;
@@ -133,9 +133,9 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(Program program, DownType d) {
-		d.prevNode = program;
+		DownType down = new DownType(null, false, program, -1);			
 		globalScope = program.enclosingScope();		
-		DownType down = new DownType(null, false, program, -1);
+		
 		
 		for(ICClass c : program.getClasses()){			
 			if(c.accept(this,d)==null)
@@ -786,14 +786,23 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(ExpressionBlock expressionBlock, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode=expressionBlock;
+		d.startScope();
+		UpType returnedType = expressionBlock.getExpression().accept(this, d);
+		d.endScope();	
+		return new UpType(returnedType);
 	}
 
 	@Override
 	public UpType visit(MethodType methodType, DownType d) {
 		// TODO Auto-generated method stub
-		return null;
+		return new UpType();
+	}
+	
+	public void printTranslation(){
+		for(String instruction:this.instructions){
+			System.out.println(instruction);
+		}
 	}
 
 }
