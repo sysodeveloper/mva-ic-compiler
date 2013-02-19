@@ -300,10 +300,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(Literal literal, DownType d) {
-		List<String> instructions = new ArrayList<String>();
-		UpType up= new UpType();
-		resultRegister = up.nextRegister();
-		up.setTarget(resultRegister);
+		List<String> instructions = new ArrayList<String>();		
+		resultRegister = d.nextRegister();		
 		
 		if(literal.getType() == LiteralTypes.STRING){
 			String strLiteral = null;
@@ -324,6 +322,9 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			String ins = spec.Move(val, resultRegister);
 			instructions.add(ins);			
 		}
+		this.instructions.addAll(instructions);
+		UpType up = new UpType();
+		up.setTarget(resultRegister);
 		return up;
 	}
 
