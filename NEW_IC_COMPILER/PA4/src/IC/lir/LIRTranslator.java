@@ -299,7 +299,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		d.prevNode = callStatement;
 		d.prevNode = callStatement;
 		UpType upType = callStatement.getCall().accept(this,d);
-		return new UpType();
+		return new UpType(upType); // ---> I changed it, it was return new UpType(), need to talk about it
 	}
 
 	@Override
@@ -486,8 +486,42 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(StaticCall call, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		String paramsExpr = "(";
+		d.prevNode = call;
+		MySymbolTable func;	
+		String retReg;
+		ClassLayout cl =  layoutManager.getClassLayout(call.getClassName());
+		func = globalScope.getChildTable(cl.getClassName()).getChildTable(call.getName());
+		// construct params list (y=reg4,)
+		List<String> formals = new ArrayList<String>();
+		for(String name:func.getEntries().keySet()){
+			if(func.getEntries().get(name).getKind()==Kind.Parameter)
+				formals.add(name);
+		}		
+		int index=0;
+		for(Expression arg :call.getArguments()){
+			UpType upArg = (arg.accept(this, d));
+			if(upArg==null) return null;			 
+			paramsExpr+=formals.get(index)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
+			index++;			
+		}
+		char[] toChar = paramsExpr.toCharArray();
+		toChar[paramsExpr.length()-1]=')';
+		paramsExpr = new String(toChar) ;
+		
+		if(func.getEntries().get("$ret").getMyType() instanceof MyVoidType )
+			retReg = "Rdummy";
+		else
+			retReg = d.nextRegister();
+		
+		instructions.add(spec.StaticCall("_"+call.getName()+paramsExpr, retReg));		
+		this.instructions.addAll(instructions);
+		
+		UpType up = new UpType();
+		if(retReg!="Rdummy")
+			up.setTarget(retReg);
+		return up;
 	}
 
 	@Override
