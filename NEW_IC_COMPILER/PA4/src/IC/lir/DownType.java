@@ -1,11 +1,15 @@
 package IC.lir;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import IC.AST.ASTNode;
 
 public class DownType {
 	public ClassLayout currentClassLayout;
 	public boolean loadOrStore; // 0 - load , 1 - store
 	public ASTNode prevNode;
+	 
 	private int nextFreeRegister;
 	
 	public DownType(ClassLayout currentClass,boolean loadOrStore /*0-load,1-store*/,ASTNode prevNode /*optional*/,int  nextFreeRegister){
@@ -13,6 +17,7 @@ public class DownType {
 		this.loadOrStore = loadOrStore;
 		this.prevNode = prevNode;
 		this.nextFreeRegister = nextFreeRegister;
+		
 	}
 	
 	private String registerDescription(int registerNumber){
@@ -20,7 +25,8 @@ public class DownType {
 	}
 	
 	public String nextRegister(){
-		String next = registerDescription(nextFreeRegister++);
+		//usedList.add(nextFreeRegister);
+		String next = registerDescription(nextFreeRegister++);		
 		return next;
 	}
 	

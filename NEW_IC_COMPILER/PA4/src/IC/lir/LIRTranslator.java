@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import IC.BinaryOps;
 import IC.LiteralTypes;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
@@ -299,20 +300,67 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(LogicalBinaryOp binaryOp, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		UpType firstOperand = binaryOp.getFirstOperand().accept(this,d);
+		String firstReg = firstOperand.getTarget();
+		UpType secondOperand = binaryOp.getSecondOperand().accept(this,d);
+		String secondReg = secondOperand.getTarget();
+		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
+		
+		if(binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR){
+			instructions.add(spec.Compare(firstReg, secondReg));			
+			if(binaryOp.getOperator() == BinaryOps.EQUAL)
+				instructions.add(spec.JumpTrue(label));
+			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
+				instructions.add(spec.JumpFalse(label));
+			if(binaryOp.getOperator() == BinaryOps.GT)
+				instructions.add(spec.JumpG(label));
+			if(binaryOp.getOperator() == BinaryOps.GTE)
+				instructions.add(spec.JumpGE(label));
+			if(binaryOp.getOperator() == BinaryOps.LT)
+				instructions.add(spec.JumpL(label));
+			if(binaryOp.getOperator() == BinaryOps.LTE)
+				instructions.add(spec.JumpLE(label));
+			}
+		else{
+			if(binaryOp.getOperator()==BinaryOps.LAND){
+				instructions.add(spec.Compare("0",firstReg));
+				instructions.add(spec.JumpTrue(label));
+				instructions.add(spec.And(firstReg, secondReg));				
+			}
+			if(binaryOp.getOperator()==BinaryOps.LOR){
+				instructions.add(spec.Compare("1",firstReg));
+				instructions.add(spec.JumpTrue(label));
+				instructions.add(spec.Or(firstReg, secondReg));				
+			}
+			
+		}
+		instructions.add(label+":");
+		
+		UpType up = new UpType(secondOperand);  // the result is stored in second operand
+		return up;
 	}
 
 	@Override
 	public UpType visit(MathUnaryOp unaryOp, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		UpType acceptedUp = unaryOp.getOperand().accept(this, d);
+		instructions.add(makeComment("- "+acceptedUp.getTarget()));
+		instructions.add(spec.Neg(acceptedUp.getTarget()));	
+		this.instructions.addAll(instructions);
+		UpType up = new UpType(acceptedUp);
+		return up;
 	}
 
 	@Override
 	public UpType visit(LogicalUnaryOp unaryOp, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		UpType acceptedUp = unaryOp.getOperand().accept(this, d);
+		instructions.add(makeComment("! "+acceptedUp.getTarget()));
+		instructions.add(spec.Not(acceptedUp.getTarget()));	
+		this.instructions.addAll(instructions);
+		UpType up = new UpType(acceptedUp);
+		return up;
 	}
 
 	@Override
