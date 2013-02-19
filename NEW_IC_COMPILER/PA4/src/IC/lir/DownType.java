@@ -10,32 +10,44 @@ public class DownType {
 	public boolean loadOrStore; // 0 - load , 1 - store
 	public ASTNode prevNode;
 	 
-	private int nextFreeRegister;
+	//private int nextFreeRegister;
+	private RegisterManager regManager;
 	
 	public DownType(ClassLayout currentClass,boolean loadOrStore /*0-load,1-store*/,ASTNode prevNode /*optional*/,int  nextFreeRegister){
 		currentClassLayout = currentClass;
 		this.loadOrStore = loadOrStore;
 		this.prevNode = prevNode;
-		this.nextFreeRegister = nextFreeRegister;
-		
+		this.regManager = new RegisterManager();
 	}
 	
-	private String registerDescription(int registerNumber){
-		return "R"+registerNumber;
-	}
+	//private String registerDescription(int registerNumber){
+	//	return "R"+registerNumber;
+	//}
 	
 	public String nextRegister(){
 		//usedList.add(nextFreeRegister);
-		String next = registerDescription(nextFreeRegister++);		
-		return next;
+		//String next = registerDescription(nextFreeRegister++);
+		return regManager.nextRegister();
+	}
+	
+	public void freeRegister(String register){
+		regManager.freeRegister(register);
 	}
 	
 	public void freeRegister(){
-		nextFreeRegister--;
+		regManager.freeRegisters();
 	}
 	
-	public void freeRegisters(int numToFree){
-		nextFreeRegister-=numToFree;
+	public void startScope(){
+		regManager.addAllocator();
 	}
+	
+	public void endScope(){
+		regManager.freeRegisters();
+	}
+	
+//	public void freeRegisters(int numToFree){
+		//nextFreeRegister-=numToFree;
+//	}
 		
 }
