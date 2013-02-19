@@ -8,8 +8,12 @@ class A{
 }
 
 class D extends C{
+	int[] ints;
 	void f(){
 		az[0] = this;
+		B b = new B();
+		A a = new C();
+		boolean x =  b != a;
 	}
 }
 
@@ -24,7 +28,7 @@ class C extends B{
 	}
 	
 	int w(int a, int b){ 
-		this.myField = -2147483649;
+		this.myField = -2147483648;
 		return 3;
 	}
 	
