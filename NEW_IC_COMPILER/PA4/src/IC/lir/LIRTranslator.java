@@ -54,7 +54,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	UpType upInfo;
 	//String Literals
 	Map<String,String> stringNames;
-	
+	List<String> instructions;
 	//While labels for continue and break
 	private String whileBeginLoop;
 	private String whileEndLoop;
@@ -112,6 +112,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		whileBeginLoop = null;
 		whileEndLoop = null;		
 		globalScope = null;		
+		instructions = new ArrayList<String>();
 		spec = new Instructions();
 	}
 	
