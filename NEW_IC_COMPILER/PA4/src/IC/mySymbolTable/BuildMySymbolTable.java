@@ -210,7 +210,7 @@ public class BuildMySymbolTable implements PropagatingVisitor<MySymbolTable, Boo
 		for(Formal f : method.getFormals()){
 			MySymbolRecord record = new MySymbolRecord(uniqueRecord++,f,Kind.Parameter,f.getType());
 			if(!table.InsertRecord(f.getName(), record)){
-				
+				semanticErrors.add(new SemanticError("Formal with the name "+f.getName()+" has already been defined", f.getLine()));				
 				return false;
 			}
 			MyType mt = typeTable.insertType(f.getType().getMyType());
