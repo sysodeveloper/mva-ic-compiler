@@ -7,6 +7,7 @@ import java.util.Map;
 
 import IC.BinaryOps;
 import IC.LiteralTypes;
+import IC.AST.ASTNode;
 import IC.AST.ArrayLocation;
 import IC.AST.Assignment;
 import IC.AST.Break;
@@ -25,6 +26,7 @@ import IC.AST.LogicalBinaryOp;
 import IC.AST.LogicalUnaryOp;
 import IC.AST.MathBinaryOp;
 import IC.AST.MathUnaryOp;
+import IC.AST.Method;
 import IC.AST.MethodType;
 import IC.AST.NewArray;
 import IC.AST.NewClass;
@@ -32,6 +34,7 @@ import IC.AST.PrimitiveType;
 import IC.AST.Program;
 import IC.AST.PropagatingVisitor;
 import IC.AST.Return;
+import IC.AST.Statement;
 import IC.AST.StatementsBlock;
 import IC.AST.StaticCall;
 import IC.AST.StaticMethod;
@@ -41,8 +44,10 @@ import IC.AST.VariableLocation;
 import IC.AST.VirtualCall;
 import IC.AST.VirtualMethod;
 import IC.AST.While;
+import IC.mySymbolTable.MySymbolRecord;
 import IC.mySymbolTable.MySymbolTable;
 import IC.mySymbolTable.MySymbolRecord.Kind;
+import IC.myTypes.MyType;
 
 public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	
@@ -121,6 +126,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(Program program, DownType d) {
+		d.prevNode = program;
 		globalScope = program.enclosingScope();		
 		DownType down = new DownType(null, false, program, -1);
 		
@@ -144,116 +150,331 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(ICClass icClass, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = icClass;
+		instructions.add(makeComment("Class " + icClass.getName()));
+		/* Class layout */
+		ClassLayout cl =  layoutManager.getClassLayout(icClass.getName());
+		/* Class Dispatch Vector */
+		if(cl.hasVirtaulMethos()){
+			dispatchVectors.add(cl.printDispatchVector());
+			dispatchNames.put(icClass.getName(), cl.printDispatchVector());
+		}
+		UpType upType;
+		/* Class Translation */
+		for(Field f : icClass.getFields()){
+			upType = f.accept(this,d);
+			if(upType == null) return null;
+		}
+		for(Method m : icClass.getMethods()){
+			upType = m.accept(this,d);
+			/* Registers are freed after each method */
+			if(upType == null) return null;
+		}
+		return new UpType();		
 	}
 
 	@Override
 	public UpType visit(Field field, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(VirtualMethod method, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = method;
+		instructions.add(makeComment("Virtual Method " + method.getName()));
+		/* Allocate Registers */
+		d.startScope();
+		/* Method Label */
+		instructions.add(d.currentClassLayout.makeSymbolicName(method.getName()+":"));
+		/* Method Translation */
+		UpType upType = method.getType().accept(this,d);
+		if(upType == null) return null;
+		for(Formal f : method.getFormals()){
+			upType = f.accept(this,d);
+			if(upType == null) return null;	
+		}
+		for(Statement s : method.getStatements()){
+			upType = s.accept(this,d);
+			if(upType == null) return null;
+		}
+		/* Method Return If Void */
+		if(method.getReturnType().getName().compareTo("void") == 0){
+			instructions.add("Return 9999");
+		}
+		/* Free Register Allocated */
+		d.freeRegister();
+		UpType up = new UpType();
+		return up;
 	}
 
 	@Override
 	public UpType visit(StaticMethod method, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = method;
+		List<String> instructions = new ArrayList<String>();
+		instructions.add(makeComment("Static Method " + method.getName()));
+		/* Allocate Registers */
+		d.startScope();
+		/* Method Label */
+		instructions.add(d.currentClassLayout.makeSymbolicName(method.getName()+":"));
+		/* Method Translation */
+		UpType upType = method.getType().accept(this,d);
+		if(upType == null) return null;
+		for(Formal f : method.getFormals()){
+			upType = f.accept(this,d);
+			if(upType == null) return null;
+		}
+		for(Statement s : method.getStatements()){
+			upType = s.accept(this,d);
+			if(upType == null) return null;
+		}
+		/* Method Return If Void */
+		if(method.getReturnType().getName().compareTo("void") == 0){
+			instructions.add("Return 9999");
+		}
+		/* Free Register Allocated */
+		d.freeRegister();
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(LibraryMethod method, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		/* No Translation For Library Method */
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(Formal formal, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		formal.getType().accept(this,d);
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(PrimitiveType type, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(UserType type, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		return new UpType();		
 	}
 
 	@Override
 	public UpType visit(Assignment assignment, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = assignment;
+		instructions.add(makeComment("Assignment Line " + assignment.getLine()));
+		/* Expression */
+		d.loadOrStore = false;	//load
+		UpType upTypeExpr = assignment.getAssignment().accept(this,d);
+		if(upTypeExpr == null) return null;
+		/* Variable */
+		d.loadOrStore = true;
+		d.downRegister = upTypeExpr.getTarget();
+		UpType upTypeVar = assignment.getVariable().accept(this,d);
+		if(upTypeVar == null) return null;
+		//reset loadOrStore
+		d.loadOrStore = false;
+		d.downRegister = null;
+/*		Kind leftSide = assignment.getVariable().getRecord().getKind();
+		switch(leftSide){
+		case Local_Variable:
+			instructions.add(spec.Move(upTypeExpr.getTarget(), d.nextRegister()));
+			break;
+		case Field:
+			instructions.add(spec.MoveFieldStore(upTypeExpr.getTarget(), d.nextRegister(), assignmentLeftOffset+""));
+			break;
+		}
+		resultRegister = registers.lastRegisterUsed();*/
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(CallStatement callStatement, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = callStatement;
+		d.prevNode = callStatement;
+		UpType upType = callStatement.getCall().accept(this,d);
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(Return returnStatement, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = returnStatement;
+		instructions.add(makeComment("Return Line " + returnStatement.getLine()));
+		if(returnStatement.hasValue()){
+			UpType upType = returnStatement.getValue().accept(this,d);
+			if(upType == null) return null;
+			instructions.add(spec.Return(upType.getTarget()));
+		}else{
+			instructions.add(spec.Return("9999"));
+		}
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(If ifStatement, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = ifStatement;
+		instructions.add(makeComment("If Line " + ifStatement.getLine()));
+		UpType upTypeCond = ifStatement.getCondition().accept(this,d);
+		if(upTypeCond == null) return null;
+		instructions.add(spec.Compare("0", upTypeCond.getTarget()));
+		if(ifStatement.hasElse()){
+			String falseLabel = getLabelName("_false_label");
+			String endLabel = getLabelName("_end_label");
+			instructions.add(spec.JumpTrue(falseLabel));
+			UpType upTypeOp = ifStatement.getOperation().accept(this,d);
+			if(upTypeOp == null) return null;
+			instructions.add(spec.Jump(endLabel));
+			instructions.add(falseLabel);
+			UpType upTypeElse = ifStatement.getElseOperation().accept(this,d);
+			if(upTypeElse == null) return null;
+			instructions.add(endLabel+":");
+		}else{
+			String endLabel = getLabelName("_end_label");
+			instructions.add(spec.JumpTrue(endLabel));
+			UpType upTypeOp = ifStatement.getOperation().accept(this,d);
+			if(upTypeOp == null) return null;
+			instructions.add(getLabelName(endLabel+":"));
+		}
+		return new UpType();	
+
 	}
 
 	@Override
 	public UpType visit(While whileStatement, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = whileStatement;
+		instructions.add(makeComment("While Line " + whileStatement.getLine()));
+		String testLabel = getLabelName("_test_label");
+		String endLabel = getLabelName("_end_label");
+		whileBeginLoop = testLabel;
+		whileEndLoop = endLabel;
+		instructions.add(testLabel+":");
+		UpType upType = whileStatement.getCondition().accept(this,d);
+		if(upType == null) return null;
+		instructions.add(spec.Compare("0", upType.getTarget()));
+		instructions.add(spec.JumpTrue(endLabel));
+		upType = whileStatement.getOperation().accept(this,d);
+		if(upType == null) return null;
+		instructions.add(spec.Jump(testLabel));
+		instructions.add(endLabel+":");
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(Break breakStatement, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		instructions.add(spec.Jump(whileEndLoop));
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(Continue continueStatement, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		instructions.add(spec.Jump(whileBeginLoop));
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(StatementsBlock statementsBlock, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		for(Statement s : statementsBlock.getStatements()){
+			UpType upType = s.accept(this,d);
+			if(upType == null) return null;
+		}
+		return new UpType();
+
 	}
 
 	@Override
 	public UpType visit(LocalVariable localVariable, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = localVariable;
+		UpType upType = localVariable.getType().accept(this,d);
+		if(upType == null) return null;
+		if(localVariable.hasInitValue()){
+			//int x = 5;
+			upType = localVariable.getInitValue().accept(this,d);
+			if(upType == null) return null;
+			String name = getVariableTranslationName(localVariable.getName(),localVariable.enclosingScope());
+			instructions.add(spec.Move(upType.getTarget(), name));
+		}
+		//int x - nothing...
+		return new UpType();
 	}
 
 	@Override
 	public UpType visit(VariableLocation location, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		ASTNode lastAST = d.prevNode;
+		String downRegister = d.downRegister;
+		boolean loadOrStore = d.loadOrStore;
+		d.prevNode = location;
+		UpType upTypeReturned = new UpType();
+		if(location.isExternal()){
+			//Must Be A Field
+			UpType upType = location.getLocation().accept(this,d);
+			if(upType == null) return null;
+			/* Get Class Layout, class is external */
+			MyType t = location.getLocation().getTypeFromTable();
+			if(t == null){
+				System.out.println("Huge error in linking types to nodes!");
+				return null;
+			}
+			ClassLayout cl = layoutManager.getClassLayout(t.getName());
+			if(location.getLocation() instanceof This){
+				cl = d.currentClassLayout;
+			}
+			/* Find ClassLayout Scope */
+			String className = cl.getClassName();
+			MySymbolTable externalTable = globalScope.getChildTable(cl.getClassName());
+			if(externalTable == null){
+				System.out.println("******************* Get Child Table failed! *******************");
+				return null;
+			}
+			/* Store Or Load */
+			if(loadOrStore){
+				//Store
+				instructions.add(spec.MoveFieldStore(downRegister, d.nextRegister(),  cl.getFieldOffset(location.getName())+""));
+			}else{
+				//Load
+				String name = getFieldTranslationName(location.getName(), externalTable);
+				resultRegister = d.nextRegister();
+				instructions.add(spec.MoveFieldLoad(name,cl.getFieldOffset(location.getName())+"",resultRegister));
+				upTypeReturned.setTarget(resultRegister);
+			}
+		}else{
+			//Field Or Local Variable (in current scope or in upper scopes)
+			MySymbolRecord rec = location.enclosingScope().Lookup(location.getName());
+			if(rec == null) return null;
+			if(rec.getKind() == Kind.Field){
+				if(loadOrStore){
+					//Store
+					instructions.add(spec.MoveFieldStore(downRegister, d.nextRegister(),  d.currentClassLayout.getFieldOffset(location.getName())+""));
+				}else{
+					//Load
+					String name = getFieldTranslationName(location.getName(), location.enclosingScope());
+					String reg = d.nextRegister();
+					instructions.add(spec.MoveFieldLoad(name,d.currentClassLayout.getFieldOffset(location.getName())+"",reg));
+					upTypeReturned.setTarget(reg);
+				}
+			}
+
+		}
+		return upTypeReturned;
 	}
 
 	@Override
 	public UpType visit(ArrayLocation location, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		d.prevNode = location;
+		String downRegister = d.downRegister;
+		boolean loadOrStore = d.loadOrStore;
+		UpType upTypeReturned = new UpType();
+		UpType upTypeExpr = location.getArray().accept(this,d);
+		if(upTypeExpr == null) return null;
+		UpType upTypeIndex = location.getIndex().accept(this,d);
+		if(upTypeIndex == null) return null;
+		if(loadOrStore){
+			//Store
+			instructions.add(spec.MoveArrayStore(downRegister, upTypeExpr.getTarget(), upTypeIndex.getTarget()));
+		}else{
+			//Load
+			instructions.add(spec.MoveArrayLoad(upTypeExpr.getTarget(),upTypeIndex.getTarget(), downRegister));
+			upTypeReturned.setTarget(downRegister);
+		}
+		return upTypeReturned;
 	}
 
 	@Override
