@@ -288,14 +288,38 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(Length length, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		UpType firstOperand = length.getArray().accept(this, d);
+		String newReg = d.nextRegister();
+		instructions.add(spec.ArrayLength(firstOperand.getTarget(), newReg));
+		UpType up = new UpType(newReg);		
+		this.instructions.addAll(instructions);
+		d.freeRegister(firstOperand.getTarget());//free register that holds array		
+		return up;
 	}
 
 	@Override
 	public UpType visit(MathBinaryOp binaryOp, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		UpType firstOperand = binaryOp.getFirstOperand().accept(this,d);
+		String firstReg = firstOperand.getTarget();
+		UpType secondOperand = binaryOp.getSecondOperand().accept(this,d);
+		String secondReg = secondOperand.getTarget();
+		if(binaryOp.getOperator()==BinaryOps.PLUS)
+			instructions.add(spec.Add(secondReg, firstReg));
+		if(binaryOp.getOperator()==BinaryOps.MINUS)
+			instructions.add(spec.Sub(secondReg, firstReg));
+		if(binaryOp.getOperator()==BinaryOps.MULTIPLY)
+			instructions.add(spec.Mul(secondReg, firstReg));
+		if(binaryOp.getOperator()==BinaryOps.DIVIDE)
+			instructions.add(spec.Div(secondReg, firstReg));
+		if(binaryOp.getOperator()==BinaryOps.MOD)
+			instructions.add(spec.Mod(secondReg, firstReg));
+		this.instructions.addAll(instructions);
+		//free second operand
+		d.freeRegister(secondReg);
+		UpType up = new UpType(firstOperand);  // the result is stored in first operand
+		return up;
 	}
 
 	@Override
@@ -308,7 +332,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
 		
 		if(binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR){
-			instructions.add(spec.Compare(firstReg, secondReg));			
+			instructions.add(spec.Compare(secondReg,firstReg));			
 			if(binaryOp.getOperator() == BinaryOps.EQUAL)
 				instructions.add(spec.JumpTrue(label));
 			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
@@ -326,18 +350,20 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			if(binaryOp.getOperator()==BinaryOps.LAND){
 				instructions.add(spec.Compare("0",firstReg));
 				instructions.add(spec.JumpTrue(label));
-				instructions.add(spec.And(firstReg, secondReg));				
+				instructions.add(spec.And(secondReg,firstReg));				
 			}
 			if(binaryOp.getOperator()==BinaryOps.LOR){
 				instructions.add(spec.Compare("1",firstReg));
 				instructions.add(spec.JumpTrue(label));
-				instructions.add(spec.Or(firstReg, secondReg));				
+				instructions.add(spec.Or(secondReg,firstReg));				
 			}
 			
 		}
 		instructions.add(label+":");
-		
-		UpType up = new UpType(secondOperand);  // the result is stored in second operand
+		this.instructions.addAll(instructions);
+		//free second operand
+		d.freeRegister(secondReg);
+		UpType up = new UpType(firstOperand);  // the result is stored in first operand
 		return up;
 	}
 

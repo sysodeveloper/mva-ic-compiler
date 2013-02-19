@@ -14,6 +14,11 @@ public class UpType {
 		this.targetRegister = param.targetRegister;
 	}
 	
+	public UpType(String reg){
+		this.targetRegister = reg;
+	}
+	
+	
 	public void setTarget(String register){
 		this.targetRegister = register;
 	}
