@@ -1,5 +1,6 @@
 package IC.lir;
 
+import java.awt.image.DataBufferByte;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import IC.AST.Assignment;
 import IC.AST.Break;
 import IC.AST.CallStatement;
 import IC.AST.Continue;
+import IC.AST.Expression;
 import IC.AST.ExpressionBlock;
 import IC.AST.Field;
 import IC.AST.Formal;
@@ -47,7 +49,12 @@ import IC.AST.While;
 import IC.mySymbolTable.MySymbolRecord;
 import IC.mySymbolTable.MySymbolTable;
 import IC.mySymbolTable.MySymbolRecord.Kind;
+
+import IC.myTypes.MyClassType;
 import IC.myTypes.MyType;
+import IC.myTypes.MyVoidType;
+
+
 
 public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	
@@ -485,32 +492,119 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(VirtualCall call, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		String paramsExpr = "(";
+		d.prevNode = call;		
+		String callerReg;
+		int call_offset;
+		MySymbolTable func;
+		String retReg;
+		
+		UpType caller = call.getLocation().accept(this, d);
+		if(caller == null) return null;
+		
+		if(!(call.getLocation() instanceof This) && !call.isExternal()){ // call like ... func();
+			caller = visit((This)call.getLocation(),d);			
+		}		
+		
+		if(call.getLocation() instanceof This || !call.isExternal()){ // case this.func()..			
+			call_offset = d.currentClassLayout.getMethodOffset(call.getName());	
+			func = globalScope.getChildTable(d.currentClassLayout.getClassName()).getChildTable(call.getName());
+		}
+		else{ // case v.func() ..
+			String className =((MyClassType) call.getLocation().getTypeFromTable()).getName();
+			ClassLayout cl =  layoutManager.getClassLayout(className);
+			call_offset = cl.getMethodOffset(call.getName());
+			func = globalScope.getChildTable(cl.getClassName()).getChildTable(call.getName());
+		}
+		
+		// construct params list (y=reg4,)
+		List<String> formals = new ArrayList<String>();
+		for(String name:func.getEntries().keySet()){
+			if(func.getEntries().get(name).getKind()==Kind.Parameter)
+				formals.add(name);
+		}		
+		int index=0;
+		for(Expression arg :call.getArguments()){
+			UpType upArg = (arg.accept(this, d));
+			if(upArg==null) return null;			 
+			paramsExpr+=formals.get(index)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
+			index++;			
+		}
+		char[] toChar = paramsExpr.toCharArray();
+		toChar[paramsExpr.length()-1]=')';
+		paramsExpr = new String(toChar) ;
+		
+		if(func.getEntries().get("$ret").getMyType() instanceof MyVoidType )
+			retReg = "Rdummy";
+		else
+			retReg = d.nextRegister();
+		
+		instructions.add(spec.VirtualCall(caller.getTarget()+"."+call_offset+paramsExpr, retReg));		
+		this.instructions.addAll(instructions);
+		
+		UpType up = new UpType();
+		if(retReg!="Rdummy")
+			up.setTarget(retReg);
+		return up;
 	}
 
 	@Override
 	public UpType visit(This thisExpression, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		String thisReg = d.nextRegister();
+		instructions.add(makeComment(thisReg+" = this "));
+		instructions.add(spec.Move("this", thisReg));
+		//instructions.add(spec.MoveFieldStore(dispatchNames.get(d.currentClassLayout.getClassName()), thisReg, "0"));
+		UpType up = new UpType(thisReg);
+		return up;
 	}
 
 	@Override
 	public UpType visit(NewClass newClass, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		List<String> instructions = new ArrayList<String>();
+		String holder = d.nextRegister();		
+		int classSize = layoutManager.getClassLayout(newClass.getName()).getLayoutSize();
+		String newClassInst = spec.allocateObject(Integer.toString(classSize));
+		instructions.add(makeComment(holder+" = new "+newClass.getName()+"()"));
+		instructions.add(spec.Library(newClassInst, holder));
+		instructions.add(spec.MoveFieldStore(dispatchNames.get(newClass.getName()), holder, "0"));
+		this.instructions.addAll(instructions);
+		UpType up = new UpType(holder);			
+		return up;
 	}
 
 	@Override
 	public UpType visit(NewArray newArray, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> instructions = new ArrayList<String>();
+		d.prevNode = newArray;
+		UpType arrayType = newArray.getType().accept(this, d);	
+		if(arrayType==null) return null;
+		UpType arraySize =newArray.getSize().accept(this,d);
+		if(arraySize==null) return null;
+		String arrHolder = d.nextRegister();
+		instructions.add(makeComment(arrHolder+" = new "+newArray.getType().getName()+"[]"));
+		if(!(newArray.getType() instanceof PrimitiveType)){
+			// need to get size of classlayout for this type			
+			int typeFactor = layoutManager.getClassLayout(newArray.getType().getName()).getLayoutSize(); 
+			instructions.add(spec.Mul(Integer.toString(typeFactor), arraySize.getTarget()));
+		}
+				
+		String newArrInst = spec.allocateArray(arraySize.getTarget());
+		
+		instructions.add(spec.Library(newArrInst, arrHolder));
+		UpType up = new UpType(arrHolder);		
+		this.instructions.addAll(instructions);
+		return up;
 	}
 
 	@Override
 	public UpType visit(Length length, DownType d) {
 		List<String> instructions = new ArrayList<String>();
+		d.prevNode = length;
 		UpType firstOperand = length.getArray().accept(this, d);
+		if(firstOperand==null)
+			return null;
 		String newReg = d.nextRegister();
 		instructions.add(spec.ArrayLength(firstOperand.getTarget(), newReg));
 		UpType up = new UpType(newReg);		
@@ -523,8 +617,13 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	public UpType visit(MathBinaryOp binaryOp, DownType d) {
 		List<String> instructions = new ArrayList<String>();
 		UpType firstOperand = binaryOp.getFirstOperand().accept(this,d);
+		d.prevNode = binaryOp;
+		if(firstOperand==null)
+			return null;
 		String firstReg = firstOperand.getTarget();
 		UpType secondOperand = binaryOp.getSecondOperand().accept(this,d);
+		if(secondOperand==null)
+			return null;
 		String secondReg = secondOperand.getTarget();
 		if(binaryOp.getOperator()==BinaryOps.PLUS)
 			instructions.add(spec.Add(secondReg, firstReg));
@@ -546,9 +645,14 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(LogicalBinaryOp binaryOp, DownType d) {
 		List<String> instructions = new ArrayList<String>();
+		d.prevNode = binaryOp;
 		UpType firstOperand = binaryOp.getFirstOperand().accept(this,d);
+		if(firstOperand==null)
+			return null;
 		String firstReg = firstOperand.getTarget();
 		UpType secondOperand = binaryOp.getSecondOperand().accept(this,d);
+		if(secondOperand==null)
+			return null;
 		String secondReg = secondOperand.getTarget();
 		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
 		
@@ -591,7 +695,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(MathUnaryOp unaryOp, DownType d) {
 		List<String> instructions = new ArrayList<String>();
+		d.prevNode = unaryOp;
 		UpType acceptedUp = unaryOp.getOperand().accept(this, d);
+		if(acceptedUp==null)
+			return null;
 		instructions.add(makeComment("- "+acceptedUp.getTarget()));
 		instructions.add(spec.Neg(acceptedUp.getTarget()));	
 		this.instructions.addAll(instructions);
@@ -602,7 +709,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(LogicalUnaryOp unaryOp, DownType d) {
 		List<String> instructions = new ArrayList<String>();
+		d.prevNode = unaryOp;
 		UpType acceptedUp = unaryOp.getOperand().accept(this, d);
+		if(acceptedUp==null)
+			return null;
 		instructions.add(makeComment("! "+acceptedUp.getTarget()));
 		instructions.add(spec.Not(acceptedUp.getTarget()));	
 		this.instructions.addAll(instructions);
