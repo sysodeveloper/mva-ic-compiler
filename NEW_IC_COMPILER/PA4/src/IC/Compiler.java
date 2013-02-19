@@ -19,8 +19,10 @@ import IC.Parser.LexicalError;
 import IC.Parser.LibraryParser;
 import IC.Parser.Parser;
 import IC.Parser.SyntaxError;
+import IC.lir.LIRTranslator;
 import IC.lir.LayoutsManager;
 import IC.lir.Translator;
+import IC.lir.UpType;
 import IC.mySymbolTable.BuildMySymbolTable;
 import IC.mySymbolTable.MySymbolTablePrinter;
 import IC.myTypes.MyTypeTable;
@@ -104,9 +106,16 @@ public class Compiler {
 				LayoutsManager lm = new LayoutsManager();
 				lm.createClassLayouts(null, ((Program)root).enclosingScope());
 				lm.printLayouts();
-				Translator trans = new Translator(lm);
+				LIRTranslator trans = new LIRTranslator(lm);
 				System.out.println("***************************************************************");
-				/*List<String> lst = trans.visit((Program)root,null);*/
+
+				UpType returnedUp = trans.visit((Program)root,null);
+				if(returnedUp==null){
+					System.out.println("Error during translation to LIR");
+					return;
+				}
+				trans.printTranslation();	
+
 				
 			}else{
 				return;
