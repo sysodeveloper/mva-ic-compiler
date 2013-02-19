@@ -70,7 +70,7 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 	public Boolean visit(StaticMethod method, MySymbolTable d) {
 		boolean result = true;
 		for(Formal f:method.getFormals()){
-			result &=f.accept(this, d);
+			result &= f.accept(this, d);
 		}
 		for(Statement s:method.getStatements())
 			result &= s.accept(this,method.enclosingScope());
@@ -193,13 +193,9 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		/*boolean filed = checkVariable(location.getName(), d,Kind.Field);
 		boolean param = checkVariable(location.getName(), d,Kind.Parameter);
 		boolean local = checkVariable(location.getName(), d,Kind.Local_Variable);*/
-		MySymbolRecord locationRecord = null;
-		if(location.isExternal()){
-			locationRecord = location.enclosingScope().getParent().Lookup(location.getName());
-		}else{
-			locationRecord = location.enclosingScope().Lookup(location.getName());
-		}
+		MySymbolRecord locationRecord = location.enclosingScope().Lookup(location.getName());
 		if(locationRecord == null){
+			semanticErrors.add(new SemanticError("undefined reference with the name "+location.getName() , location.getLine()));
 			return false;
 		}
 		boolean filed = false;
