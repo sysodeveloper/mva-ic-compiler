@@ -122,18 +122,22 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	public UpType visit(Program program, DownType d) {
 		globalScope = program.enclosingScope();		
 		DownType down = new DownType(null, false, program, -1);
-		/* Program Translation */
-		instructions.add(makeComment("A new program begins..."));
-		instructions.add(makeComment(""));
-		instructions.add(makeComment(""));
-		instructions.add(makeComment("String Literals"));
-		instructions.addAll(stringLiterals);
-		instructions.add(makeComment("Dispatch Vectors"));
-		instructions.addAll(dispatchVectors);
+		
 		for(ICClass c : program.getClasses()){			
 			if(c.accept(this,d)==null)
 				return null;
 		}
+		List<String> tempInst = new ArrayList<String>(); 	
+		/* Program Translation */
+		tempInst.add(makeComment("A new program begins..."));
+		tempInst.add(makeComment(""));
+		tempInst.add(makeComment(""));
+		tempInst.add(makeComment("String Literals"));
+		tempInst.addAll(stringLiterals);
+		tempInst.add(makeComment("Dispatch Vectors"));
+		tempInst.addAll(dispatchVectors);		
+		instructions.addAll(0, tempInst);
+		
 		return new UpType();				
 	}
 
