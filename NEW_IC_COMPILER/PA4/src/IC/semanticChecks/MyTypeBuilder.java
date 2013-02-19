@@ -463,7 +463,14 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(This thisExpression, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
+		//must return the correct class type
+		MySymbolRecord rec = thisExpression.enclosingScope().Lookup(thisExpression.enclosingScope().getDescription());
+		while(rec != null && rec.getKind() != Kind.Class){
+			rec = rec.getNode().enclosingScope().Lookup(rec.getNode().enclosingScope().getDescription());
+		}
+		if(rec != null){
+			return rec.getMyType();
+		}
 		//maybe we need this type to be the current class type? It is not one of the rules...
 		return voidType;
 	}
