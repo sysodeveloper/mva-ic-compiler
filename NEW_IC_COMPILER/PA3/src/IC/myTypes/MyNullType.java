@@ -1,5 +1,7 @@
 package IC.myTypes;
 
+import IC.AST.PrimitiveType;
+
 public class MyNullType extends MyPrimitiveType {
 	public MyNullType(){
 		this.setName("null");
@@ -8,8 +10,19 @@ public class MyNullType extends MyPrimitiveType {
 	
 	@Override
 	public boolean subtypeOf(MyType type) {
-		// TODO Auto-generated method stub
-		return true;
+		if(type instanceof MyStringType){
+			return true;
+		}
+		if(type instanceof MyNullType){
+			return true;
+		}
+		if(type instanceof MyArrayType){
+			return true;	
+		}
+		if(type instanceof MyClassType){
+			return true;
+		}
+		return false;
 	}
 	
 	public MyNullType clone(){
