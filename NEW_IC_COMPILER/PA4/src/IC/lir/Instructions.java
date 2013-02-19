@@ -25,7 +25,7 @@ public class Instructions {
 		return output.toString(); 
 	}
 	
-	public String MoveArray(String op1,String op1Offset, String op2){
+	public String MoveArrayLoad(String op1,String op1Offset, String op2){
 		StringBuffer output = new StringBuffer();
 		output.append("MoveArray ");
 		output.append(op1);
@@ -35,6 +35,15 @@ public class Instructions {
 		return output.toString(); 
 	}	
 	
+	public String MoveArrayStore(String op1, String op2,String op2Offset){
+		StringBuffer output = new StringBuffer();
+		output.append("MoveArray ");
+		output.append(op1);
+		output.append(",");
+		output.append(op2);
+		output.append("["+op2Offset+"]");
+		return output.toString(); 
+	}		
 	
 	public String MoveFieldLoad(String op1,String op1Ofsset, String op2){
 		StringBuffer output = new StringBuffer();
