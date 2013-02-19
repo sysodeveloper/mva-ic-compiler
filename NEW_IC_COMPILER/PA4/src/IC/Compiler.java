@@ -101,12 +101,12 @@ public class Compiler {
 				if(!typesPass){
 					return;
 				}
-				LayoutsManager lm = new LayoutsManager();
+				/*LayoutsManager lm = new LayoutsManager();
 				lm.createClassLayouts(null, ((Program)root).enclosingScope());
 				lm.printLayouts();
 				Translator trans = new Translator(lm);
 				System.out.println("***************************************************************");
-				List<String> lst = trans.visit((Program)root,null);
+				List<String> lst = trans.visit((Program)root,null);*/
 				
 			}else{
 				return;

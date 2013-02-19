@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBElement.GlobalScope;
+
 import IC.BinaryOps;
 import IC.AST.*;
 import IC.myTypes.*;
@@ -438,7 +440,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(This thisExpression, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
+
 		//maybe we need this type to be the current class type? It is not one of the rules...
 		return voidType;
 	}
