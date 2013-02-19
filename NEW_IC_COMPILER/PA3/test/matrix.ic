@@ -24,7 +24,7 @@ class C extends B{
 	}
 	
 	int w(int a, int b){ 
-		this.myField = 3;
+		this.myField = -2147483649;
 		return 3;
 	}
 	

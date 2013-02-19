@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBElement.GlobalScope;
-
 import IC.BinaryOps;
 import IC.AST.*;
 import IC.myTypes.*;
@@ -15,6 +13,7 @@ import IC.mySymbolTable.MySymbolRecord.Kind;
 
 
 public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
+	private MySymbolTable globalScope;
 	private MyTypeTable types;
 	private List<SemanticError> semanticErrors = new ArrayList<SemanticError>();
 	private MyType intType;
@@ -66,6 +65,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(Program program, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
+		globalScope = program.enclosingScope();
 		for(ICClass c : program.getClasses()){
 			c.accept(this,d);
 		}
@@ -440,8 +440,14 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(This thisExpression, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-
-		//maybe we need this type to be the current class type? It is not one of the rules...
+		MySymbolTable enc = thisExpression.enclosingScope();
+		while (enc.getParent() != globalScope){
+			enc = enc.getParent();
+		}
+		MySymbolRecord rec = enc.Lookup(enc.getDescription());
+		if(rec != null){
+			return rec.getMyType();
+		}
 		return voidType;
 	}
 	@Override
@@ -551,7 +557,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		fromNewArray = false;
 		fromVariableLocation = false;
 		
-		MyType operandType = unaryOp.getOperand().accept(this, d);
+		MyType operandType = unaryOp.getOperand().accept(this, new Boolean(true));
 		
 		if(operandType != intType){
 			semanticErrors.add(new SemanticError("Can perform "+unaryOp.getOperator().getDescription()+" operation only on int types",unaryOp.getLine()));
@@ -572,12 +578,20 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 	public MyType visit(Literal literal, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
 		MyType type =  types.insertType(literal.getMyType());
 		if(type!=intType)
 			return type;
 		try{
-			int value = Integer.parseInt(((String)literal.getValue()));
+			Boolean minusBefore = new Boolean(false);
+			if(d instanceof Boolean){
+				minusBefore = ((Boolean)d).booleanValue();
+			}
+			int value = 0;
+			if(!minusBefore){
+				 value = Integer.parseInt(((String)literal.getValue()));	
+			}else{
+				value = Integer.parseInt(((String)"-"+literal.getValue()));
+			}
 		}catch(NumberFormatException e){
 			semanticErrors.add(new SemanticError("the number is out of range",literal.getLine()));
 			return voidType;
