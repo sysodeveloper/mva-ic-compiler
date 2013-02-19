@@ -9,6 +9,7 @@ public class DownType {
 	public ClassLayout currentClassLayout;
 	public boolean loadOrStore; // 0 - load , 1 - store
 	public ASTNode prevNode;
+	public String downRegister;
 	 
 	//private int nextFreeRegister;
 	private RegisterManager regManager;
@@ -18,6 +19,7 @@ public class DownType {
 		this.loadOrStore = loadOrStore;
 		this.prevNode = prevNode;
 		this.regManager = new RegisterManager();
+		this.downRegister = null;
 	}
 	
 	//private String registerDescription(int registerNumber){
