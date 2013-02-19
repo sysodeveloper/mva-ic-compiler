@@ -120,8 +120,21 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(Program program, DownType d) {
-		// TODO Auto-generated method stub
-		return null;
+		globalScope = program.enclosingScope();		
+		DownType down = new DownType(null, false, program, -1);
+		/* Program Translation */
+		instructions.add(makeComment("A new program begins..."));
+		instructions.add(makeComment(""));
+		instructions.add(makeComment(""));
+		instructions.add(makeComment("String Literals"));
+		instructions.addAll(stringLiterals);
+		instructions.add(makeComment("Dispatch Vectors"));
+		instructions.addAll(dispatchVectors);
+		for(ICClass c : program.getClasses()){			
+			if(c.accept(this,d)==null)
+				return null;
+		}
+		return new UpType();				
 	}
 
 	@Override
