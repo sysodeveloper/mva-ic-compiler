@@ -465,9 +465,12 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 				instructions.add(spec.MoveFieldStore(downRegister,upType.getTarget(),  cl.getFieldOffset(location.getName())+""));
 			}else{
 				//Load
-				String name = getFieldTranslationName(location.getName(), externalTable);
+				//String name = getFieldTranslationName(location.getName(), externalTable);
+				String tempReg = d.nextRegister();
+				//instructions.add(spec.Move(name, tempReg));
 				resultRegister = d.nextRegister();
-				instructions.add(spec.MoveFieldLoad(name,cl.getFieldOffset(location.getName())+"",resultRegister));
+				instructions.add(spec.MoveFieldLoad(upType.getTarget(),cl.getFieldOffset(location.getName())+"",resultRegister));
+				d.freeRegister(tempReg);
 				upTypeReturned.setTarget(resultRegister);
 			}
 		}else{
