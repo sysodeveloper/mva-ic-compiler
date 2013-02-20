@@ -640,12 +640,12 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		for(Expression arg :call.getArguments()){
 			UpType upArg = (arg.accept(this, d));
 			if(upArg==null) return null;			 
-			paramsExpr+=getParameterTranslationName(formals.get(index), func)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
+			paramsExpr+=getParameterTranslationName(formals.get(index), func)+"="+upArg.getTarget(); // param1=R1,param2=Reg45,...
+			if(index<call.getArguments().size()-1)
+				paramsExpr+=",";
 			index++;			
 		}
-		char[] toChar = paramsExpr.toCharArray();
-		toChar[paramsExpr.length()-1]=')';
-		paramsExpr = new String(toChar) ;
+		paramsExpr=paramsExpr.concat(")");
 		
 		if(func.getEntries().get("$ret").getMyType() instanceof MyVoidType )
 			retReg = "Rdummy";
