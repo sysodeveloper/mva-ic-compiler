@@ -102,8 +102,9 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	}
 	
 	private String getStringLiteralTranslationName(String strLiteral){
-		return "str"+stringLiteralUnique+": "+"''"+strLiteral+"''";
+		return "str"+stringLiteralUnique;
 	}
+	
 	//Comments
 	private String makeComment(String str){ 
 		return "#"+str;
@@ -136,6 +137,14 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		DownType down = new DownType(null, false, program, -1);			
 		
 		globalScope = program.enclosingScope();			
+		
+		for(ICClass c1:program.getClasses()){
+			ClassLayout cl =  layoutManager.getClassLayout(c1.getName());
+			
+			dispatchVectors.add(cl.printDispatchVector());
+			dispatchNames.put(c1.getName(),"_DV_"+c1.getName());
+		}
+		
 		for(ICClass c : program.getClasses()){			
 			if(c.accept(this,down)==null)
 				return null;
@@ -161,11 +170,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		/* Class layout */
 		ClassLayout cl =  layoutManager.getClassLayout(icClass.getName());
 		d.currentClassLayout = cl; //To check with Ahia 
-		/* Class Dispatch Vector */
-		if(cl.hasVirtaulMethos()){
-			dispatchVectors.add(cl.printDispatchVector());
-			dispatchNames.put(icClass.getName(), cl.printDispatchVector());
-		}
+		//}
 		UpType upType;
 		/* Class Translation */
 		for(Field f : icClass.getFields()){
@@ -217,12 +222,15 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(StaticMethod method, DownType d) {
 		d.prevNode = method;
-		List<String> instructions = new ArrayList<String>();
+		//List<String> instructions = new ArrayList<String>();
 		instructions.add(makeComment("Static Method " + method.getName()));
 		/* Allocate Registers */
 		d.startScope();
 		/* Method Label */
-		instructions.add(d.currentClassLayout.makeSymbolicName(method.getName()+":"));
+		if(method.getName().compareTo("main")==0)
+			instructions.add("_ic_main:");
+		else
+			instructions.add(d.currentClassLayout.makeSymbolicName(method.getName()+":"));
 		/* Method Translation */
 		UpType upType = method.getType().accept(this,d);
 		if(upType == null) return null;
@@ -320,7 +328,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			UpType upTypeOp = ifStatement.getOperation().accept(this,d);
 			if(upTypeOp == null) return null;
 			instructions.add(spec.Jump(endLabel));
-			instructions.add(falseLabel);
+			instructions.add(falseLabel+":");
 			UpType upTypeElse = ifStatement.getElseOperation().accept(this,d);
 			if(upTypeElse == null) return null;
 			instructions.add(endLabel+":");
@@ -329,7 +337,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			instructions.add(spec.JumpTrue(endLabel));
 			UpType upTypeOp = ifStatement.getOperation().accept(this,d);
 			if(upTypeOp == null) return null;
-			instructions.add(getLabelName(endLabel+":"));
+			instructions.add(endLabel+":");
 		}
 		return new UpType();	
 
@@ -402,8 +410,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		UpType upTypeReturned = new UpType();
 		if(location.isExternal()){
 			//Must Be A Field
+			d.loadOrStore = false; //load
 			UpType upType = location.getLocation().accept(this,d);
 			if(upType == null) return null;
+			d.loadOrStore = loadOrStore;
 			/* Get Class Layout, class is external */
 			MyType t = location.getLocation().getTypeFromTable();			
 			
@@ -450,7 +460,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 				}
 			}
 			
-			if(rec.getKind() == Kind.Local_Variable){
+			if(rec.getKind() == Kind.Local_Variable || rec.getKind() == Kind.Parameter){
 				String name = getVariableTranslationName(location.getName(),location.enclosingScope());
 				if(loadOrStore){
 					//Store
@@ -459,7 +469,6 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 					//Load
 					String reg = d.nextRegister();
 					upTypeReturned.setTarget(reg);
-					
 					instructions.add(spec.Move(name, reg));
 				}
 			}
@@ -474,10 +483,12 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		String downRegister = d.downRegister;
 		boolean loadOrStore = d.loadOrStore;
 		UpType upTypeReturned = new UpType();
+		d.loadOrStore = false; //load
 		UpType upTypeExpr = location.getArray().accept(this,d);
 		if(upTypeExpr == null) return null;
 		UpType upTypeIndex = location.getIndex().accept(this,d);
 		if(upTypeIndex == null) return null;
+		d.loadOrStore = loadOrStore;
 		if(loadOrStore){
 			//Store
 			instructions.add(spec.MoveArrayStore(downRegister, upTypeExpr.getTarget(), upTypeIndex.getTarget()));
@@ -496,6 +507,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		d.prevNode = call;
 		MySymbolTable func;	
 		String retReg;
+		boolean library=false;
+		if(call.getClassName().compareTo("Library")==0)
+			library=true;
+		
 		ClassLayout cl =  layoutManager.getClassLayout(call.getClassName());
 		func = globalScope.getChildTable(cl.getClassName()).getChildTable(call.getName());
 		// construct params list (y=reg4,)
@@ -508,7 +523,11 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		for(Expression arg :call.getArguments()){
 			UpType upArg = (arg.accept(this, d));
 			if(upArg==null) return null;			 
-			paramsExpr+=formals.get(index)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
+			if(library){
+				paramsExpr+=upArg.getTarget()+","; // R1,Reg45,...
+			}			
+			else
+				paramsExpr+=formals.get(index)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
 			index++;			
 		}
 		char[] toChar = paramsExpr.toCharArray();
@@ -520,7 +539,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		else
 			retReg = d.nextRegister();
 		
-		instructions.add(spec.StaticCall("_"+call.getName()+paramsExpr, retReg));		
+		if(library)
+			instructions.add(spec.Library("_"+call.getName()+paramsExpr, retReg));
+		else
+			instructions.add(spec.StaticCall("_"+call.getName()+paramsExpr, retReg));		
 		this.instructions.addAll(instructions);
 		
 		UpType up = new UpType();
@@ -685,6 +707,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	public UpType visit(LogicalBinaryOp binaryOp, DownType d) {
 		List<String> instructions = new ArrayList<String>();
 		d.prevNode = binaryOp;
+		String resultReg = d.nextRegister();
 		UpType firstOperand = binaryOp.getFirstOperand().accept(this,d);
 		if(firstOperand==null)
 			return null;
@@ -694,21 +717,21 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			return null;
 		String secondReg = secondOperand.getTarget();
 		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
-		
+		instructions.add(spec.Move("0", resultReg));
 		if(binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR){
-			instructions.add(spec.Compare(secondReg,firstReg));			
+			instructions.add(spec.Compare(firstReg,secondReg));			
 			if(binaryOp.getOperator() == BinaryOps.EQUAL)
-				instructions.add(spec.JumpTrue(label));
-			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
 				instructions.add(spec.JumpFalse(label));
+			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
+				instructions.add(spec.JumpTrue(label));
 			if(binaryOp.getOperator() == BinaryOps.GT)
-				instructions.add(spec.JumpG(label));
-			if(binaryOp.getOperator() == BinaryOps.GTE)
-				instructions.add(spec.JumpGE(label));
-			if(binaryOp.getOperator() == BinaryOps.LT)
-				instructions.add(spec.JumpL(label));
-			if(binaryOp.getOperator() == BinaryOps.LTE)
 				instructions.add(spec.JumpLE(label));
+			if(binaryOp.getOperator() == BinaryOps.GTE)
+				instructions.add(spec.JumpL(label));
+			if(binaryOp.getOperator() == BinaryOps.LT)
+				instructions.add(spec.JumpGE(label));
+			if(binaryOp.getOperator() == BinaryOps.LTE)
+				instructions.add(spec.JumpG(label));
 			}
 		else{
 			if(binaryOp.getOperator()==BinaryOps.LAND){
@@ -723,11 +746,14 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			}
 			
 		}
+		instructions.add(spec.Move("1", resultReg));
 		instructions.add(label+":");
+		// here dont do nothing
 		this.instructions.addAll(instructions);
 		//free second operand
+		d.freeRegister(firstReg);
 		d.freeRegister(secondReg);
-		UpType up = new UpType(firstOperand);  // the result is stored in first operand
+		UpType up = new UpType(resultReg);  // the result is stored in first operand
 		return up;
 	}
 
@@ -769,7 +795,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			if(!stringNames.containsKey(literal.getValue())){
 				strLiteral = getStringLiteralTranslationName((String)literal.getValue());
 				stringNames.put((String)literal.getValue(), strLiteral);
-				stringLiterals.add(strLiteral);
+				stringLiterals.add(strLiteral+": "+'"'+(String)literal.getValue()+'"');
 			}else{
 				strLiteral = stringNames.get(literal.getValue().toString());
 			}
@@ -779,7 +805,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			
 		}else{
 			String val = literal.getValue().toString();
-			
+			if(val.compareTo("null")==0)
+				val="0";
 			String ins = spec.Move(val, resultRegister);
 			instructions.add(ins);			
 		}
@@ -805,6 +832,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	}
 	
 	public void printTranslation(){
+
 		for(String instruction:this.instructions){
 			System.out.println(instruction);
 		}
