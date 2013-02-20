@@ -51,6 +51,7 @@ import IC.mySymbolTable.MySymbolTable;
 import IC.mySymbolTable.MySymbolRecord.Kind;
 
 import IC.myTypes.MyClassType;
+import IC.myTypes.MyStringType;
 import IC.myTypes.MyType;
 import IC.myTypes.MyVoidType;
 
@@ -102,7 +103,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	}
 	
 	private String getStringLiteralTranslationName(String strLiteral){
-		return "str"+stringLiteralUnique;
+		return "str"+stringLiteralUnique++;
 	}
 	
 	//Comments
@@ -139,8 +140,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		globalScope = program.enclosingScope();			
 		
 		for(ICClass c1:program.getClasses()){
+			if(c1.getName().compareTo("Library") == 0){
+				continue;
+			}
 			ClassLayout cl =  layoutManager.getClassLayout(c1.getName());
-			
 			dispatchVectors.add(cl.printDispatchVector());
 			dispatchNames.put(c1.getName(),"_DV_"+c1.getName());
 		}
@@ -244,7 +247,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		}
 		/* Method Return If Void */
 		if(method.getReturnType().getName().compareTo("void") == 0){
-			instructions.add("Return 9999");
+			if(method.getName().compareTo("main")!=0)
+				instructions.add("Return 9999");
+			else
+				instructions.add(spec.Library("__exit(0)", "Rdummy"));
 		}
 		/* Free Register Allocated */
 		d.freeRegister();
@@ -540,7 +546,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			retReg = d.nextRegister();
 		
 		if(library)
-			instructions.add(spec.Library("_"+call.getName()+paramsExpr, retReg));
+			instructions.add(spec.Library("__"+call.getName()+paramsExpr, retReg));
 		else
 			instructions.add(spec.StaticCall("_"+call.getName()+paramsExpr, retReg));		
 		this.instructions.addAll(instructions);
@@ -686,8 +692,13 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(secondOperand==null)
 			return null;
 		String secondReg = secondOperand.getTarget();
-		if(binaryOp.getOperator()==BinaryOps.PLUS)
-			instructions.add(spec.Add(secondReg, firstReg));
+		if(binaryOp.getOperator()==BinaryOps.PLUS){
+			if(binaryOp.getFirstOperand().getTypeFromTable() instanceof MyStringType){
+				instructions.add(spec.Library("__stringCat("+firstReg+","+secondReg+")", firstReg));
+			}
+			else
+				instructions.add(spec.Add(secondReg, firstReg));
+		}
 		if(binaryOp.getOperator()==BinaryOps.MINUS)
 			instructions.add(spec.Sub(secondReg, firstReg));
 		if(binaryOp.getOperator()==BinaryOps.MULTIPLY)

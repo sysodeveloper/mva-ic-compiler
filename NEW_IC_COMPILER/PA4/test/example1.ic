@@ -3,6 +3,7 @@ class A {
   int i;
 
   static int sfunc(boolean b) {
+    string a= "a"+"b";
     if (b) {
       {
         int k = 5;

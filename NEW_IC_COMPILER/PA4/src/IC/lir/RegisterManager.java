@@ -36,7 +36,6 @@ public class RegisterManager {
 		//no free register yet, create one
 		
 		registers.add(false);
-		System.out.println(this.registers);
 		//add to allocator stack
 		allocators.peek().add(r);
 		//save last register
@@ -63,11 +62,9 @@ public class RegisterManager {
 			}
 			if(regNumber >= 0){
 				//free register at pos regNumber
-				System.out.println("Free " + regNumber);
 				this.registers.set(regNumber, true);
 			}
 		}
-		System.out.println(this.registers);
 	}
 	
 	public String lastRegisterUsed(){
