@@ -654,8 +654,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		if(hasErrors()){
 			return voidType;
 		}
-		
-		return  expressionBlock.getExpression().accept(this, d);
+		MyType type = expressionBlock.getExpression().accept(this, d);
+		expressionBlock.setTypeFromTable(type);
+		return  type;
 	}
 	@Override
 	public MyType visit(MethodType methodType, Object d) {
