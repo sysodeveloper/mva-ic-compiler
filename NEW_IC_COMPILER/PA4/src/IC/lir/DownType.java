@@ -10,7 +10,7 @@ public class DownType {
 	public boolean loadOrStore; // 0 - load , 1 - store
 	public ASTNode prevNode;
 	public String downRegister;
-	 
+	public boolean resultInRegister;	//indicates whether the result must be stored in register
 	//private int nextFreeRegister;
 	private RegisterManager regManager;
 	
@@ -20,6 +20,7 @@ public class DownType {
 		this.prevNode = prevNode;
 		this.regManager = new RegisterManager();
 		this.downRegister = null;
+		this.resultInRegister = false;
 	}
 	
 	//private String registerDescription(int registerNumber){
