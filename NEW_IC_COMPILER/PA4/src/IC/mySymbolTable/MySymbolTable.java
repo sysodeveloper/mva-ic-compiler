@@ -170,9 +170,10 @@ public class MySymbolTable {
 		for(MySymbolTable child : this.getChildren()){
 			if(child.getDescription().compareTo(description) == 0){
 				return child;
-			}else{
-				return child.getChildTable(description);
 			}
+			for(MySymbolTable child1 : this.getChildren()){
+				child1.getChildTable(description);
+			}	
 		}
 		return ret;
 	}
