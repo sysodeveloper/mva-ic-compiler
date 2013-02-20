@@ -628,7 +628,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			String className =((MyClassType) call.getLocation().getTypeFromTable()).getName();
 			ClassLayout cl =  layoutManager.getClassLayout(className);
 			call_offset = cl.getMethodOffset(call.getName());
-			func = globalScope.getChildTable(cl.getClassName()).getChildTable(call.getName());
+			func = globalScope.getChildTable(cl.getClassName()).getChildTable(call.getName()); 
 		}
 		
 		// construct params list (y=reg4,)
