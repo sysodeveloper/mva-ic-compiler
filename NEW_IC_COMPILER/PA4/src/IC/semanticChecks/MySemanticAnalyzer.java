@@ -190,10 +190,13 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 
 	@Override
 	public Boolean visit(VariableLocation location, MySymbolTable d) {
-		/*boolean filed = checkVariable(location.getName(), d,Kind.Field);
+		boolean filed = checkVariable(location.getName(), d,Kind.Field);
 		boolean param = checkVariable(location.getName(), d,Kind.Parameter);
-		boolean local = checkVariable(location.getName(), d,Kind.Local_Variable);*/
-		MySymbolRecord locationRecord = location.enclosingScope().Lookup(location.getName());
+		boolean local = checkVariable(location.getName(), d,Kind.Local_Variable);
+		if(!filed && !param && !local){
+			semanticErrors.add(new SemanticError("undefined reference with the name "+location.getName() , location.getLine()));
+		}
+		/*MySymbolRecord locationRecord = location.enclosingScope().Lookup(location.getName());
 		if(locationRecord == null){
 			semanticErrors.add(new SemanticError("undefined reference with the name "+location.getName() , location.getLine()));
 			return false;
@@ -211,7 +214,8 @@ public class MySemanticAnalyzer implements PropagatingVisitor<MySymbolTable, Boo
 		case Local_Variable:
 			local = true;
 			break;
-		}
+		}*/
+		
 		if(location.isExternal()){
 			boolean result = location.getLocation().accept(this, d);
 			if(!result)
