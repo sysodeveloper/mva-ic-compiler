@@ -209,7 +209,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			instructions.add("Return 9999");
 		}
 		/* Free Register Allocated */
-		d.freeRegister();
+		d.endScope();		
 		UpType up = new UpType();
 		return up;
 	}
@@ -281,16 +281,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		//reset loadOrStore
 		d.loadOrStore = false;
 		d.downRegister = null;
-/*		Kind leftSide = assignment.getVariable().getRecord().getKind();
-		switch(leftSide){
-		case Local_Variable:
-			instructions.add(spec.Move(upTypeExpr.getTarget(), d.nextRegister()));
-			break;
-		case Field:
-			instructions.add(spec.MoveFieldStore(upTypeExpr.getTarget(), d.nextRegister(), assignmentLeftOffset+""));
-			break;
-		}
-		resultRegister = registers.lastRegisterUsed();*/
+		d.freeRegister(upTypeExpr.getTarget());
 		return new UpType();
 	}
 
@@ -434,7 +425,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			/* Store Or Load */
 			if(loadOrStore){
 				//Store
-				instructions.add(spec.MoveFieldStore(downRegister, d.nextRegister(),  cl.getFieldOffset(location.getName())+""));
+				instructions.add(spec.MoveFieldStore(downRegister,upType.getTarget(),  cl.getFieldOffset(location.getName())+""));
 			}else{
 				//Load
 				String name = getFieldTranslationName(location.getName(), externalTable);
@@ -456,6 +447,20 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 					String reg = d.nextRegister();
 					instructions.add(spec.MoveFieldLoad(name,d.currentClassLayout.getFieldOffset(location.getName())+"",reg));
 					upTypeReturned.setTarget(reg);
+				}
+			}
+			
+			if(rec.getKind() == Kind.Local_Variable){
+				String name = getVariableTranslationName(location.getName(),location.enclosingScope());
+				if(loadOrStore){
+					//Store
+					instructions.add(spec.Move(downRegister, name));
+				}else{
+					//Load
+					String reg = d.nextRegister();
+					upTypeReturned.setTarget(reg);
+					
+					instructions.add(spec.Move(name, reg));
 				}
 			}
 
@@ -599,7 +604,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		List<String> instructions = new ArrayList<String>();
 		String holder = d.nextRegister();		
 		int classSize = layoutManager.getClassLayout(newClass.getName()).getLayoutSize();
-		String newClassInst = spec.allocateObject(Integer.toString(classSize));
+		String newClassInst = spec.allocateObject(Integer.toString(4*classSize));
 		instructions.add(makeComment(holder+" = new "+newClass.getName()+"()"));
 		instructions.add(spec.Library(newClassInst, holder));
 		instructions.add(spec.MoveFieldStore(dispatchNames.get(newClass.getName()), holder, "0"));
