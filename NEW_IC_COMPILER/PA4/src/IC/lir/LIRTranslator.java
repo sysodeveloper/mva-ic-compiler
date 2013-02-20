@@ -901,7 +901,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	private List<String> nullPointer(String reg){
 		List<String> inst = new ArrayList<String>();
 		inst.add(spec.Compare("0", reg));
-		inst.add(spec.JumpTrue("labelNPE"));
+		inst.add(spec.JumpTrue("_labelNPE"));
 		return inst;
 	}
 	
@@ -910,9 +910,9 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		String length = d.nextRegister();
 		inst.add(spec.ArrayLength(array, length));
 		inst.add(spec.Compare(index, length));
-		inst.add(spec.JumpLE("labelABE"));
+		inst.add(spec.JumpLE("_labelABE"));
 		inst.add(spec.Compare("0", index));
-		inst.add(spec.JumpL("labelABE"));
+		inst.add(spec.JumpL("_labelABE"));
 		d.freeRegister(length);
 		return inst;
 	}
@@ -920,14 +920,14 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	private List<String> divisionByZero(String reg){
 		List<String> inst = new ArrayList<String>();
 		inst.add(spec.Compare("0", reg));
-		inst.add(spec.JumpTrue("labelDBE"));
+		inst.add(spec.JumpTrue("_labelDBE"));
 		return inst;
 	}
 	
 	private List<String> arraySize(String reg){
 		List<String> inst = new ArrayList<String>();
 		inst.add(spec.Compare("0", reg));
-		inst.add(spec.JumpLE("labelASE"));
+		inst.add(spec.JumpLE("_labelASE"));
 		return inst;
 	}
 }
