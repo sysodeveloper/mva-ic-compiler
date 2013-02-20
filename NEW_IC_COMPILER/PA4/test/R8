@@ -1,0 +1,32 @@
+// Check virtual calls and overriding.
+class R8
+{
+	static void main(string[] args)
+	{
+		A a = new A();
+		println("A a = new A();");
+		a.m();
+		B b = new B();
+		println("B b = new B();");
+		b.m();
+		A c = new B();
+		println("A c = new B();");
+		c.m();
+	}
+}
+
+class A
+{
+	void m()
+	{
+		println("Hello from A.");
+	}
+}
+
+class B extends A
+{
+	void m()
+	{
+		println("Hello from B.");
+	}
+}

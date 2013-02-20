@@ -1,0 +1,12 @@
+// check "readln, eof, stoa, atos, and random." creation but without microLIR
+class C3
+{
+	static void main(string[] args)
+	{
+		string s =readln();
+		eof();
+		int i = stoa(s);
+		string s2 = atos(i);
+		int r = random(10);
+	}
+}

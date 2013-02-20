@@ -24,8 +24,9 @@ class A {
         arr[i] = val;
         i = i + 1;
         Library.printi(i);
-        if (a == null)
-          break;
+        if (i <=0)
+          continue;    
+          
     }
   }
 }

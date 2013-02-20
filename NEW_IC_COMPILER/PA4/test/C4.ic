@@ -1,0 +1,16 @@
+// check "readln, eof, stoa, atos, and random." creation but without microLIR
+class C4
+{
+	static void main(string[] args)
+	{
+		println("println");
+		print("print");
+		printi(3);
+		printb(true);
+		printb(false);
+		int i = stoi(s);
+		string s2 = itos(i);
+		println("time = " + time());
+		exit(0);
+	}
+}

@@ -1,0 +1,10 @@
+// a.length (a=null) -> should print "Runtime Error: Null pointer dereference!"
+class R3
+{
+	static void main(string[] args)
+	{
+		int[] a=null;
+		int b;
+		b = a.length;
+	}
+}

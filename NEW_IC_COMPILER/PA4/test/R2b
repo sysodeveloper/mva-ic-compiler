@@ -1,0 +1,10 @@
+// a[i] (size(a) = n and (i >= n or i < 0)) -> should print "Runtime Error: Array index out of bounds!"
+class R2b
+{
+	static void main(string[] args)
+	{
+		int[] a = new int[3];
+		int b;
+		b = a[-2];
+	}
+}
