@@ -130,14 +130,16 @@ public class ClassLayout {
 	
 	public String printDispatchVector(){
 		StringBuffer dispatchVector = new StringBuffer();
-		if(hasVirtaulMethos()){
-			dispatchVector.append("_DV_"+this.className+":");
+		//if(hasVirtaulMethos()){
+			dispatchVector.append("_DV_"+this.className+": [");
 			for(String methodName : this.methodToOffset.keySet()){
 				dispatchVector.append(methodName);
 				dispatchVector.append(",");
 			}
-			dispatchVector.deleteCharAt(dispatchVector.length()-1);
-		}
+			if(dispatchVector.charAt(dispatchVector.length()-1)==',')
+				dispatchVector.deleteCharAt(dispatchVector.length()-1);
+		//}
+			dispatchVector.append("]")	;
 		return dispatchVector.toString();
 	}
 	
