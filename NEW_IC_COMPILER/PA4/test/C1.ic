@@ -1,0 +1,10 @@
+// string concat ("bla"+"bla") -> __stringCat(s,t)
+class C1
+{
+	static void main(string[] args)
+	{
+		string s1 = "hello";
+		string s2 = "world!";
+		println(s1 + " " + s2);
+	}
+}

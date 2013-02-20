@@ -1,0 +1,19 @@
+// o.m() (o=null) -> should print "Runtime Error:  Null pointer dereference!"
+class R6
+{
+	static void main(string[] args)
+	{
+		int[] a=null;
+		Person p = null;
+		int b;
+		b = p.think();
+	}
+}
+
+class Person
+{
+	int brain;
+	void think()
+	{
+	}
+}

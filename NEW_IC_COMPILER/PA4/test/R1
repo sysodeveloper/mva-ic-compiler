@@ -1,0 +1,10 @@
+// a[i] (a = null) -> should print "Runtime Error: Null Pointer dereference!"
+class R1
+{
+	static void main(string[] args)
+	{
+		int[] a=null;
+		int b;
+		b = a[1];
+	}
+}

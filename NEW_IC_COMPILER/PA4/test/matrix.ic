@@ -1,6 +1,12 @@
 class A{
+	int uuuuuu;
 	int x;
+	
 	int y(){
+		A a = new A();
+		int yy;
+		yy=1+2;
+		yy=3;
 		this.x = 6;
 		(new B()).x = 8;
 		int u;
@@ -14,4 +20,5 @@ class A{
 
 class B{
 	int x;
+	int z;
 }
