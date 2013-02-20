@@ -159,7 +159,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		tempInst.add(makeComment(""));
 		tempInst.add(makeComment(""));
 		tempInst.add(makeComment("String Literals"));
-		String[] errors={"Division by zero","Ilegal Array size","Array index out of bounds","Null pointer"};
+		String[] errors={"Runtime Error: Division by zero!","Runtime Error: Array allocation with negative array size!","Runtime Error: Array index out of bounds!","Runtime Error: Null pointer dereference!"};
 		for(String error:errors){
 			setLabel(error);
 		}
