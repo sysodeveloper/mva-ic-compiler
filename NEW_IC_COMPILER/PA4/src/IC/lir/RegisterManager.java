@@ -21,18 +21,22 @@ public class RegisterManager {
 	}
 	
 	public String nextRegister(){
+	
 		if(allocators.size() <= 0 ){
 			addAllocator();
 		}
 		int r = 0;
 		for(Boolean b : registers){
 			if(b.booleanValue() == true){
+				this.registers.set(r, false);
 				return registerDescription(r); 
 			}
 			r++;
 		}
 		//no free register yet, create one
+		
 		registers.add(false);
+		System.out.println(this.registers);
 		//add to allocator stack
 		allocators.peek().add(r);
 		//save last register
@@ -50,7 +54,7 @@ public class RegisterManager {
 	
 	public void freeRegister(String register){
 		if(register.length() >= 2){
-			String number = register.substring(2);
+			String number = register.substring(1);
 			int regNumber = -1;
 			try{
 				regNumber = Integer.parseInt(number);
@@ -59,9 +63,11 @@ public class RegisterManager {
 			}
 			if(regNumber >= 0){
 				//free register at pos regNumber
+				System.out.println("Free " + regNumber);
 				this.registers.set(regNumber, true);
 			}
 		}
+		System.out.println(this.registers);
 	}
 	
 	public String lastRegisterUsed(){
