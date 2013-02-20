@@ -296,8 +296,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(CallStatement callStatement, DownType d) {
-		d.prevNode = callStatement;
-		d.prevNode = callStatement;
+		d.prevNode = callStatement;		
 		UpType upType = callStatement.getCall().accept(this,d);
 		return new UpType(upType); // ---> I changed it, it was return new UpType(), need to talk about it
 	}
