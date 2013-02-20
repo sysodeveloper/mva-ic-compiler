@@ -90,7 +90,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	
 	private String getParameterTranslationName(String parName,MySymbolTable enclosingScope){
 		int id = enclosingScope.Lookup(parName).getId();
-		return "p"+id + parName;
+		//return "p"+id + parName;
+		return "p0" + parName;
 	}
 	
 	private String getFieldTranslationName(String fieldName,MySymbolTable enclosingScope){
@@ -158,9 +159,28 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		tempInst.add(makeComment(""));
 		tempInst.add(makeComment(""));
 		tempInst.add(makeComment("String Literals"));
+		String[] errors={"Division by zero","Ilegal Array size","Array index out of bounds","Null pointer"};
+		for(String error:errors){
+			setLabel(error);
+		}
+		
 		tempInst.addAll(stringLiterals);
 		tempInst.add(makeComment("Dispatch Vectors"));
-		tempInst.addAll(dispatchVectors);		
+		tempInst.addAll(dispatchVectors);
+		
+		// error labels
+		tempInst.add("labelDBE:"); // division by zero
+		tempInst.add(spec.Library("__println("+stringNames.get(errors[0])+")", "Rdummy"));
+		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
+		tempInst.add("labelASE:"); // array allocation
+		tempInst.add(spec.Library("__println("+stringNames.get(errors[1])+")", "Rdummy"));
+		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
+		tempInst.add("labelABE:"); // array bounds
+		tempInst.add(spec.Library("__println("+stringNames.get(errors[2])+")", "Rdummy"));
+		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
+		tempInst.add("labelNPE:"); // null pointer
+		tempInst.add(spec.Library("__println("+stringNames.get(errors[3])+")", "Rdummy"));
+		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
 		instructions.addAll(0, tempInst);
 		
 		return new UpType();				
@@ -295,7 +315,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		//reset loadOrStore
 		d.loadOrStore = false;
 		d.downRegister = null;
-		d.freeRegister(upTypeExpr.getTarget());
+		if(upTypeExpr.getTarget() != null) d.freeRegister(upTypeExpr.getTarget());
 		return new UpType();
 	}
 
@@ -454,20 +474,26 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			MySymbolRecord rec = location.enclosingScope().Lookup(location.getName());
 			if(rec == null) return null;
 			if(rec.getKind() == Kind.Field){
+				UpType thisField = visit(new This(0),d);
+				
 				if(loadOrStore){
 					//Store
-					instructions.add(spec.MoveFieldStore(downRegister, d.nextRegister(),  d.currentClassLayout.getFieldOffset(location.getName())+""));
+					instructions.add(spec.MoveFieldStore(downRegister, thisField.getTarget(),  d.currentClassLayout.getFieldOffset(location.getName())+""));
 				}else{
 					//Load
 					String name = getFieldTranslationName(location.getName(), location.enclosingScope());
 					String reg = d.nextRegister();
-					instructions.add(spec.MoveFieldLoad(name,d.currentClassLayout.getFieldOffset(location.getName())+"",reg));
+					instructions.add(spec.MoveFieldLoad(thisField.getTarget(),d.currentClassLayout.getFieldOffset(location.getName())+"",reg));
 					upTypeReturned.setTarget(reg);
 				}
 			}
 			
 			if(rec.getKind() == Kind.Local_Variable || rec.getKind() == Kind.Parameter){
-				String name = getVariableTranslationName(location.getName(),location.enclosingScope());
+				String name = null;
+				if(rec.getKind() == Kind.Local_Variable)
+					name = getVariableTranslationName(location.getName(),location.enclosingScope());
+				else
+					name = getParameterTranslationName(location.getName(), location.enclosingScope());
 				if(loadOrStore){
 					//Store
 					instructions.add(spec.Move(downRegister, name));
@@ -492,16 +518,19 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		d.loadOrStore = false; //load
 		UpType upTypeExpr = location.getArray().accept(this,d);
 		if(upTypeExpr == null) return null;
+		instructions.addAll(nullPointer(upTypeExpr.getTarget()));//runtime null pointer
 		UpType upTypeIndex = location.getIndex().accept(this,d);
-		if(upTypeIndex == null) return null;
+		if (upTypeIndex == null) return null;
+		instructions.addAll(arrayAccess(upTypeExpr.getTarget(),upTypeIndex.getTarget(),d));//runtime array access
 		d.loadOrStore = loadOrStore;
 		if(loadOrStore){
 			//Store
 			instructions.add(spec.MoveArrayStore(downRegister, upTypeExpr.getTarget(), upTypeIndex.getTarget()));
 		}else{
 			//Load
-			instructions.add(spec.MoveArrayLoad(upTypeExpr.getTarget(),upTypeIndex.getTarget(), downRegister));
-			upTypeReturned.setTarget(downRegister);
+			String reg = d.nextRegister();
+			instructions.add(spec.MoveArrayLoad(upTypeExpr.getTarget(),upTypeIndex.getTarget(), reg));
+			upTypeReturned.setTarget(reg);
 		}
 		return upTypeReturned;
 	}
@@ -533,7 +562,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 				paramsExpr+=upArg.getTarget()+","; // R1,Reg45,...
 			}			
 			else
-				paramsExpr+=formals.get(index)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
+				paramsExpr+=getParameterTranslationName(formals.get(index), func)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
 			index++;			
 		}
 		char[] toChar = paramsExpr.toCharArray();
@@ -595,7 +624,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		for(Expression arg :call.getArguments()){
 			UpType upArg = (arg.accept(this, d));
 			if(upArg==null) return null;			 
-			paramsExpr+=formals.get(index)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
+			paramsExpr+=getParameterTranslationName(formals.get(index), func)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
 			index++;			
 		}
 		char[] toChar = paramsExpr.toCharArray();
@@ -656,6 +685,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			int typeFactor = layoutManager.getClassLayout(newArray.getType().getName()).getLayoutSize(); 
 			instructions.add(spec.Mul(Integer.toString(typeFactor), arraySize.getTarget()));
 		}
+		else{
+			int typeFactor = 4; 
+			instructions.add(spec.Mul(Integer.toString(typeFactor), arraySize.getTarget()));
+		}
 				
 		String newArrInst = spec.allocateArray(arraySize.getTarget());
 		
@@ -672,6 +705,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		UpType firstOperand = length.getArray().accept(this, d);
 		if(firstOperand==null)
 			return null;
+		instructions.addAll(nullPointer(firstOperand.getTarget()));
 		String newReg = d.nextRegister();
 		instructions.add(spec.ArrayLength(firstOperand.getTarget(), newReg));
 		UpType up = new UpType(newReg);		
@@ -736,13 +770,13 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
 				instructions.add(spec.JumpTrue(label));
 			if(binaryOp.getOperator() == BinaryOps.GT)
-				instructions.add(spec.JumpLE(label));
-			if(binaryOp.getOperator() == BinaryOps.GTE)
-				instructions.add(spec.JumpL(label));
-			if(binaryOp.getOperator() == BinaryOps.LT)
 				instructions.add(spec.JumpGE(label));
-			if(binaryOp.getOperator() == BinaryOps.LTE)
+			if(binaryOp.getOperator() == BinaryOps.GTE)
 				instructions.add(spec.JumpG(label));
+			if(binaryOp.getOperator() == BinaryOps.LT)
+				instructions.add(spec.JumpLE(label));
+			if(binaryOp.getOperator() == BinaryOps.LTE)
+				instructions.add(spec.JumpL(label));
 			}
 		else{
 			if(binaryOp.getOperator()==BinaryOps.LAND){
@@ -848,5 +882,46 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			System.out.println(instruction);
 		}
 	}
-
+	private void setLabel(String label){
+		String strLiteral = null;
+		if(!stringNames.containsKey(label)){
+			strLiteral = getStringLiteralTranslationName(label);
+			stringNames.put(label, strLiteral);
+			stringLiterals.add(strLiteral+": "+'"'+label+'"');
+		}else{
+			strLiteral = stringNames.get(label);
+		}	
+	}
+	private List<String> nullPointer(String reg){
+		List<String> inst = new ArrayList<String>();
+		inst.add(spec.Compare("0", reg));
+		inst.add(spec.JumpTrue("labelNPE"));
+		return inst;
+	}
+	
+	private List<String> arrayAccess(String array,String index, DownType d){
+		List<String> inst = new ArrayList<String>();
+		String length = d.nextRegister();
+		inst.add(spec.ArrayLength(array, length));
+		inst.add(spec.Compare(index, length));
+		inst.add(spec.JumpLE("labelABE"));
+		inst.add(spec.Compare("0", index));
+		inst.add(spec.JumpL("labelABE"));
+		d.freeRegister(length);
+		return inst;
+	}
+	
+	private List<String> divisionByZero(String reg){
+		List<String> inst = new ArrayList<String>();
+		inst.add(spec.Compare("0", reg));
+		inst.add(spec.JumpTrue("labelDBE"));
+		return inst;
+	}
+	
+	private List<String> arraySize(String reg){
+		List<String> inst = new ArrayList<String>();
+		inst.add(spec.Compare("0", reg));
+		inst.add(spec.JumpLE("labelASE"));
+		return inst;
+	}
 }
