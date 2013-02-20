@@ -253,7 +253,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(method.getName().compareTo("main")==0)
 			instructions.add("_ic_main:");
 		else
-			instructions.add(d.currentClassLayout.makeSymbolicName(method.getName()+":"));
+			instructions.add("_"+method.getName()+":");
 		/* Method Translation */
 		UpType upType = method.getType().accept(this,d);
 		if(upType == null) return null;
@@ -565,16 +565,15 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			UpType upArg = (arg.accept(this, d));
 			if(upArg==null) return null;			 
 			if(library){
-				paramsExpr+=upArg.getTarget()+","; // R1,Reg45,...
+				paramsExpr+=upArg.getTarget(); // R1,Reg45,...
 			}			
 			else
-				paramsExpr+=getParameterTranslationName(formals.get(index), func)+"="+upArg.getTarget()+","; // param1=R1,param2=Reg45,...
+				paramsExpr+=getParameterTranslationName(formals.get(index), func)+"="+upArg.getTarget(); // param1=R1,param2=Reg45,...
+			if(index<call.getArguments().size()-1)
+				paramsExpr+=",";
 			index++;			
 		}
-		char[] toChar = paramsExpr.toCharArray();
-		toChar[paramsExpr.length()-1]=')';
-		paramsExpr = new String(toChar) ;
-		
+		paramsExpr=paramsExpr.concat(")");
 		if(func.getEntries().get("$ret").getMyType() instanceof MyVoidType )
 			retReg = "Rdummy";
 		else
@@ -594,6 +593,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 
 	@Override
 	public UpType visit(VirtualCall call, DownType d) {
+		
+		
 		List<String> instructions = new ArrayList<String>();
 		String paramsExpr = "(";
 		d.prevNode = call;		
@@ -601,9 +602,18 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		int call_offset;
 		MySymbolTable func;
 		String retReg;
+		UpType caller = null;
+		// check if it is a static call to a function of the current class
+		if(!call.isExternal()){
+			if(d.currentClassLayout.getMethodOffset(call.getName())==-1){
+				return visit(new StaticCall(call.getLine(), d.currentClassLayout.getClassName(), call.getName(), call.getArguments()),d);
+			}
+		}
 		
-		UpType caller = call.getLocation().accept(this, d);
-		if(caller == null) return null;
+		if(call.isExternal()){
+			caller = call.getLocation().accept(this, d);
+			if(caller == null) return null;
+		}
 		
 		if(!(call.getLocation() instanceof This) && !call.isExternal()){ // call like ... func();
 			caller = visit((This)call.getLocation(),d);			

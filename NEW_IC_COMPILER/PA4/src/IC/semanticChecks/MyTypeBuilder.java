@@ -416,7 +416,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			}
 		}
 		MyType type =  func.getNode().enclosingScope().Lookup("$ret").getMyType();
-		call.setTypeFromTable(type);
+		call.setTypeFromTable(func.getMyType());
 		return type;
 	}
 	@Override
@@ -467,7 +467,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			}
 		}
 		MyType type=func.getNode().enclosingScope().Lookup("$ret").getMyType();
-		call.setTypeFromTable(type);
+		call.setTypeFromTable(func.getMyType());
 		return type;
 	}
 	@Override
