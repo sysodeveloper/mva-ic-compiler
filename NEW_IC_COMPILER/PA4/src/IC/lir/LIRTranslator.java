@@ -439,6 +439,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			d.loadOrStore = false; //load
 			UpType upType = location.getLocation().accept(this,d);
 			if(upType == null) return null;
+			instructions.addAll(nullPointer(upType.getTarget())); // runtime check null pointer reference
 			d.loadOrStore = loadOrStore;
 			/* Get Class Layout, class is external */
 			MyType t = location.getLocation().getTypeFromTable();			
@@ -678,6 +679,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(arrayType==null) return null;
 		UpType arraySize =newArray.getSize().accept(this,d);
 		if(arraySize==null) return null;
+		instructions.addAll(arraySize(arraySize.getTarget())); //runtime check array size
 		String arrHolder = d.nextRegister();
 		instructions.add(makeComment(arrHolder+" = new "+newArray.getType().getName()+"[]"));
 		if(!(newArray.getType() instanceof PrimitiveType)){
@@ -737,10 +739,14 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			instructions.add(spec.Sub(secondReg, firstReg));
 		if(binaryOp.getOperator()==BinaryOps.MULTIPLY)
 			instructions.add(spec.Mul(secondReg, firstReg));
-		if(binaryOp.getOperator()==BinaryOps.DIVIDE)
-			instructions.add(spec.Div(secondReg, firstReg));
-		if(binaryOp.getOperator()==BinaryOps.MOD)
+		if(binaryOp.getOperator()==BinaryOps.DIVIDE){
+			instructions.addAll(divisionByZero(secondReg));//runtime check division by zero
+			instructions.add(spec.Div(secondReg, firstReg));			
+		}
+		if(binaryOp.getOperator()==BinaryOps.MOD){
+			instructions.addAll(divisionByZero(secondReg));//runtime check division by zero
 			instructions.add(spec.Mod(secondReg, firstReg));
+		}
 		this.instructions.addAll(instructions);
 		//free second operand
 		d.freeRegister(secondReg);
