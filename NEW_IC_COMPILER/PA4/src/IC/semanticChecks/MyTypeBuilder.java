@@ -87,14 +87,17 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		for(Method m: icClass.getMethods()){
 			m.accept(this,d);
 		}
-		return icClass.getRecord().getMyType();
+		MyType type = icClass.getRecord().getMyType();
+		icClass.setTypeFromTable(type);
+		return type;
 	}
 	@Override
 	public MyType visit(Field field, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
-		return field.getRecord().getMyType();
+		MyType type = field.getRecord().getMyType();
+		field.setTypeFromTable(type);
+		return type;
 	}
 
 	public MyType visit(Method method, Object d){
@@ -112,11 +115,15 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		for(Statement s : method.getStatements()){
 			s.accept(this,d);
 		}
-		return method.getRecord().getMyType();
+		MyType type = method.getRecord().getMyType();
+		method.setTypeFromTable(type);
+		return type;
 	}
 	@Override
 	public MyType visit(VirtualMethod method, Object d) {
-		return visit((Method)method,d);
+		MyType mtype = visit((Method)method,d);
+		method.setTypeFromTable(mtype);
+		return mtype;
 	}
 	@Override
 	public MyType visit(StaticMethod method, Object d) {
@@ -124,32 +131,39 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		if(fromTable.getName().compareTo(mainMethodType.getName()) == 0){
 			mainMethods++;
 		}
-		return visit((Method)method,d);
+		MyType mtype =visit((Method)method,d);
+		method.setTypeFromTable(mtype);
+		return mtype;
 	}
 	@Override
 	public MyType visit(LibraryMethod method, Object d) {
-		return visit((Method)method,d);
+		MyType mtype = visit((Method)method,d);
+		method.setTypeFromTable(mtype);
+		return mtype;
 	}
 	@Override
 	public MyType visit(Formal formal, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
-		return formal.getType().accept(this,d);
+		MyType mtype = formal.getType().accept(this,d);
+		formal.setTypeFromTable(mtype);
+		return mtype;
 	}
 	@Override
 	public MyType visit(PrimitiveType type, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
-		return types.insertType(type.getMyType());
+		MyType mtype = types.insertType(type.getMyType());
+		type.setTypeFromTable(mtype);
+		return mtype;
 	}
 	@Override
 	public MyType visit(UserType type, Object d) {
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
-		return types.insertType(type.getMyType());
+		MyType mtype = types.insertType(type.getMyType());
+		type.setTypeFromTable(mtype);
+		return mtype;
 	}
 	@Override
 	public MyType visit(Assignment assignment, Object d) {
@@ -161,6 +175,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		MyType varType = types.insertType(assignment.getVariable().accept(this,d));
 		MyType exprType = types.insertType(assignment.getAssignment().accept(this,d));
 		if(TypeOK(varType,exprType)){
+			assignment.setTypeFromTable(varType);
 			return varType;
 		}
 
@@ -175,8 +190,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		// TODO Auto-generated method stub
 		fromNewArray = false;
 		fromVariableLocation = false;
-		
-		return callStatement.getCall().accept(this, d);
+		MyType type = callStatement.getCall().accept(this, d);
+		callStatement.setTypeFromTable(type);
+		return type;
 	
 	}
 	@Override
@@ -193,6 +209,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		if(returnStatement.hasValue()){
 			MyType ret = types.insertType(returnStatement.getValue().accept(this,d));
 			if(TypeOK(methodType, ret)){
+				returnStatement.setTypeFromTable(methodType);
 				return methodType;
 			}
 			semanticErrors.add(new SemanticError("Return value type "+ret.getName()+" doesn't match function return type "+methodType.getName(),returnStatement.getLine()));
@@ -220,6 +237,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		if(ifStatement.hasElse()){
 			ifStatement.getElseOperation().accept(this,d);
 		}
+		ifStatement.setTypeFromTable(conditionType);
 		return conditionType;
 	}
 	@Override
@@ -234,6 +252,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		}
 		//Continue traversing the tree
 		whileStatement.getOperation().accept(this,d);
+		whileStatement.setTypeFromTable(conditionType);
 		return conditionType;
 	}
 	@Override
@@ -277,6 +296,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("Type of initializing expresion "+initType.getName()+" didnt match variable type "+varType.getName(),localVariable.getLine()));
 			return voidType;
 		}
+		localVariable.setTypeFromTable(varType);
 		return varType;
 	}
 	@Override
@@ -294,7 +314,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			
 			//current class field
 			if(location.getLocation() instanceof This){
-				return getVarType(location.getName(),location.enclosingScope(),Kind.Field);
+				MyType type = getVarType(location.getName(),location.enclosingScope(),Kind.Field);
+				location.setTypeFromTable(type);
+				return type;
 			}
 			//field of other class  need to check if exists
 			MySymbolRecord externalField = ((MyClassType)locType).getClassAST().enclosingScope().Lookup(location.getName());
@@ -302,10 +324,14 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 				semanticErrors.add(new SemanticError("Field with the name "+location.getName()+" does not exist", location.getLine()));
 				return voidType;
 			}
-			return externalField.getMyType();
+			MyType type = externalField.getMyType();
+			location.setTypeFromTable(type);
+			return type;
 		
-		}				
-		return location.enclosingScope().Lookup(location.getName()).getMyType();
+		}	
+		MyType type = location.enclosingScope().Lookup(location.getName()).getMyType();
+		location.setTypeFromTable(type);
+		return type;
 	}
 	@Override
 	public MyType visit(ArrayLocation location, Object d) {
@@ -341,10 +367,12 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 				newType.setFullName();*/
 				newType.setDimention(newType.getDimention()-1);
 				MyType ret = types.insertType(newType);
+				location.setTypeFromTable(ret);
 				return ret;
 			}else if(mtype.getDimention() == 1){
 				//now array must be converted to base type
 				MyType ret =  types.insertType(((MyArrayType)mtype).getElementType().clone());
+				location.setTypeFromTable(ret);
 				return ret;
 			}
         }else if(this.fromNewArray){
@@ -352,8 +380,12 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			MyArrayType newType = (MyArrayType) mtype.clone();
 			newType.setDimention(newType.getDimention()+1);
 			newType.setFullName();
-			return types.insertType(newType);        	
+			MyType type = types.insertType(newType); 
+			location.setTypeFromTable(type);
+			return type;       	
         }
+       
+		location.setTypeFromTable(mtype);
 		return mtype;
 
 	}
@@ -383,8 +415,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 				return voidType;
 			}
 		}
-		
-		return func.getNode().enclosingScope().Lookup("$ret").getMyType();
+		MyType type =  func.getNode().enclosingScope().Lookup("$ret").getMyType();
+		call.setTypeFromTable(type);
+		return type;
 	}
 	@Override
 	public MyType visit(VirtualCall call, Object d) {
@@ -433,8 +466,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 				return voidType;
 			}
 		}
-		
-		return func.getNode().enclosingScope().Lookup("$ret").getMyType();
+		MyType type=func.getNode().enclosingScope().Lookup("$ret").getMyType();
+		call.setTypeFromTable(type);
+		return type;
 	}
 	@Override
 	public MyType visit(This thisExpression, Object d) {
@@ -446,7 +480,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		}
 		MySymbolRecord rec = enc.Lookup(enc.getDescription());
 		if(rec != null){
-			return rec.getMyType();
+			MyType type=rec.getMyType();
+			thisExpression.setTypeFromTable(type);
+			return type;
 		}
 		return voidType;
 	}
@@ -457,7 +493,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		
 		MyClassType c = new MyClassType();
 		c.setName(newClass.getName());
-		return types.insertType(c);
+		MyType type = types.insertType(c);
+		newClass.setTypeFromTable(type);
+		return type;
 	}
 	@Override
 	public MyType visit(NewArray newArray, Object d) {
@@ -473,7 +511,9 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		arr.setDimention(1);
 		arr.setFullName();
 		this.fromNewArray = true;
-		return this.types.insertType(arr);
+		MyType type = this.types.insertType(arr);
+		newArray.setTypeFromTable(type);
+		return type;
 
 	}
 	@Override
@@ -486,6 +526,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("length can be applyed only to array types",length.getLine()));
 			return voidType;
 		}
+		length.setTypeFromTable(intType);
 		return intType;
 	}
 	@Override
@@ -505,15 +546,18 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		}
 		//special case for strings 
 		if(leftType == stringType){
-			if(binaryOp.getOperator()==BinaryOps.PLUS)
+			if(binaryOp.getOperator()==BinaryOps.PLUS){
+				binaryOp.setTypeFromTable(leftType);
 				return leftType;
+			}
 			semanticErrors.add(new SemanticError("Cannot perform "+binaryOp.getOperator().getDescription()+ " operation on string types",binaryOp.getLine()));
 			return voidType;
 		}
 		if(leftType != intType){ // math operation on types which are not integers
 			semanticErrors.add(new SemanticError("Cannot perform math operation on "+leftType.getName() ,binaryOp.getLine()));
 			return voidType;
-		}		
+		}
+		binaryOp.setTypeFromTable(leftType);
 		return leftType;
 	}
 	@Override
@@ -532,6 +576,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 				semanticErrors.add(new SemanticError("Cannot perform logical operation on different types",binaryOp.getLine()));
 				return voidType;
 			}
+			binaryOp.setTypeFromTable(boolType);
 			return boolType;
 		}
 		// binaryOps && , || - only on booleans 
@@ -540,6 +585,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 				semanticErrors.add(new SemanticError("Can perform "+binaryOp.getOperator().getDescription()+" operation only on boolean types",binaryOp.getLine()));
 				return voidType;
 			}
+			binaryOp.setTypeFromTable(boolType);
 			return boolType;
 			
 		}
@@ -549,7 +595,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("Can perform "+binaryOp.getOperator().getDescription()+" operation only on int types",binaryOp.getLine()));
 			return voidType;
 		}
-		
+		binaryOp.setTypeFromTable(boolType);
 		return boolType;
 	}
 	@Override
@@ -563,6 +609,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("Can perform "+unaryOp.getOperator().getDescription()+" operation only on int types",unaryOp.getLine()));
 			return voidType;
 		}
+		unaryOp.setTypeFromTable(intType);
 		return intType;
 	}
 	@Override
@@ -572,6 +619,7 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 			semanticErrors.add(new SemanticError("Can perform "+unaryOp.getOperator().getDescription()+" operation only on boolean types",unaryOp.getLine()));
 			return voidType;
 		}
+		unaryOp.setTypeFromTable(boolType);
 		return boolType;
 	}
 	@Override
@@ -579,8 +627,10 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		fromNewArray = false;
 		fromVariableLocation = false;
 		MyType type =  types.insertType(literal.getMyType());
-		if(type!=intType)
+		if(type!=intType){
+			literal.setTypeFromTable(type);
 			return type;
+		}
 		try{
 			Boolean minusBefore = new Boolean(false);
 			if(d instanceof Boolean){
@@ -595,7 +645,8 @@ public class MyTypeBuilder implements PropagatingVisitor<Object, MyType> {
 		}catch(NumberFormatException e){
 			semanticErrors.add(new SemanticError("the number is out of range",literal.getLine()));
 			return voidType;
-		}		
+		}
+		literal.setTypeFromTable(type);
 		return type;
 	}
 	@Override
