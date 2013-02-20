@@ -613,6 +613,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(call.isExternal()){
 			caller = call.getLocation().accept(this, d);
 			if(caller == null) return null;
+			instructions.addAll(nullPointer(caller.getTarget()));
 		}
 		
 		if(!(call.getLocation() instanceof This) && !call.isExternal()){ // call like ... func();
