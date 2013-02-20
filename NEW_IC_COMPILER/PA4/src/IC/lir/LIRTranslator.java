@@ -169,16 +169,16 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		tempInst.addAll(dispatchVectors);
 		
 		// error labels
-		tempInst.add("labelDBE:"); // division by zero
+		tempInst.add("_labelDBE:"); // division by zero
 		tempInst.add(spec.Library("__println("+stringNames.get(errors[0])+")", "Rdummy"));
 		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
-		tempInst.add("labelASE:"); // array allocation
+		tempInst.add("_labelASE:"); // array allocation
 		tempInst.add(spec.Library("__println("+stringNames.get(errors[1])+")", "Rdummy"));
 		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
-		tempInst.add("labelABE:"); // array bounds
+		tempInst.add("_labelABE:"); // array bounds
 		tempInst.add(spec.Library("__println("+stringNames.get(errors[2])+")", "Rdummy"));
 		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
-		tempInst.add("labelNPE:"); // null pointer
+		tempInst.add("_labelNPE:"); // null pointer
 		tempInst.add(spec.Library("__println("+stringNames.get(errors[3])+")", "Rdummy"));
 		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
 		instructions.addAll(0, tempInst);
