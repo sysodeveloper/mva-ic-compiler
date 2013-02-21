@@ -786,10 +786,6 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		if(firstOperand==null)
 			return null;
 		String reg = firstOperand.getTarget();
-		/*if(!isReg(firstOperand.getTarget())){
-			reg = d.nextRegister();
-			instructions.add(spec.Move(firstOperand.getTarget(), reg));
-		}*/
 		instructions.addAll(nullPointer(reg,d));
 		String newReg = d.nextRegister();
 		instructions.add(spec.ArrayLength(reg, newReg));
@@ -886,17 +882,6 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		//user accumulators
 		String accuReg = ReturnAccumulator(firstOperand.getTarget(),secondOperand.getTarget(),d);
 		String firstPlace, secondPlace;
-		/*if(accuReg.compareTo(firstReg) == 0){
-			firstPlace = secondReg;
-			secondPlace = accuReg;
-		}else if(accuReg.compareTo(secondReg) == 0){
-			firstPlace = firstReg;
-			secondPlace = accuReg;
-		}else{
-			instructions.add(spec.Move(firstReg, accuReg));
-			firstPlace = secondReg;
-			secondPlace = accuReg;			
-		}*/
 		if(accuReg.compareTo(firstReg) == 0){
 			firstPlace = accuReg;
 			secondPlace = secondReg;
