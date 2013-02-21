@@ -46,7 +46,8 @@ public class DownType {
 	}
 	
 	public void endScope(){
-		regManager.freeRegisters();
+		//regManager.freeRegisters();
+		regManager.freeAll();
 	}
 	
 //	public void freeRegisters(int numToFree){

@@ -1,6 +1,8 @@
 package IC.lir;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -52,6 +54,7 @@ public class RegisterManager {
 	}
 	
 	public void freeRegister(String register){
+		if(register.charAt(0) != 'R') return;
 		if(register.length() >= 2){
 			String number = register.substring(1);
 			int regNumber = -1;
@@ -69,6 +72,10 @@ public class RegisterManager {
 	
 	public String lastRegisterUsed(){
 		return lastRegister;
+	}
+	
+	public void freeAll(){
+		Collections.fill(this.registers, true);
 	}
 	
 	private String registerDescription(int registerNumber){
