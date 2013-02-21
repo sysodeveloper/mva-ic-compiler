@@ -599,13 +599,13 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		String paramsExpr = "(";
 		d.prevNode = call;		
 		String callerReg;
-		int call_offset;
-		MySymbolTable func;
+		int call_offset=-1;
+		MySymbolTable func=null;
 		String retReg;
 		UpType caller = null;
 		// check if it is a static call to a function of the current class
 		if(!call.isExternal()){
-			if(d.currentClassLayout.getMethodOffset(call.getName())==-1){
+			if(!d.currentClassLayout.hasMethodInLayout(call.getName())){
 				return visit(new StaticCall(call.getLine(), d.currentClassLayout.getClassName(), call.getName(), call.getArguments()),d);
 			}
 		}
@@ -617,18 +617,20 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		}
 		
 		if(!(call.getLocation() instanceof This) && !call.isExternal()){ // call like ... func();
-			caller = visit((This)call.getLocation(),d);			
+			caller = visit((This)call.getLocation(),d);	
+			call_offset = d.currentClassLayout.getMethodOffset(call.getName());				
+			func = d.prevNode.enclosingScope().LookUpTable(call.getName());
 		}		
 		
-		if(call.getLocation() instanceof This || !call.isExternal()){ // case this.func()..			
+		if(call.getLocation() instanceof This){ // case this.func()..			
 			call_offset = d.currentClassLayout.getMethodOffset(call.getName());	
-			func = globalScope.getChildTable(d.currentClassLayout.getClassName()).getChildTable(call.getName());
+			func = d.prevNode.enclosingScope().LookUpTable(call.getName());
 		}
-		else{ // case v.func() ..
+		if(call.isExternal()){ // case v.func() ..
 			String className =((MyClassType) call.getLocation().getTypeFromTable()).getName();
 			ClassLayout cl =  layoutManager.getClassLayout(className);
 			call_offset = cl.getMethodOffset(call.getName());
-			func = globalScope.getChildTable(cl.getClassName()).getChildTable(call.getName()); 
+			func = globalScope.getChildTable(className).getChildTable(call.getName()); 
 		}
 		
 		// construct params list (y=reg4,)
