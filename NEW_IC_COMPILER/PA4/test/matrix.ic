@@ -1,24 +1,19 @@
 class A{
-	int uuuuuu;
-	int x;
-	
-	int y(){
-		A a = new A();
-		int yy;
-		yy=1+2;
-		yy=3;
-		this.x = 6;
-		(new B()).x = 8;
-		int u;
-		u = 5;
-		int[] arr = new int[10];
-		return 7;
-	}
-	static void main(string[] args){
+	int a,b,c;
+	void foo(){
+		int y = 1;
+		int x = 2;
+		int z = 3;
+		x = 1 + 4;
+		int[] arr = new int[6];
+		boolean b = true;
+		
+		
 	}
 }
 
 class B{
-	int x;
-	int z;
+	int d;
+	static void main(string[] args){
+	}
 }
