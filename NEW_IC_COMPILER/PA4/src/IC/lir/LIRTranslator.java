@@ -316,6 +316,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		d.loadOrStore = false;
 		d.downRegister = null;
 		if(upTypeExpr.getTarget() != null) d.freeRegister(upTypeExpr.getTarget());
+		d.endScope();
 		return new UpType();
 	}
 
@@ -325,6 +326,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		UpType upType = callStatement.getCall().accept(this,d);
 		if(upType!=null)
 			return new UpType(upType); // ---> I changed it, it was return new UpType(), need to talk about it
+		d.endScope();
 		return new UpType();
 	}
 
@@ -339,6 +341,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		}else{
 			instructions.add(spec.Return("9999"));
 		}
+		d.endScope();
 		return new UpType();
 	}
 
@@ -367,6 +370,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			if(upTypeOp == null) return null;
 			instructions.add(endLabel+":");
 		}
+		d.endScope();
 		return new UpType();	
 
 	}
@@ -388,6 +392,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(upType == null) return null;
 		instructions.add(spec.Jump(testLabel));
 		instructions.add(endLabel+":");
+		d.endScope();
 		return new UpType();
 	}
 
@@ -409,6 +414,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			UpType upType = s.accept(this,d);
 			if(upType == null) return null;
 		}
+		d.endScope();
 		return new UpType();
 
 	}
@@ -426,6 +432,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			instructions.add(spec.Move(upType.getTarget(), name));
 		}
 		//int x - nothing...
+		d.endScope();
 		return new UpType();
 	}
 
@@ -441,7 +448,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			d.loadOrStore = false; //load
 			UpType upType = location.getLocation().accept(this,d);
 			if(upType == null) return null;
-			instructions.addAll(nullPointer(upType.getTarget())); // runtime check null pointer reference
+			String reg = upType.getTarget();
+			instructions.addAll(nullPointer(reg,d)); // runtime check null pointer reference
 			d.loadOrStore = loadOrStore;
 			/* Get Class Layout, class is external */
 			MyType t = location.getLocation().getTypeFromTable();			
@@ -464,15 +472,15 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			/* Store Or Load */
 			if(loadOrStore){
 				//Store
-				instructions.add(spec.MoveFieldStore(downRegister,upType.getTarget(),  cl.getFieldOffset(location.getName())+""));
+				instructions.add(spec.MoveFieldStore(downRegister,reg,  cl.getFieldOffset(location.getName())+""));
 			}else{
 				//Load
 				//String name = getFieldTranslationName(location.getName(), externalTable);
-				String tempReg = d.nextRegister();
+				//String tempReg = d.nextRegister();
 				//instructions.add(spec.Move(name, tempReg));
-				resultRegister = d.nextRegister();
-				instructions.add(spec.MoveFieldLoad(upType.getTarget(),cl.getFieldOffset(location.getName())+"",resultRegister));
-				d.freeRegister(tempReg);
+				resultRegister = reg;//upType.getTarget();//d.nextRegister();
+				instructions.add(spec.MoveFieldLoad(reg,cl.getFieldOffset(location.getName())+"",resultRegister));
+				//d.freeRegister(tempReg);
 				upTypeReturned.setTarget(resultRegister);
 			}
 		}else{
@@ -488,7 +496,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 				}else{
 					//Load
 					String name = getFieldTranslationName(location.getName(), location.enclosingScope());
-					String reg = d.nextRegister();
+					String reg = thisField.getTarget();//d.nextRegister();
 					instructions.add(spec.MoveFieldLoad(thisField.getTarget(),d.currentClassLayout.getFieldOffset(location.getName())+"",reg));
 					upTypeReturned.setTarget(reg);
 				}
@@ -505,7 +513,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 					instructions.add(spec.Move(downRegister, name));
 				}else{
 					//Load
-					String reg = d.nextRegister();
+					//avoid loading locals to registers
+					String reg = name;//d.nextRegister();
 					upTypeReturned.setTarget(reg);
 					instructions.add(spec.Move(name, reg));
 				}
@@ -524,20 +533,40 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		d.loadOrStore = false; //load
 		UpType upTypeExpr = location.getArray().accept(this,d);
 		if(upTypeExpr == null) return null;
-		instructions.addAll(nullPointer(upTypeExpr.getTarget()));//runtime null pointer
+		String regExpr = upTypeExpr.getTarget();
+		if(!isReg(regExpr)){
+			regExpr = d.nextRegister();
+			instructions.add(spec.Move(upTypeExpr.getTarget(), regExpr));
+		}
+		instructions.addAll(nullPointer(regExpr,d));//runtime null pointer
 		UpType upTypeIndex = location.getIndex().accept(this,d);
 		if (upTypeIndex == null) return null;
-		instructions.addAll(arrayAccess(upTypeExpr.getTarget(),upTypeIndex.getTarget(),d));//runtime array access
+		String newReg = upTypeIndex.getTarget();
+		if(isMemory(upTypeIndex.getTarget())){
+			//index must be immediate or register
+			newReg = d.nextRegister();
+			instructions.add(spec.Move(upTypeIndex.getTarget(),newReg));
+			//d.freeRegister(newReg);
+		}
+		String newExprReg = regExpr;
+		/*if(!isReg(upTypeExpr.getTarget())){
+			//load to register
+			newExprReg = d.nextRegister();
+			instructions.add(spec.Move(upTypeExpr.getTarget(), newExprReg));
+			//d.freeRegister(newRegExpr);
+		}*/
+		instructions.addAll(arrayAccess(newExprReg,newReg,d));//runtime array access
 		d.loadOrStore = loadOrStore;
 		if(loadOrStore){
 			//Store
-			instructions.add(spec.MoveArrayStore(downRegister, upTypeExpr.getTarget(), upTypeIndex.getTarget()));
+			instructions.add(spec.MoveArrayStore(downRegister, newExprReg, newReg));
 		}else{
 			//Load
 			String reg = d.nextRegister();
-			instructions.add(spec.MoveArrayLoad(upTypeExpr.getTarget(),upTypeIndex.getTarget(), reg));
+			instructions.add(spec.MoveArrayLoad(newExprReg,newReg, reg));
 			upTypeReturned.setTarget(reg);
 		}
+		d.freeRegister(newExprReg);
 		return upTypeReturned;
 	}
 
@@ -613,7 +642,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(call.isExternal()){
 			caller = call.getLocation().accept(this, d);
 			if(caller == null) return null;
-			instructions.addAll(nullPointer(caller.getTarget()));
+			instructions.addAll(nullPointer(caller.getTarget(),d));
 		}
 		
 		if(!(call.getLocation() instanceof This) && !call.isExternal()){ // call like ... func();
@@ -658,8 +687,13 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			retReg = "Rdummy";
 		else
 			retReg = d.nextRegister();
-		
-		instructions.add(spec.VirtualCall(caller.getTarget()+"."+call_offset+paramsExpr, retReg));		
+		String reg = caller.getTarget();
+		if(!isReg(reg)){
+			reg = d.nextRegister();
+			instructions.add(spec.Move(caller.getTarget(), reg));
+			d.freeRegister(reg);
+		}
+		instructions.add(spec.VirtualCall(reg+"."+call_offset+paramsExpr, retReg));		
 		this.instructions.addAll(instructions);
 		
 		UpType up = new UpType();
@@ -675,6 +709,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		instructions.add(spec.Move("this", thisReg));
 		//instructions.add(spec.MoveFieldStore(dispatchNames.get(d.currentClassLayout.getClassName()), thisReg, "0"));
 		UpType up = new UpType(thisReg);
+		
 		return up;
 	}
 
@@ -701,24 +736,39 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(arrayType==null) return null;
 		UpType arraySize =newArray.getSize().accept(this,d);
 		if(arraySize==null) return null;
-		instructions.addAll(arraySize(arraySize.getTarget())); //runtime check array size
+		String reg = arraySize.getTarget();
+		/*if(!isReg(reg)){
+			reg = d.nextRegister();
+			instructions.add(spec.Move(arraySize.getTarget(), reg));
+		}*/
+		instructions.addAll(arraySize(reg,d)); //runtime check array size
 		String arrHolder = d.nextRegister();
 		instructions.add(makeComment(arrHolder+" = new "+newArray.getType().getName()+"[]"));
+		String accReg = reg;
 		if(!(newArray.getType() instanceof PrimitiveType)){
 			// need to get size of classlayout for this type			
-			int typeFactor = layoutManager.getClassLayout(newArray.getType().getName()).getLayoutSize(); 
-			instructions.add(spec.Mul(Integer.toString(typeFactor*4), arraySize.getTarget()));
+			int typeFactor = layoutManager.getClassLayout(newArray.getType().getName()).getLayoutSize();
+			accReg = ReturnAccumulator(typeFactor+"", arraySize.getTarget(), d);
+			if(accReg.compareTo(arraySize.getTarget()) != 0){
+				instructions.add(spec.Move(arraySize.getTarget(), accReg));
+			}
+			instructions.add(spec.Mul(Integer.toString(typeFactor), accReg));
 		}
 		else{
-			int typeFactor = 4; 
-			instructions.add(spec.Mul(Integer.toString(typeFactor), arraySize.getTarget()));
+			int typeFactor = 4;
+			accReg = ReturnAccumulator(typeFactor+"", arraySize.getTarget(), d);
+			if(accReg.compareTo(arraySize.getTarget()) != 0){
+				instructions.add(spec.Move(arraySize.getTarget(), accReg));
+			}
+			instructions.add(spec.Mul(Integer.toString(typeFactor), accReg));
 		}
 				
-		String newArrInst = spec.allocateArray(arraySize.getTarget());
+		String newArrInst = spec.allocateArray(accReg);
 		
 		instructions.add(spec.Library(newArrInst, arrHolder));
 		UpType up = new UpType(arrHolder);		
 		this.instructions.addAll(instructions);
+		d.freeRegister(reg);
 		return up;
 	}
 
@@ -729,13 +779,15 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		UpType firstOperand = length.getArray().accept(this, d);
 		if(firstOperand==null)
 			return null;
-		instructions.addAll(nullPointer(firstOperand.getTarget()));
+		String reg = firstOperand.getTarget();
+		instructions.addAll(nullPointer(reg,d));
 		String newReg = d.nextRegister();
-		instructions.add(spec.ArrayLength(firstOperand.getTarget(), newReg));
+		instructions.add(spec.ArrayLength(reg, newReg));
 		UpType up = new UpType(newReg);		
 		this.instructions.addAll(instructions);
-		d.freeRegister(firstOperand.getTarget());//free register that holds array		
+		d.freeRegister(reg);//free register that holds array		
 		return up;
+
 	}
 
 	@Override
@@ -750,29 +802,62 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(secondOperand==null)
 			return null;
 		String secondReg = secondOperand.getTarget();
+		//user accumulators
+		String accuReg = ReturnAccumulator(firstOperand.getTarget(),secondOperand.getTarget(),d);
+		String firstPlace, secondPlace;
+		if(accuReg.compareTo(firstReg) == 0){
+			firstPlace = secondReg;
+			secondPlace = accuReg;
+		}else if(accuReg.compareTo(secondReg) == 0){
+			firstPlace = firstReg;
+			secondPlace = accuReg;
+		}else{
+			if(binaryOp.getOperator()==BinaryOps.PLUS && binaryOp.getFirstOperand().getTypeFromTable() instanceof MyStringType){
+				
+			}else{
+				instructions.add(spec.Move(firstReg, accuReg));
+			}
+			firstPlace = secondReg;
+			secondPlace = accuReg;			
+		}
 		if(binaryOp.getOperator()==BinaryOps.PLUS){
 			if(binaryOp.getFirstOperand().getTypeFromTable() instanceof MyStringType){
-				instructions.add(spec.Library("__stringCat("+firstReg+","+secondReg+")", firstReg));
+				instructions.add(spec.Library("__stringCat("+firstReg+","+secondReg+")", accuReg));
 			}
-			else
-				instructions.add(spec.Add(secondReg, firstReg));
+			else{
+				instructions.add(spec.Add(firstPlace, secondPlace));
+			}
 		}
 		if(binaryOp.getOperator()==BinaryOps.MINUS)
-			instructions.add(spec.Sub(secondReg, firstReg));
+			instructions.add(spec.Sub(firstPlace, secondPlace));
 		if(binaryOp.getOperator()==BinaryOps.MULTIPLY)
-			instructions.add(spec.Mul(secondReg, firstReg));
+			instructions.add(spec.Mul(firstPlace, secondPlace));
 		if(binaryOp.getOperator()==BinaryOps.DIVIDE){
-			instructions.addAll(divisionByZero(secondReg));//runtime check division by zero
-			instructions.add(spec.Div(secondReg, firstReg));			
+			String next = secondReg;
+			/*if(!isReg(secondReg)){
+				next = d.nextRegister();
+				instructions.add(spec.Move(secondReg, next));
+				d.freeRegister(next);
+				firstPlace = next;
+			}*/
+			instructions.addAll(divisionByZero(next,d));//runtime check division by zero
+			instructions.add(spec.Div(firstPlace, secondPlace));			
 		}
 		if(binaryOp.getOperator()==BinaryOps.MOD){
-			instructions.addAll(divisionByZero(secondReg));//runtime check division by zero
-			instructions.add(spec.Mod(secondReg, firstReg));
+			String next = secondReg;
+			/*if(!isReg(secondReg)){
+				next = d.nextRegister();
+				instructions.add(spec.Move(secondReg, next));
+				d.freeRegister(next);
+				firstPlace = next;
+			}*/
+			instructions.addAll(divisionByZero(next,d));//runtime check division by zero
+			instructions.add(spec.Mod(next, secondPlace));
 		}
 		this.instructions.addAll(instructions);
 		//free second operand
-		d.freeRegister(secondReg);
-		UpType up = new UpType(firstOperand);  // the result is stored in first operand
+		//d.freeRegister(secondReg);
+		UpType up = new UpType(accuReg);  // the result is stored in first operand
 		return up;
 	}
 
@@ -789,10 +874,25 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(secondOperand==null)
 			return null;
 		String secondReg = secondOperand.getTarget();
+		//user accumulators
+		String accuReg = ReturnAccumulator(firstOperand.getTarget(),secondOperand.getTarget(),d);
+		String firstPlace, secondPlace;
+		if(accuReg.compareTo(firstReg) == 0){
+			firstPlace = accuReg;
+			secondPlace = secondReg;
+		}else if(accuReg.compareTo(secondReg) == 0){
+			firstPlace = accuReg;
+			secondPlace = firstReg;
+		}else{
+			instructions.add(spec.Move(secondReg, accuReg));
+			firstPlace = accuReg;
+			secondPlace = firstReg;
+		}
 		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
+		resultReg = d.nextRegister();
 		instructions.add(spec.Move("0", resultReg));
 		if(binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR){
-			instructions.add(spec.Compare(firstReg,secondReg));			
+			instructions.add(spec.Compare(secondPlace,firstPlace));			
 			if(binaryOp.getOperator() == BinaryOps.EQUAL)
 				instructions.add(spec.JumpFalse(label));
 			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
@@ -808,14 +908,14 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			}
 		else{
 			if(binaryOp.getOperator()==BinaryOps.LAND){
-				instructions.add(spec.Compare("0",firstReg));
+				instructions.add(spec.Compare("0",secondPlace));
 				instructions.add(spec.JumpTrue(label));
-				instructions.add(spec.And(secondReg,firstReg));				
+				instructions.add(spec.And(firstPlace,secondPlace));				
 			}
 			if(binaryOp.getOperator()==BinaryOps.LOR){
-				instructions.add(spec.Compare("1",firstReg));
+				instructions.add(spec.Compare("1",secondPlace));
 				instructions.add(spec.JumpTrue(label));
-				instructions.add(spec.Or(secondReg,firstReg));				
+				instructions.add(spec.Or(firstPlace,secondPlace));				
 			}
 			
 		}
@@ -824,8 +924,9 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		// here dont do nothing
 		this.instructions.addAll(instructions);
 		//free second operand
-		d.freeRegister(firstReg);
-		d.freeRegister(secondReg);
+		//d.freeRegister(firstReg);
+		//d.freeRegister(secondReg);
+		d.freeRegister(accuReg);
 		UpType up = new UpType(resultReg);  // the result is stored in first operand
 		return up;
 	}
@@ -838,9 +939,15 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(acceptedUp==null)
 			return null;
 		instructions.add(makeComment("- "+acceptedUp.getTarget()));
-		instructions.add(spec.Neg(acceptedUp.getTarget()));	
+		String reg = acceptedUp.getTarget();
+		String newReg = reg;
+		if(!isReg(reg)){
+			newReg = d.nextRegister();
+			instructions.add(spec.Move(reg, newReg));
+		}
+		instructions.add(spec.Neg(newReg));	
 		this.instructions.addAll(instructions);
-		UpType up = new UpType(acceptedUp);
+		UpType up = new UpType(newReg);
 		return up;
 	}
 
@@ -851,11 +958,19 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		UpType acceptedUp = unaryOp.getOperand().accept(this, d);
 		if(acceptedUp==null)
 			return null;
+		String reg = acceptedUp.getTarget();
+		String newReg = reg;
 		instructions.add(makeComment("! "+acceptedUp.getTarget()));
-		instructions.add(spec.Not(acceptedUp.getTarget()));	
+		if(!isReg(reg)){
+			newReg = d.nextRegister();
+			instructions.add(spec.Move(reg, newReg));
+		}
+
+		instructions.add(spec.Not(newReg));	
 		this.instructions.addAll(instructions);
-		UpType up = new UpType(acceptedUp);
+		UpType up = new UpType(newReg);
 		return up;
+
 	}
 
 	@Override
@@ -874,12 +989,17 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			}
 			//load to register
 			
-			instructions.add(spec.Move(strLiteral,resultRegister));
+			//instructions.add(spec.Move(strLiteral,resultRegister));
 			
 		}else{
 			String val = literal.getValue().toString();
-			if(val.compareTo("null")==0)
+			if(val.compareTo("null")==0 || val.compareTo("false") == 0)
 				val="0";
+			else if(val.compareTo("true") == 0)
+				val="1";
+			//avoid storing literal in registers
+			resultRegister = val;
+
 			String ins = spec.Move(val, resultRegister);
 			instructions.add(ins);			
 		}
@@ -905,8 +1025,15 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	}
 	
 	public void printTranslation(){
-
 		for(String instruction:this.instructions){
+			//Remove Move x,x
+			if(instruction.startsWith("Move")){
+				String str = instruction.substring(instruction.indexOf(" ")+1);
+				String[] arr = str.split(",");
+				if(arr.length == 2 && arr[0].compareTo(arr[1]) == 0){
+					continue;
+				}
+			}
 			System.out.println(instruction);
 		}
 	}
@@ -920,9 +1047,16 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			strLiteral = stringNames.get(label);
 		}	
 	}
-	private List<String> nullPointer(String reg){
+	private List<String> nullPointer(String reg, DownType d){
 		List<String> inst = new ArrayList<String>();
-		inst.add(spec.Compare("0", reg));
+		String newReg = reg;
+		if(!isReg(reg)){
+			newReg = d.nextRegister();
+			instructions.add(spec.Move(reg, newReg));
+			d.freeRegister(newReg);
+			//return null;
+		}
+		inst.add(spec.Compare("0", newReg));
 		inst.add(spec.JumpTrue("_labelNPE"));
 		return inst;
 	}
@@ -933,23 +1067,90 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		inst.add(spec.ArrayLength(array, length));
 		inst.add(spec.Compare(index, length));
 		inst.add(spec.JumpLE("_labelABE"));
-		inst.add(spec.Compare("0", index));
+		if(!isReg(index)){
+			String newReg = d.nextRegister();
+			inst.add(spec.Move(index, newReg));
+			inst.add(spec.Compare("0", newReg));
+			d.freeRegister(newReg);
+			//return null;
+		}else{
+			inst.add(spec.Compare("0", index));
+		}
 		inst.add(spec.JumpL("_labelABE"));
 		d.freeRegister(length);
 		return inst;
 	}
 	
-	private List<String> divisionByZero(String reg){
+	private List<String> divisionByZero(String reg,DownType d){
 		List<String> inst = new ArrayList<String>();
-		inst.add(spec.Compare("0", reg));
+		String newReg = reg;
+		if(!isReg(reg)){
+			newReg = d.nextRegister();
+			instructions.add(spec.Move(reg, newReg));
+			d.freeRegister(newReg);
+//			return null;
+		}
+		inst.add(spec.Compare("0", newReg));
 		inst.add(spec.JumpTrue("_labelDBE"));
 		return inst;
 	}
 	
-	private List<String> arraySize(String reg){
+	private List<String> arraySize(String reg,DownType d){
+		String newReg = reg;
+		if(!isReg(reg)){
+			newReg = d.nextRegister();
+			instructions.add(spec.Move(reg, newReg));
+			d.freeRegister(newReg);
+			//return null;
+		}
 		List<String> inst = new ArrayList<String>();
-		inst.add(spec.Compare("0", reg));
+		inst.add(spec.Compare("0", newReg));
 		inst.add(spec.JumpLE("_labelASE"));
 		return inst;
+	}
+	private boolean isMemory(String reg){
+		return !isConst(reg) && !isReg(reg);
+	}
+	
+	private boolean isConst(String reg){
+		if(reg.charAt(0) >= '0' && reg.charAt(0) <= '9') return true;
+		return false;
+	}
+	
+	private boolean isReg(String reg){
+		if(reg.charAt(0) == 'R') return true;
+		return false;
+	}
+	
+	private String ReturnAccumulator(String firstOperand,String secondOperand,DownType d){
+		if(isConst(firstOperand) && isConst(secondOperand)){
+			return d.nextRegister();
+		}
+		if(isConst(firstOperand) && isMemory(secondOperand)){
+			return d.nextRegister();
+		}
+		if(isConst(firstOperand) && isReg(secondOperand)){
+			return secondOperand;
+		}
+		if(isMemory(firstOperand) && isConst(secondOperand)){d.nextRegister();
+			return d.nextRegister();
+		}
+		if(isMemory(firstOperand) && isMemory(secondOperand)){
+			return d.nextRegister();
+		}
+		if(isMemory(firstOperand) && isReg(secondOperand)){
+			return secondOperand;
+		}
+		if(isReg(firstOperand) && isConst(secondOperand)){
+			return firstOperand;
+		}
+		if(isReg(firstOperand) && isMemory(secondOperand)){
+			return firstOperand;
+		}
+		if(isReg(firstOperand) && isReg(secondOperand)){
+			d.freeRegister(secondOperand);
+			return firstOperand;
+		}
+		return d.nextRegister();
 	}
 }
