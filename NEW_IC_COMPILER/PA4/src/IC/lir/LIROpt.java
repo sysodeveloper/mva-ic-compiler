@@ -182,7 +182,6 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		tempInst.add(spec.Library("__println("+stringNames.get(errors[3])+")", "Rdummy"));
 		tempInst.add(spec.Library("__exit(1)", "Rdummy"));
 		instructions.addAll(0, tempInst);
-		
 		return new UpType();				
 	}
 
@@ -205,6 +204,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 			/* Registers are freed after each method */
 			if(upType == null) return null;
 		}
+		d.endScope();
 		return new UpType();		
 	}
 
@@ -239,6 +239,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		/* Free Register Allocated */
 		d.endScope();		
 		UpType up = new UpType();
+		d.endScope();
 		return up;
 	}
 
@@ -316,6 +317,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		d.loadOrStore = false;
 		d.downRegister = null;
 		if(upTypeExpr.getTarget() != null) d.freeRegister(upTypeExpr.getTarget());
+		d.endScope();
 		return new UpType();
 	}
 
@@ -325,6 +327,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		UpType upType = callStatement.getCall().accept(this,d);
 		if(upType!=null)
 			return new UpType(upType); // ---> I changed it, it was return new UpType(), need to talk about it
+		d.endScope();
 		return new UpType();
 	}
 
@@ -339,6 +342,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		}else{
 			instructions.add(spec.Return("9999"));
 		}
+		d.endScope();
 		return new UpType();
 	}
 
@@ -367,6 +371,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 			if(upTypeOp == null) return null;
 			instructions.add(endLabel+":");
 		}
+		d.endScope();
 		return new UpType();	
 
 	}
@@ -388,18 +393,21 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		if(upType == null) return null;
 		instructions.add(spec.Jump(testLabel));
 		instructions.add(endLabel+":");
+		d.endScope();
 		return new UpType();
 	}
 
 	@Override
 	public UpType visit(Break breakStatement, DownType d) {
 		instructions.add(spec.Jump(whileEndLoop));
+		d.endScope();
 		return new UpType();
 	}
 
 	@Override
 	public UpType visit(Continue continueStatement, DownType d) {
 		instructions.add(spec.Jump(whileBeginLoop));
+		d.endScope();
 		return new UpType();
 	}
 
@@ -409,6 +417,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 			UpType upType = s.accept(this,d);
 			if(upType == null) return null;
 		}
+		d.endScope();
 		return new UpType();
 
 	}
@@ -426,6 +435,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 			instructions.add(spec.Move(upType.getTarget(), name));
 		}
 		//int x - nothing...
+		d.endScope();
 		return new UpType();
 	}
 
@@ -876,7 +886,7 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 		//user accumulators
 		String accuReg = ReturnAccumulator(firstOperand.getTarget(),secondOperand.getTarget(),d);
 		String firstPlace, secondPlace;
-		if(accuReg.compareTo(firstReg) == 0){
+		/*if(accuReg.compareTo(firstReg) == 0){
 			firstPlace = secondReg;
 			secondPlace = accuReg;
 		}else if(accuReg.compareTo(secondReg) == 0){
@@ -886,12 +896,23 @@ public class LIROpt implements PropagatingVisitor<DownType, UpType>{
 			instructions.add(spec.Move(firstReg, accuReg));
 			firstPlace = secondReg;
 			secondPlace = accuReg;			
+		}*/
+		if(accuReg.compareTo(firstReg) == 0){
+			firstPlace = accuReg;
+			secondPlace = secondReg;
+		}else if(accuReg.compareTo(secondReg) == 0){
+			firstPlace = accuReg;
+			secondPlace = firstReg;
+		}else{
+			instructions.add(spec.Move(secondReg, accuReg));
+			firstPlace = accuReg;
+			secondPlace = firstReg;
 		}
 		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
 		resultReg = d.nextRegister();
 		instructions.add(spec.Move("0", resultReg));
 		if(binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR){
-			instructions.add(spec.Compare(firstPlace,secondPlace));			
+			instructions.add(spec.Compare(secondPlace,firstPlace));			
 			if(binaryOp.getOperator() == BinaryOps.EQUAL)
 				instructions.add(spec.JumpFalse(label));
 			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
