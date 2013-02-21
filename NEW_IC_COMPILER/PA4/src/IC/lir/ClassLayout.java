@@ -1,7 +1,13 @@
 package IC.lir;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 public class ClassLayout {
@@ -117,9 +123,13 @@ public class ClassLayout {
 	}
 	
 	public int getMethodOffset(String methodName){
-		String methodSymbolicName = makeSymbolicName(methodName);
+		/*String methodSymbolicName = makeSymbolicName(methodName);
 		if(methodToOffset.containsKey(methodSymbolicName)){
 			return methodToOffset.get(methodSymbolicName);
+		}*/
+		for(String mName: methodToOffset.keySet()){
+			if(mName.split("_")[2].compareTo(methodName)==0)
+				return methodToOffset.get(mName);
 		}
 		return -1;
 	}	
@@ -140,8 +150,24 @@ public class ClassLayout {
 		StringBuffer dispatchVector = new StringBuffer();
 		//if(hasVirtaulMethos()){
 			dispatchVector.append("_DV_"+this.className+": [");
-			for(String methodName : this.methodToOffset.keySet()){
-				dispatchVector.append(methodName);
+			// sort by offsets :
+			class Cmp implements Comparator<Entry<String,Integer>>{
+				@Override
+				public int compare(Entry<String, Integer> o1,
+						Entry<String, Integer> o2) {
+					return o1.getValue()-o2.getValue();
+					
+				}
+				
+			}
+			Set<Entry<String,Integer>> ent = methodToOffset.entrySet();
+			List<Entry<String,Integer>>list =new ArrayList<Map.Entry<String,Integer>>();
+			for(Entry<String,Integer> e : ent){
+				list.add(e);
+			}
+			Collections.sort(list, new Cmp());
+			for(Entry<String, Integer> methodName : list){
+				dispatchVector.append(methodName.getKey());
 				dispatchVector.append(",");
 			}
 			if(dispatchVector.charAt(dispatchVector.length()-1)==',')
