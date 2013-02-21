@@ -87,6 +87,16 @@ public class MySymbolTable {
 		return null;
 	}
 	
+	public MySymbolTable LookUpTable(String key){
+		MySymbolTable current = this;
+		while(current!=null){
+			if(current.getEntries().containsKey(key))
+				break;
+			current=current.getParent();
+		}
+		return current.getChildTable(key);
+	}
+	
 	public String toString(){
 		StringBuffer output = new StringBuffer();
 		StringBuffer[] chunks = { new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer(),new StringBuffer() };
