@@ -67,7 +67,7 @@ public class SethiUllman implements Visitor<Integer> {
 		for(Statement s :method.getStatements())
 			weight+=s.accept(this);
 		method.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("VirtualMethod"+weight);
 		return weight;
 	}
 
@@ -77,7 +77,7 @@ public class SethiUllman implements Visitor<Integer> {
 		for(Statement s :method.getStatements())
 			weight+=s.accept(this);
 		method.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("StaticMethod"+weight);
 		return weight;
 	}
 
@@ -111,7 +111,7 @@ public class SethiUllman implements Visitor<Integer> {
 		int second = assignment.getVariable().accept(this);
 		int weight = (first>second)?first:second+1;
 		assignment.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("Assignment"+weight);
 		return weight;
 	}
 
@@ -119,7 +119,7 @@ public class SethiUllman implements Visitor<Integer> {
 	public Integer visit(CallStatement callStatement) {
 		int weight = callStatement.getCall().accept(this);
 		callStatement.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("CallStatement"+weight);
 		return weight;
 	}
 
@@ -127,9 +127,9 @@ public class SethiUllman implements Visitor<Integer> {
 	public Integer visit(Return returnStatement) {
 		int weight = 0;
 		if(returnStatement.hasValue())
-			weight+=returnStatement.accept(this);
+			weight+=returnStatement.getValue().accept(this);
 		returnStatement.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("returnStatement"+weight);
 		return weight;
 	}
 
@@ -140,7 +140,7 @@ public class SethiUllman implements Visitor<Integer> {
 		if(ifStatement.hasElse())
 			weight+=ifStatement.getElseOperation().accept(this);
 		ifStatement.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("ifStatement"+weight);
 		return weight;
 	}
 
@@ -148,21 +148,21 @@ public class SethiUllman implements Visitor<Integer> {
 	public Integer visit(While whileStatement) {
 		int weight = whileStatement.getCondition().accept(this) + whileStatement.getOperation().accept(this);		 
 		whileStatement.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("whileStatement"+weight);
 		return weight;
 	}
 
 	@Override
 	public Integer visit(Break breakStatement) {
 		breakStatement.setWeight(0);
-		System.out.println(0);
+		System.out.println("breakStatement"+0);
 		return 0;
 	}
 
 	@Override
 	public Integer visit(Continue continueStatement) {
 		continueStatement.setWeight(0);
-		System.out.println(0);
+		System.out.println("continueStatement"+0);
 		return 0;
 	}
 
@@ -172,14 +172,14 @@ public class SethiUllman implements Visitor<Integer> {
 		for(Statement s : statementsBlock.getStatements())
 			weight+=s.accept(this);
 		statementsBlock.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("statementsBlock"+weight);
 		return weight;
 	}
 
 	@Override
 	public Integer visit(LocalVariable localVariable) {
 		localVariable.setWeight(0);
-		System.out.println(0);
+		System.out.println("LocalVariable"+0);
 		return 0;
 	}
 
@@ -189,7 +189,7 @@ public class SethiUllman implements Visitor<Integer> {
 		if(location.isExternal())
 			weight=location.getLocation().accept(this);			
 		location.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("VariableLocation"+weight);
 		return weight;
 	}
 
@@ -197,7 +197,7 @@ public class SethiUllman implements Visitor<Integer> {
 	public Integer visit(ArrayLocation location) {
 		int weight = location.getIndex().accept(this) + location.getArray().accept(this);
 		location.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("ArrayLocation"+weight);
 		return weight;
 	}
 
@@ -208,7 +208,7 @@ public class SethiUllman implements Visitor<Integer> {
 			weight+=param.accept(this);
 		}
 		call.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("StaticCall"+weight);
 		return weight;
 	}
 
@@ -219,35 +219,35 @@ public class SethiUllman implements Visitor<Integer> {
 			weight+=param.accept(this);
 		}
 		call.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("VirtualCall"+weight);
 		return weight;
 	}
 
 	@Override
 	public Integer visit(This thisExpression) {
 		thisExpression.setWeight(1);
-		System.out.println(1);
+		System.out.println("thisExpression"+1);
 		return 1;
 	}
 
 	@Override
 	public Integer visit(NewClass newClass) {
 		newClass.setWeight(1);
-		System.out.println(1);
+		System.out.println("newClass"+1);
 		return 1;
 	}
 
 	@Override
 	public Integer visit(NewArray newArray) {
 		newArray.setWeight(2);
-		System.out.println(2);
+		System.out.println("newArray"+2);
 		return 2;
 	}
 
 	@Override
 	public Integer visit(Length length) {
 		length.setWeight(1);
-		System.out.println(1);
+		System.out.println("length"+1);
 		return 1;
 	}
 
@@ -262,7 +262,7 @@ public class SethiUllman implements Visitor<Integer> {
 		else
 			weight = (first<=second)?second+1:first;
 		binaryOp.setWeight(weight);	
-		System.out.println(weight);
+		System.out.println("MathBinaryOp"+weight);
 		return weight;	
 	}
 
@@ -277,7 +277,7 @@ public class SethiUllman implements Visitor<Integer> {
 		else
 			weight = (first<=second)?second+1:first;
 		binaryOp.setWeight(weight);	
-		System.out.println(weight);
+		System.out.println("LogicalBinaryOp"+weight);
 		return weight;	
 		
 	}	
@@ -288,7 +288,7 @@ public class SethiUllman implements Visitor<Integer> {
 		if(w==0)
 			w=w+1;
 		unaryOp.setWeight(w);
-		System.out.println(w);
+		System.out.println("MathUnaryOp"+w);
 		return w;
 	}
 
@@ -298,14 +298,14 @@ public class SethiUllman implements Visitor<Integer> {
 		if(w==0)
 			w=w+1;
 		unaryOp.setWeight(w);
-		System.out.println(w);
+		System.out.println("LogicalUnaryOp"+w);
 		return w;
 	}
 
 	@Override
 	public Integer visit(Literal literal) {
 		literal.setWeight(0);
-		System.out.println(0);
+		System.out.println("literal"+0);
 		return 0;
 	}
 
@@ -313,7 +313,7 @@ public class SethiUllman implements Visitor<Integer> {
 	public Integer visit(ExpressionBlock expressionBlock) {
 		int weight = expressionBlock.getExpression().accept(this);
 		expressionBlock.setWeight(weight);
-		System.out.println(weight);
+		System.out.println("expressionBlock"+weight);
 		return weight;
 	}
 
