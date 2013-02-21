@@ -124,6 +124,14 @@ public class ClassLayout {
 		return -1;
 	}	
 	
+	public boolean hasMethodInLayout(String methodName){
+		for(String mName : methodToOffset.keySet()){
+			if(mName.split("_")[2].compareTo(methodName)==0)
+				return true;
+		}
+		return false;
+	}
+	
 	public boolean hasVirtaulMethos(){
 		return this.methodToOffset.size() > 0;
 	}
