@@ -618,8 +618,9 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		
 		if(!(call.getLocation() instanceof This) && !call.isExternal()){ // call like ... func();
 			caller = visit((This)call.getLocation(),d);	
-			call_offset = d.currentClassLayout.getMethodOffset(call.getName());				
 			func = d.prevNode.enclosingScope().LookUpTable(call.getName());
+			call_offset = d.currentClassLayout.getMethodOffset(call.getName());				
+			
 		}		
 		
 		if(call.getLocation() instanceof This){ // case this.func()..			
@@ -630,7 +631,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			String className =((MyClassType) call.getLocation().getTypeFromTable()).getName();
 			ClassLayout cl =  layoutManager.getClassLayout(className);
 			call_offset = cl.getMethodOffset(call.getName());
-			func = globalScope.getChildTable(className).getChildTable(call.getName()); 
+			MySymbolTable upLook=null, downLook=null;
+			downLook = globalScope.getChildTable(className).getChildTable(call.getName()); 
+			upLook = globalScope.getChildTable(className).LookUpTable(call.getName());
+			func = (downLook!=null)?downLook:upLook;
 		}
 		
 		// construct params list (y=reg4,)
@@ -703,7 +707,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(!(newArray.getType() instanceof PrimitiveType)){
 			// need to get size of classlayout for this type			
 			int typeFactor = layoutManager.getClassLayout(newArray.getType().getName()).getLayoutSize(); 
-			instructions.add(spec.Mul(Integer.toString(typeFactor), arraySize.getTarget()));
+			instructions.add(spec.Mul(Integer.toString(typeFactor*4), arraySize.getTarget()));
 		}
 		else{
 			int typeFactor = 4; 
