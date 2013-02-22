@@ -109,11 +109,11 @@ public class Compiler {
 				}
 				LayoutsManager lm = new LayoutsManager();
 				lm.createClassLayouts(null, ((Program)root).enclosingScope());
-				lm.printLayouts();
+				//lm.printLayouts();
 				//SethiUllman su = new SethiUllman();
 				//su.visit((Program) root);
 				LIRTranslator trans = new LIRTranslator(lm);
-				System.out.println("***************************************************************");
+				//System.out.println("***************************************************************");
 				SethiUllman su  = new SethiUllman();
 				su.visit((Program)root);
 				UpType returnedUp = trans.visit((Program)root,null);

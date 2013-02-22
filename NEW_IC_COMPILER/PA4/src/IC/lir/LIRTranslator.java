@@ -156,7 +156,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		List<String> tempInst = new ArrayList<String>(); 	
 		/* Program Translation */
 		tempInst.add(makeComment("A new program begins...#"));
-		tempInst.add(makeComment(" Class Layouts#"));
+		tempInst.add(makeComment("Class Layouts#"));
 		for(String layout:layoutManager.getLayouts()){
 			tempInst.add(makeComment("	"+layout));
 		}		
