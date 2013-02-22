@@ -859,6 +859,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		this.instructions.addAll(instructions);
 		//free second operand
 		//d.freeRegister(secondReg);
+		if(firstReg.compareTo(accuReg) != 0 ) d.freeRegister(firstReg);
+		if(secondReg.compareTo(accuReg) != 0 ) d.freeRegister(secondReg);
 		UpType up = new UpType(accuReg);  // the result is stored in first operand
 		return up;
 	}
@@ -950,9 +952,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		//free second operand
 		//d.freeRegister(firstReg);
 		/*d.freeRegister(firstPlace);
-		d.freeRegister(secondPlace);
-		d.freeRegister(firstReg);
-		d.freeRegister(secondReg);*/
+		d.freeRegister(secondPlace);*/
+		//d.freeRegister(firstReg);
+		//d.freeRegister(secondReg);
+		//d.freeRegister(accuReg);
 		UpType up = new UpType(resultReg);
 		return up;
 	}
