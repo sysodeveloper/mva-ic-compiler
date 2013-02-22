@@ -155,17 +155,17 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		}
 		List<String> tempInst = new ArrayList<String>(); 	
 		/* Program Translation */
-		tempInst.add(makeComment("A new program begins..."));
-		tempInst.add(makeComment(""));
-		tempInst.add(makeComment(""));
-		tempInst.add(makeComment("String Literals"));
+		tempInst.add(makeComment("A new program begins...#"));
+		tempInst.add(makeComment("#"));
+		tempInst.add(makeComment("#"));
+		tempInst.add(makeComment("String Literals#"));
 		String[] errors={"Runtime Error: Division by zero!","Runtime Error: Array allocation with negative array size!","Runtime Error: Array index out of bounds!","Runtime Error: Null pointer dereference!"};
 		for(String error:errors){
 			setLabel(error);
 		}
 		
 		tempInst.addAll(stringLiterals);
-		tempInst.add(makeComment("Dispatch Vectors"));
+		tempInst.add(makeComment("Dispatch Vectors#"));
 		tempInst.addAll(dispatchVectors);
 		
 		// error labels
@@ -189,7 +189,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(ICClass icClass, DownType d) {
 		d.prevNode = icClass;
-		instructions.add(makeComment("Class " + icClass.getName()));
+		instructions.add(makeComment("Class " + icClass.getName())+"#");
 		/* Class layout */
 		ClassLayout cl =  layoutManager.getClassLayout(icClass.getName());
 		d.currentClassLayout = cl; //To check with Ahia 
@@ -216,7 +216,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(VirtualMethod method, DownType d) {
 		d.prevNode = method;
-		instructions.add(makeComment("Virtual Method " + method.getName()));
+		instructions.add(makeComment("Virtual Method " + method.getName()+"#"));
 		/* Allocate Registers */
 		d.startScope();
 		/* Method Label */
@@ -246,7 +246,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	public UpType visit(StaticMethod method, DownType d) {
 		d.prevNode = method;
 		//List<String> instructions = new ArrayList<String>();
-		instructions.add(makeComment("Static Method " + method.getName()));
+		instructions.add(makeComment("Static Method " + method.getName()+"#"));
 		/* Allocate Registers */
 		d.startScope();
 		/* Method Label */
@@ -1093,7 +1093,9 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		return new UpType();
 	}
 	
-	public void printTranslation(){
+	public List<String> printTranslation(){
+		List<String> inst = new ArrayList<String>();
+		
 		for(String instruction:this.instructions){
 			//Remove Move x,x
 			if(instruction.startsWith("Move")){
@@ -1103,8 +1105,22 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 					continue;
 				}
 			}
-			System.out.println(instruction);
+			if(inst.size()>0){
+				if(!instruction.startsWith("#") && inst.get(inst.size()-1).startsWith("#") && !inst.get(inst.size()-1).endsWith("#") ){
+					String s = instruction+"\t\t"+inst.get(inst.size()-1);
+					inst.remove(inst.size()-1);
+					inst.add(s);					
+				}
+				else {
+					inst.add(instruction);
+				}
+			}
+			else
+				inst.add(instruction);
+			//System.out.println(instruction);
 		}
+		return inst;
+		
 	}
 	private void setLabel(String label){
 		String strLiteral = null;
