@@ -869,7 +869,6 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	public UpType visit(LogicalBinaryOp binaryOp, DownType d) {
 		List<String> instructions = new ArrayList<String>();
 		d.prevNode = binaryOp;
-		String resultReg = d.nextRegister();
 		UpType firstOperand = binaryOp.getFirstOperand().accept(this,d);
 		if(firstOperand==null)
 			return null;
@@ -878,13 +877,13 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(secondOperand==null)
 			return null;
 		String secondReg = secondOperand.getTarget();
+		
 		//user accumulators
-		String accuReg = ReturnAccumulator(firstOperand.getTarget(),secondOperand.getTarget(),d);
-		String firstPlace, secondPlace;
-		boolean reverseLogic = false;
+		//String accuReg = ReturnAccumulator(firstOperand.getTarget(),secondOperand.getTarget(),d);
+		/*String firstPlace, secondPlace;
 		firstPlace = firstReg;
-		secondPlace = secondReg;
-		if(accuReg.compareTo(firstReg) == 0){
+		secondPlace = secondReg;*/
+		/*if(accuReg.compareTo(firstReg) == 0){
 			if(!isReg(secondPlace)){
 				String next = d.nextRegister();
 				instructions.add(spec.Move(secondPlace, next));
@@ -897,55 +896,61 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			d.freeRegister(firstReg);
 			d.freeRegister(secondReg);
 			secondPlace = accuReg;
-		}
+		}*/
 		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
-		resultReg = d.nextRegister();
-		instructions.add(spec.Move("0", resultReg));
-		if(binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR){
-			instructions.add(spec.Compare(firstPlace,secondPlace));			
+		boolean NotAndOr = binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR;
+		String resultReg = null;
+		if(NotAndOr){
+			resultReg = d.nextRegister();
+			instructions.add(spec.Move("0", resultReg));
+		}
+		if(NotAndOr){
+			//if secondReg is not in register then move it to one
+			String tmpReg = secondReg;
+			if(!isReg(secondReg)){
+				tmpReg = d.nextRegister();
+				instructions.add(spec.Move(secondReg, tmpReg));
+			}
+			instructions.add(spec.Compare(firstReg,tmpReg));			
 			if(binaryOp.getOperator() == BinaryOps.EQUAL)
 				instructions.add(spec.JumpFalse(label));
 			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
 				instructions.add(spec.JumpTrue(label));
-			if(binaryOp.getOperator() == BinaryOps.GT)
-				if(reverseLogic){
-					instructions.add(spec.JumpL(label));
-				}else{
-					instructions.add(spec.JumpGE(label));
-				}
-			if(binaryOp.getOperator() == BinaryOps.GTE)
-				if(reverseLogic){
-					instructions.add(spec.JumpLE(label));
-				}else{
-					instructions.add(spec.JumpG(label));
-				}
-			if(binaryOp.getOperator() == BinaryOps.LT)
-				if(reverseLogic){
-					instructions.add(spec.JumpG(label));
-				}else{
-					instructions.add(spec.JumpLE(label));
-				}
-			if(binaryOp.getOperator() == BinaryOps.LTE)
-				if(reverseLogic){
-					instructions.add(spec.JumpGE(label));
-				}else{
-					instructions.add(spec.JumpL(label));
-				}
+			if(binaryOp.getOperator() == BinaryOps.GT){
+				instructions.add(spec.JumpGE(label));
 			}
-		else{
+			if(binaryOp.getOperator() == BinaryOps.GTE){
+				instructions.add(spec.JumpG(label));
+			}
+			if(binaryOp.getOperator() == BinaryOps.LT){
+				instructions.add(spec.JumpLE(label));
+			}
+			if(binaryOp.getOperator() == BinaryOps.LTE){
+				instructions.add(spec.JumpL(label));
+			}
+			d.freeRegister(tmpReg);
+		}else{
+			//if firstReg is not in register then move it to one
+			String tmpReg = firstReg;
+			if(!isReg(firstReg)){
+				tmpReg = d.nextRegister();
+				instructions.add(spec.Move(firstReg, tmpReg));
+			}
+			resultReg = tmpReg;
 			if(binaryOp.getOperator()==BinaryOps.LAND){
-				instructions.add(spec.Compare("0",secondPlace));
+				instructions.add(spec.Compare("0",tmpReg));
 				instructions.add(spec.JumpTrue(label));
-				instructions.add(spec.And(firstPlace,secondPlace));				
+				instructions.add(spec.And(secondReg,tmpReg));				
 			}
 			if(binaryOp.getOperator()==BinaryOps.LOR){
-				instructions.add(spec.Compare("1",secondPlace));
+				instructions.add(spec.Compare("1",tmpReg));
 				instructions.add(spec.JumpTrue(label));
-				instructions.add(spec.Or(firstPlace,secondPlace));				
+				instructions.add(spec.Or(secondReg,tmpReg));				
 			}
-			
 		}
-		instructions.add(spec.Move("1", resultReg));
+		if(NotAndOr){
+			instructions.add(spec.Move("1", resultReg));
+		}
 		instructions.add(label+":");
 		// here dont do nothing
 		this.instructions.addAll(instructions);
@@ -956,6 +961,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		//d.freeRegister(firstReg);
 		//d.freeRegister(secondReg);
 		//d.freeRegister(accuReg);
+		if(firstReg.compareTo(resultReg) != 0) d.freeRegister(firstReg);
+		d.freeRegister(secondReg);
 		UpType up = new UpType(resultReg);
 		return up;
 	}
