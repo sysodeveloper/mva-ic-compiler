@@ -675,7 +675,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		int index=0;
 		for(Expression arg :call.getArguments()){
 			UpType upArg = (arg.accept(this, d));
-			if(upArg==null) return null;			 
+			if(upArg==null) return null;
+			
 			paramsExpr+=getParameterTranslationName(formals.get(index), func)+"="+upArg.getTarget(); // param1=R1,param2=Reg45,...
 			if(index<call.getArguments().size()-1)
 				paramsExpr+=",";
@@ -752,7 +753,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			if(accReg.compareTo(arraySize.getTarget()) != 0){
 				instructions.add(spec.Move(arraySize.getTarget(), accReg));
 			}
-			instructions.add(spec.Mul(Integer.toString(typeFactor), accReg));
+			instructions.add(spec.Mul(Integer.toString(typeFactor*4), accReg));
 		}
 		else{
 			int typeFactor = 4;
@@ -877,34 +878,56 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		//user accumulators
 		String accuReg = ReturnAccumulator(firstOperand.getTarget(),secondOperand.getTarget(),d);
 		String firstPlace, secondPlace;
+		boolean reverseLogic = false;
+		firstPlace = firstReg;
+		secondPlace = secondReg;
 		if(accuReg.compareTo(firstReg) == 0){
-			firstPlace = accuReg;
-			secondPlace = secondReg;
+			if(!isReg(secondPlace)){
+				String next = d.nextRegister();
+				instructions.add(spec.Move(secondPlace, next));
+				secondPlace = next;
+			}
 		}else if(accuReg.compareTo(secondReg) == 0){
-			firstPlace = accuReg;
-			secondPlace = firstReg;
+			//ok
 		}else{
-			instructions.add(spec.Move(secondReg, accuReg));
-			firstPlace = accuReg;
-			secondPlace = firstReg;
+			instructions.add(spec.Move(secondPlace, accuReg));
+			d.freeRegister(firstReg);
+			d.freeRegister(secondReg);
+			secondPlace = accuReg;
 		}
 		String label = getLabelName("_"+binaryOp.getOperator()+"_end");
 		resultReg = d.nextRegister();
 		instructions.add(spec.Move("0", resultReg));
 		if(binaryOp.getOperator()!=BinaryOps.LAND && binaryOp.getOperator()!=BinaryOps.LOR){
-			instructions.add(spec.Compare(secondPlace,firstPlace));			
+			instructions.add(spec.Compare(firstPlace,secondPlace));			
 			if(binaryOp.getOperator() == BinaryOps.EQUAL)
 				instructions.add(spec.JumpFalse(label));
 			if(binaryOp.getOperator() == BinaryOps.NEQUAL)
 				instructions.add(spec.JumpTrue(label));
 			if(binaryOp.getOperator() == BinaryOps.GT)
-				instructions.add(spec.JumpGE(label));
+				if(reverseLogic){
+					instructions.add(spec.JumpL(label));
+				}else{
+					instructions.add(spec.JumpGE(label));
+				}
 			if(binaryOp.getOperator() == BinaryOps.GTE)
-				instructions.add(spec.JumpG(label));
+				if(reverseLogic){
+					instructions.add(spec.JumpLE(label));
+				}else{
+					instructions.add(spec.JumpG(label));
+				}
 			if(binaryOp.getOperator() == BinaryOps.LT)
-				instructions.add(spec.JumpLE(label));
+				if(reverseLogic){
+					instructions.add(spec.JumpG(label));
+				}else{
+					instructions.add(spec.JumpLE(label));
+				}
 			if(binaryOp.getOperator() == BinaryOps.LTE)
-				instructions.add(spec.JumpL(label));
+				if(reverseLogic){
+					instructions.add(spec.JumpGE(label));
+				}else{
+					instructions.add(spec.JumpL(label));
+				}
 			}
 		else{
 			if(binaryOp.getOperator()==BinaryOps.LAND){
@@ -925,9 +948,11 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		this.instructions.addAll(instructions);
 		//free second operand
 		//d.freeRegister(firstReg);
-		//d.freeRegister(secondReg);
-		d.freeRegister(accuReg);
-		UpType up = new UpType(resultReg);  // the result is stored in first operand
+		/*d.freeRegister(firstPlace);
+		d.freeRegister(secondPlace);
+		d.freeRegister(firstReg);
+		d.freeRegister(secondReg);*/
+		UpType up = new UpType(resultReg);
 		return up;
 	}
 
@@ -976,8 +1001,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(Literal literal, DownType d) {
 		List<String> instructions = new ArrayList<String>();		
-		resultRegister = d.nextRegister();		
-		
+		//resultRegister = d.nextRegister();		
+		resultRegister = null;
 		if(literal.getType() == LiteralTypes.STRING){
 			String strLiteral = null;
 			if(!stringNames.containsKey(literal.getValue())){
@@ -987,8 +1012,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			}else{
 				strLiteral = stringNames.get(literal.getValue().toString());
 			}
+			resultRegister = strLiteral;
 			//load to register
-			
 			//instructions.add(spec.Move(strLiteral,resultRegister));
 			
 		}else{
@@ -999,7 +1024,6 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 				val="1";
 			//avoid storing literal in registers
 			resultRegister = val;
-
 			String ins = spec.Move(val, resultRegister);
 			instructions.add(ins);			
 		}
@@ -1014,7 +1038,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		d.prevNode=expressionBlock;
 		d.startScope();
 		UpType returnedType = expressionBlock.getExpression().accept(this, d);
-		d.endScope();	
+		//d.endScope();	
 		return new UpType(returnedType);
 	}
 
@@ -1087,7 +1111,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(!isReg(reg)){
 			newReg = d.nextRegister();
 			instructions.add(spec.Move(reg, newReg));
-			d.freeRegister(newReg);
+			//d.freeRegister(newReg);
 //			return null;
 		}
 		inst.add(spec.Compare("0", newReg));
@@ -1132,7 +1156,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(isConst(firstOperand) && isReg(secondOperand)){
 			return secondOperand;
 		}
-		if(isMemory(firstOperand) && isConst(secondOperand)){d.nextRegister();
+		if(isMemory(firstOperand) && isConst(secondOperand)){
 			return d.nextRegister();
 		}
 		if(isMemory(firstOperand) && isMemory(secondOperand)){
@@ -1148,7 +1172,6 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			return firstOperand;
 		}
 		if(isReg(firstOperand) && isReg(secondOperand)){
-			d.freeRegister(secondOperand);
 			return firstOperand;
 		}
 		return d.nextRegister();
