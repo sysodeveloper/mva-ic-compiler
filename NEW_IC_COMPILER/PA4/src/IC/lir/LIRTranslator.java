@@ -546,7 +546,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			//index must be immediate or register
 			newReg = d.nextRegister();
 			instructions.add(spec.Move(upTypeIndex.getTarget(),newReg));
-			//d.freeRegister(newReg);
+			d.freeRegister(newReg);
 		}
 		String newExprReg = regExpr;
 		/*if(!isReg(upTypeExpr.getTarget())){
@@ -1111,7 +1111,7 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		if(!isReg(reg)){
 			newReg = d.nextRegister();
 			instructions.add(spec.Move(reg, newReg));
-			//d.freeRegister(newReg);
+			d.freeRegister(newReg);
 //			return null;
 		}
 		inst.add(spec.Compare("0", newReg));
