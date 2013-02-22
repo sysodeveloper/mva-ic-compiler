@@ -563,11 +563,16 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			instructions.add(spec.MoveArrayStore(downRegister, newExprReg, newReg));
 		}else{
 			//Load
-			String reg = d.nextRegister();
+			//accum
+			String reg = ReturnAccumulator(newExprReg, newReg, d);
 			instructions.add(spec.MoveArrayLoad(newExprReg,newReg, reg));
 			upTypeReturned.setTarget(reg);
 		}
-		d.freeRegister(newExprReg);
+		if(upTypeReturned.getTarget() == null){
+			d.freeRegister(newExprReg);
+		}else if(newExprReg.compareTo(upTypeReturned.getTarget()) != 0){
+			d.freeRegister(newExprReg);
+		}
 		return upTypeReturned;
 	}
 
