@@ -3,8 +3,11 @@ package IC;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import java_cup.runtime.Symbol;
@@ -107,19 +110,36 @@ public class Compiler {
 				LayoutsManager lm = new LayoutsManager();
 				lm.createClassLayouts(null, ((Program)root).enclosingScope());
 				lm.printLayouts();
-				SethiUllman su = new SethiUllman();
-				su.visit((Program) root);
+				//SethiUllman su = new SethiUllman();
+				//su.visit((Program) root);
 				LIRTranslator trans = new LIRTranslator(lm);
 				System.out.println("***************************************************************");
-
+				SethiUllman su  = new SethiUllman();
+				su.visit((Program)root);
 				UpType returnedUp = trans.visit((Program)root,null);
 				if(returnedUp==null){
 					System.out.println("Error during translation to LIR");
 					return;
 				}
-				trans.printTranslation();	
-
-				
+				ArrayList<String> inst = (ArrayList<String>) trans.printTranslation();	
+				boolean outputLir=false;
+				for(int i=1;i<args.length;i++){
+					if(args[i].compareTo("-print-lir") == 0){
+						outputLir=true;
+						File lir = new File(args[0].replace(".ic", ".lir"));
+						FileWriter fw  = new FileWriter(lir);
+						PrintWriter out  = new PrintWriter(fw);
+						for(String s : inst){
+							out.println(s);
+							out.flush();
+						}
+						
+						break;
+					}
+				}
+				if(!outputLir)
+				for(String s : inst)
+					System.out.println(s);				
 			}else{
 				return;
 			}
