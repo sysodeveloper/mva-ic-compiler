@@ -21,6 +21,7 @@ import IC.Parser.Parser;
 import IC.Parser.SyntaxError;
 import IC.lir.LIRTranslator;
 import IC.lir.LayoutsManager;
+import IC.lir.SethiUllman;
 import IC.lir.Translator;
 import IC.lir.UpType;
 import IC.mySymbolTable.BuildMySymbolTable;
@@ -106,6 +107,8 @@ public class Compiler {
 				LayoutsManager lm = new LayoutsManager();
 				lm.createClassLayouts(null, ((Program)root).enclosingScope());
 				lm.printLayouts();
+				SethiUllman su = new SethiUllman();
+				su.visit((Program) root);
 				LIRTranslator trans = new LIRTranslator(lm);
 				System.out.println("***************************************************************");
 

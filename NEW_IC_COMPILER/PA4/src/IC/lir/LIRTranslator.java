@@ -795,12 +795,27 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	@Override
 	public UpType visit(MathBinaryOp binaryOp, DownType d) {
 		List<String> instructions = new ArrayList<String>();
-		UpType firstOperand = binaryOp.getFirstOperand().accept(this,d);
+		//Sethi Ulman
+		UpType firstOperand= null;
+		UpType secondOperand = null;
 		d.prevNode = binaryOp;
+		if(binaryOp.getOperator() == BinaryOps.PLUS || binaryOp.getOperator() == BinaryOps.MULTIPLY){
+			if(binaryOp.getFirstOperand().getWeight() >= binaryOp.getSecondOperand().getWeight()){
+				firstOperand = binaryOp.getFirstOperand().accept(this,d);
+				secondOperand = binaryOp.getSecondOperand().accept(this,d);
+			}else{
+				secondOperand = binaryOp.getSecondOperand().accept(this,d);
+				firstOperand = binaryOp.getFirstOperand().accept(this,d);
+			}
+		}else{
+			firstOperand = binaryOp.getFirstOperand().accept(this,d);
+			secondOperand = binaryOp.getSecondOperand().accept(this,d);			
+		}
+		//firstOperand = binaryOp.getFirstOperand().accept(this,d);
 		if(firstOperand==null)
 			return null;
 		String firstReg = firstOperand.getTarget();
-		UpType secondOperand = binaryOp.getSecondOperand().accept(this,d);
+		//secondOperand = binaryOp.getSecondOperand().accept(this,d);
 		if(secondOperand==null)
 			return null;
 		String secondReg = secondOperand.getTarget();
@@ -869,11 +884,25 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 	public UpType visit(LogicalBinaryOp binaryOp, DownType d) {
 		List<String> instructions = new ArrayList<String>();
 		d.prevNode = binaryOp;
-		UpType firstOperand = binaryOp.getFirstOperand().accept(this,d);
+		UpType firstOperand = null;
+		UpType secondOperand = null;
+		//Sethi Ulman
+		if(binaryOp.getOperator() == BinaryOps.EQUAL || binaryOp.getOperator() == BinaryOps.NEQUAL){
+			if(binaryOp.getFirstOperand().getWeight() >= binaryOp.getSecondOperand().getWeight()){
+				firstOperand = binaryOp.getFirstOperand().accept(this,d);
+				secondOperand = binaryOp.getSecondOperand().accept(this,d);			
+			}else{
+				secondOperand = binaryOp.getSecondOperand().accept(this,d);
+				firstOperand = binaryOp.getFirstOperand().accept(this,d);
+			}
+		}else{
+			firstOperand = binaryOp.getFirstOperand().accept(this,d);
+			secondOperand = binaryOp.getSecondOperand().accept(this,d);
+		}
+
 		if(firstOperand==null)
 			return null;
 		String firstReg = firstOperand.getTarget();
-		UpType secondOperand = binaryOp.getSecondOperand().accept(this,d);
 		if(secondOperand==null)
 			return null;
 		String secondReg = secondOperand.getTarget();
