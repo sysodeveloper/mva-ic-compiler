@@ -546,7 +546,8 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 			//index must be immediate or register
 			newReg = d.nextRegister();
 			instructions.add(spec.Move(upTypeIndex.getTarget(),newReg));
-			d.freeRegister(newReg);
+			//SHOULD NOT BE FREED
+			//d.freeRegister(newReg);
 		}
 		String newExprReg = regExpr;
 		/*if(!isReg(upTypeExpr.getTarget())){
