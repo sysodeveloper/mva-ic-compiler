@@ -64,4 +64,14 @@ public class LayoutsManager {
 			}
 		}
 	}
+	public List<String> getLayouts(){
+		List<String> layouts = new ArrayList<String>();
+		for(ClassLayout c : classLayouts){
+			layouts.add("	class  "+c.getClassName()+"		");
+			for(Entry<String,Integer> f : c.getFieldToOffset().entrySet()){
+				layouts.add("  field  "+f.getKey()+" offset "+f.getValue());
+			}			
+		}
+		return layouts;
+	} 	
 }
