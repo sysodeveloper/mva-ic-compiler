@@ -20,6 +20,8 @@ public abstract class ASTNode {
 	
 	private MyType tableType;
 	
+	private int weight = -1;
+	
 	public MyType getTypeFromTable() {
 		return tableType;
 	}
@@ -95,5 +97,13 @@ public abstract class ASTNode {
 	 */
 	public void setID(int id){
 		this.id = id;
+	}
+	
+	public void setWeight(int weight){
+		this.weight = weight;
+	}
+	
+	public int getWeight(){
+		return this.weight;
 	}
 }
