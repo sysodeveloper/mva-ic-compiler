@@ -109,7 +109,7 @@ public class SethiUllman implements Visitor<Integer> {
 	public Integer visit(Assignment assignment) {
 		int first = assignment.getAssignment().accept(this);
 		int second = assignment.getVariable().accept(this);
-		int weight = (first>second)?first:second+1;
+		int weight = (first<second)?second:(first==second)?second+1:first;
 		assignment.setWeight(weight);
 		System.out.println("Assignment"+weight);
 		return weight;
@@ -185,7 +185,7 @@ public class SethiUllman implements Visitor<Integer> {
 
 	@Override
 	public Integer visit(VariableLocation location) {
-		int weight = 1;
+		int weight = 1;		
 		if(location.isExternal())
 			weight=location.getLocation().accept(this);			
 		location.setWeight(weight);
@@ -246,9 +246,10 @@ public class SethiUllman implements Visitor<Integer> {
 
 	@Override
 	public Integer visit(Length length) {
-		length.setWeight(1);
-		System.out.println("length"+1);
-		return 1;
+		int weight = length.getArray().accept(this);
+		length.setWeight(weight);
+		System.out.println("length"+weight);
+		return weight;
 	}
 
 	@Override
@@ -260,7 +261,7 @@ public class SethiUllman implements Visitor<Integer> {
 			weight = (first==second)?first+1:(first>second)?first:second;			
 		}
 		else
-			weight = (first<=second)?second+1:first;
+			weight = (first<second)?second:(first==second)?second+1:first;
 		binaryOp.setWeight(weight);	
 		System.out.println("MathBinaryOp"+weight);
 		return weight;	
@@ -275,7 +276,7 @@ public class SethiUllman implements Visitor<Integer> {
 			weight = (first==second)?first+1:(first>second)?first:second;			
 		}
 		else
-			weight = (first<=second)?second+1:first;
+			weight = (first<second)?second:(first==second)?second+1:first;
 		binaryOp.setWeight(weight);	
 		System.out.println("LogicalBinaryOp"+weight);
 		return weight;	
