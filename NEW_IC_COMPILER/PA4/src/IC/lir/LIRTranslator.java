@@ -156,7 +156,10 @@ public class LIRTranslator implements PropagatingVisitor<DownType, UpType>{
 		List<String> tempInst = new ArrayList<String>(); 	
 		/* Program Translation */
 		tempInst.add(makeComment("A new program begins...#"));
-		tempInst.add(makeComment("#"));
+		tempInst.add(makeComment(" Class Layouts#"));
+		for(String layout:layoutManager.getLayouts()){
+			tempInst.add(makeComment("	"+layout));
+		}		
 		tempInst.add(makeComment("#"));
 		tempInst.add(makeComment("String Literals#"));
 		String[] errors={"Runtime Error: Division by zero!","Runtime Error: Array allocation with negative array size!","Runtime Error: Array index out of bounds!","Runtime Error: Null pointer dereference!"};
