@@ -144,7 +144,7 @@ public class Compiler {
 				return;
 			}
 		}catch(Exception exp){
-			exp.printStackTrace();
+			System.out.println("Error " + exp.getMessage());
 		}
 		//check if needs to dump symbol table and type table.
 		if(types == null) return;
@@ -329,7 +329,8 @@ public class Compiler {
 		try{
 			types.printTypeTable();
 		}catch(Exception exp){
-			exp.printStackTrace();
+			//exp.printStackTrace();
+			System.out.println("Error while printing type table " + exp.getMessage());
 		}
 	}
 	
